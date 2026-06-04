@@ -50,4 +50,5 @@ class SettingsDataStore(private val context: Context) {
             preferences[THEME_MODE] = mode.name
         }
     }
+
 }

@@ -1,22 +1,23 @@
 package es.alejandro.grandarbiter.di
 
 import androidx.room.Room
-import es.alejandro.grandarbiter.data.document.DocumentDownloader
-import es.alejandro.grandarbiter.data.document.DocumentParser
-import es.alejandro.grandarbiter.data.document.DocumentUpdateChecker
+import es.alejandro.grandarbiter.data.connectivity.NetworkConnectivityObserver
 import es.alejandro.grandarbiter.data.local.AppDatabase
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.data.remote.AcademyRuinsService
 import es.alejandro.grandarbiter.data.remote.ScryfallService
+import es.alejandro.grandarbiter.data.repository.CRRepositoryImpl
 import es.alejandro.grandarbiter.data.repository.CardRepositoryImpl
-import es.alejandro.grandarbiter.data.repository.DocumentRepositoryImpl
+import es.alejandro.grandarbiter.domain.connectivity.ConnectivityObserver
+import es.alejandro.grandarbiter.domain.repository.CRRepository
 import es.alejandro.grandarbiter.domain.repository.CardRepository
-import es.alejandro.grandarbiter.domain.repository.DocumentRepository
+import es.alejandro.grandarbiter.ui.home.HomeViewModel
 import es.alejandro.grandarbiter.ui.main.MainViewModel
+import es.alejandro.grandarbiter.ui.setup.SetUpViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -59,27 +60,28 @@ val databaseModule = module {
             androidContext(),
             AppDatabase::class.java,
             "judge_companion_db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
-    single { get<AppDatabase>().documentDao() }
+    single { get<AppDatabase>().crDao() }
     single { get<AppDatabase>().cardDao() }
-    single { get<AppDatabase>().quickReferenceDao() }
     
     single { SettingsDataStore(androidContext()) }
 }
 
 val repositoryModule = module {
-    single<DocumentRepository> { DocumentRepositoryImpl(get(), get(), get(), get(), get()) }
+    single<CRRepository> { CRRepositoryImpl(get(), get(), get()) }
     single<CardRepository> { CardRepositoryImpl(get(), get()) }
 }
 
 val appModule = module {
-    single { DocumentUpdateChecker(get()) }
-    single { DocumentDownloader(get()) }
-    single { DocumentParser(androidContext()) }
+    single<ConnectivityObserver> { NetworkConnectivityObserver(androidContext()) }
 }
 
 val viewModelModule = module {
-    viewModel { MainViewModel(get()) }
+    viewModelOf(::MainViewModel)
+    viewModelOf(::SetUpViewModel)
+    viewModelOf(::HomeViewModel)
 }

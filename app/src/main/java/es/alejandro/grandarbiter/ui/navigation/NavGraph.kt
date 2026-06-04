@@ -55,6 +55,7 @@ fun AppNavGraph(
         startDestination = startDestination,
         modifier = modifier
     ) {
+
         composable(Screen.SetUp.route) {
             SetUpScreen(onSetUpComplete = onSetUpComplete)
         }

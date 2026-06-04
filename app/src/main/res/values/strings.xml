@@ -1,8 +1,59 @@
 <resources>
-    <string name="app_name">Judge Companion</string>
+    <string name="app_name">Grand Arbiter</string>
     <string name="nav_home">Home</string>
     <string name="nav_documents">Documents</string>
     <string name="nav_card_search">Card Search</string>
+    <string name="nav_oracle_search">Oracle Search</string>
     <string name="nav_tools">Tools</string>
     <string name="splash_text">Grand Arbiter</string>
+
+    <!-- Home Screen -->
+    <string name="home_judge_call">Judge Call</string>
+    <string name="home_time_to_add">TIME TO ADD</string>
+    <string name="home_timer_placeholder">00:00:00</string>
+    <string name="home_start_timer">Start Timer</string>
+    <string name="home_pause_timer">Pause Timer</string>
+    <string name="home_reset_timer">Reset</string>
+    <string name="home_document_library">Document Library</string>
+    <string name="home_cr_title">Comprehensive Rules</string>
+    <string name="home_cr_description">Complete game rules database. The ultimate authority on game mechanics and interactions.</string>
+    <string name="home_ipg_title">Infraction Procedure Guide</string>
+    <string name="home_ipg_description">Latest tournament guidelines and penalty instructions.</string>
+    <string name="home_mtr_title">Magic Tournament Rules</string>
+    <string name="home_mtr_description">Standard operating procedures for all sanctioned play.</string>
+    <string name="home_jar_title">Judging at Regular</string>
+    <string name="home_jar_description">Rules and philosophy for local, regular REL events.</string>
+    <string name="home_badge_cr">CR</string>
+    <string name="home_badge_ipg">IPG</string>
+    <string name="home_badge_mtr">MTR</string>
+    <string name="home_badge_jar">JAR</string>
+    <string name="home_date_cr">Feb 2024</string>
+    <string name="home_date_ipg">Oct 2023</string>
+    <string name="home_date_mtr">Nov 2023</string>
+    <string name="home_date_jar">Aug 2023</string>
+
+    <!-- Setup Screen -->
+    <string name="setup_title">Setting up Grand Arbiter</string>
+    <string name="setup_subtitle">This will only happen once. Please keep the app open.</string>
+    <string name="setup_step_connectivity_title">Checking connectivity</string>
+    <string name="setup_step_connectivity_subtitle">Verifying internet connection</string>
+    <string name="setup_step_downloading_title">Downloading documents</string>
+    <string name="setup_step_downloading_subtitle">Fetching latest versions from the server</string>
+    <string name="setup_step_processing_cr_title">Processing Comprehensive Rules</string>
+    <string name="setup_step_processing_cr_subtitle">Parsing and indexing CR · This may take a moment</string>
+    <string name="setup_step_processing_ipg_title">Processing IPG</string>
+    <string name="setup_step_processing_ipg_subtitle">Parsing Infraction Procedure Guide</string>
+    <string name="setup_step_processing_mtr_title">Processing MTR</string>
+    <string name="setup_step_processing_mtr_subtitle">Parsing Magic Tournament Rules</string>
+    <string name="setup_step_processing_oar_title">Processing oAR</string>
+    <string name="setup_step_processing_oar_subtitle">Parsing Judging at Regular</string>
+    <string name="setup_step_finalizing_title">Finalizing</string>
+    <string name="setup_step_finalizing_subtitle">Saving everything to local database</string>
+    <string name="setup_footer_note">Do not close the app during this process.</string>
+    <string name="connectivity_check_title">Checking connectivity</string>
+    <string name="connectivity_check_subtitle">Verifying internet connection</string>
+    <string name="cr_download_title">Downloading CR</string>
+    <string name="cr_download_subtitle">Fetching last version of the Comprehensive Rules</string>
+    <string name="cr_store_title">Saving CR</string>
+    <string name="cr_store_subtitle">Storing Comprehensive Rules on the database</string>
 </resources>

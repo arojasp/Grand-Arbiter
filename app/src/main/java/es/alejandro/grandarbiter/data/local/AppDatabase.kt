@@ -2,26 +2,22 @@ package es.alejandro.grandarbiter.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import es.alejandro.grandarbiter.data.local.dao.CRDao
 import es.alejandro.grandarbiter.data.local.dao.CardDao
-import es.alejandro.grandarbiter.data.local.dao.DocumentDao
-import es.alejandro.grandarbiter.data.local.dao.QuickReferenceDao
+import es.alejandro.grandarbiter.data.local.entities.CREntity
 import es.alejandro.grandarbiter.data.local.entities.CardCacheEntity
-import es.alejandro.grandarbiter.data.local.entities.DocumentEntity
-import es.alejandro.grandarbiter.data.local.entities.DocumentSectionEntity
-import es.alejandro.grandarbiter.data.local.entities.QuickReferenceEntity
 
 @Database(
     entities = [
-        DocumentEntity::class,
-        DocumentSectionEntity::class,
-        CardCacheEntity::class,
-        QuickReferenceEntity::class
+        CREntity::class,
+        CardCacheEntity::class
     ],
-    version = 1,
+    version = 5,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun documentDao(): DocumentDao
+    abstract fun crDao(): CRDao
     abstract fun cardDao(): CardDao
-    abstract fun quickReferenceDao(): QuickReferenceDao
 }

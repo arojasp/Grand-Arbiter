@@ -40,6 +40,19 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
         return
     }
 
+    MainScreenContent(
+        startDestination = startDestination!!,
+        onSetUpComplete = {
+            viewModel.setSetUpDone()
+        }
+    )
+}
+
+@Composable
+fun MainScreenContent(
+    startDestination: String,
+    onSetUpComplete: () -> Unit
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -91,9 +104,9 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
         AppNavGraph(
             navController = navController,
             modifier = Modifier.padding(innerPadding),
-            startDestination = startDestination!!,
+            startDestination = startDestination,
             onSetUpComplete = {
-                viewModel.setSetUpDone()
+                onSetUpComplete()
                 navController.navigate(Screen.Home.route) {
                     popUpTo(Screen.SetUp.route) { inclusive = true }
                 }
@@ -107,7 +120,10 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
 @Composable
 fun MainScreenDarkPreview() {
     GrandArbiterTheme(themeMode = ThemeMode.DARK) {
-        MainScreen()
+        MainScreenContent(
+            startDestination = Screen.Home.route,
+            onSetUpComplete = {}
+        )
     }
 }
 
@@ -115,6 +131,9 @@ fun MainScreenDarkPreview() {
 @Composable
 fun MainScreenLightPreview() {
     GrandArbiterTheme(themeMode = ThemeMode.LIGHT) {
-        MainScreen()
+        MainScreenContent(
+            startDestination = Screen.Home.route,
+            onSetUpComplete = {}
+        )
     }
 }

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Judge Companion</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_documents">Documents</string>
+    <string name="nav_card_search">Card Search</string>
+    <string name="nav_tools">Tools</string>
+    <string name="splash_text">Grand Arbiter</string>
+</resources>

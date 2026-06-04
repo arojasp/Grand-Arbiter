@@ -1,15 +1,39 @@
+# Build artifacts
+bin/
+gen/
+out/
+build/
+.gradle/
+.navigation/
+
+# IDE files
+.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+*.iws
+*.ipr
+.shelf/
+.settings/
+.project
+.classpath
+
+# Local properties
 local.properties
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Captures
+captures/
+
+# External Native Build
+.externalNativeBuild/
+.cxx/

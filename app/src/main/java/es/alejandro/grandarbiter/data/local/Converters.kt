@@ -4,6 +4,8 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
+import es.alejandro.grandarbiter.data.local.entities.TOCSubItem
+
 class Converters {
     private val gson = Gson()
 
@@ -15,6 +17,17 @@ class Converters {
     @TypeConverter
     fun toStringList(value: String?): List<String>? {
         val listType = object : TypeToken<List<String>>() {}.type
+        return gson.fromJson(value, listType)
+    }
+
+    @TypeConverter
+    fun fromTOCSubItemList(value: List<TOCSubItem>?): String? {
+        return gson.toJson(value)
+    }
+
+    @TypeConverter
+    fun toTOCSubItemList(value: String?): List<TOCSubItem>? {
+        val listType = object : TypeToken<List<TOCSubItem>>() {}.type
         return gson.fromJson(value, listType)
     }
 }

@@ -56,4 +56,15 @@
     <string name="cr_download_subtitle">Fetching last version of the Comprehensive Rules</string>
     <string name="cr_store_title">Saving CR</string>
     <string name="cr_store_subtitle">Storing Comprehensive Rules on the database</string>
+
+    <!-- IPG Screen -->
+    <string name="ipg_title">IPG</string>
+    <string name="ipg_search_placeholder">Search rules, penalties, or sections…</string>
+    <string name="ipg_definition_label">DEFINITION</string>
+    <string name="ipg_philosophy_label">PHILOSOPHY</string>
+    <string name="ipg_default_penalty_label">DEFAULT PENALTY</string>
+    <string name="ipg_time_limit_label">TIME LIMIT</string>
+    <string name="ipg_upgrade_downgrade_path_label">UPGRADE/DOWNGRADE PATH</string>
+    <string name="ipg_penalty_warning">Warning</string>
+    <string name="ipg_time_limit_zero">+0 mins</string>
 </resources>

@@ -11,6 +11,7 @@ import es.alejandro.grandarbiter.data.repository.CardRepositoryImpl
 import es.alejandro.grandarbiter.domain.connectivity.ConnectivityObserver
 import es.alejandro.grandarbiter.domain.repository.CRRepository
 import es.alejandro.grandarbiter.domain.repository.CardRepository
+import es.alejandro.grandarbiter.ui.comprehensiverules.ComprehensiveRulesViewModel
 import es.alejandro.grandarbiter.ui.home.HomeViewModel
 import es.alejandro.grandarbiter.ui.main.MainViewModel
 import es.alejandro.grandarbiter.ui.setup.SetUpViewModel
@@ -84,4 +85,5 @@ val viewModelModule = module {
     viewModelOf(::MainViewModel)
     viewModelOf(::SetUpViewModel)
     viewModelOf(::HomeViewModel)
+    viewModelOf(::ComprehensiveRulesViewModel)
 }

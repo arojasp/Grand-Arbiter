@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.data.local.entities.CREntity
+import es.alejandro.grandarbiter.data.local.entities.GlossaryEntity
+import es.alejandro.grandarbiter.data.local.entities.TOCEntity
 import es.alejandro.grandarbiter.domain.connectivity.ConnectivityObserver
 import es.alejandro.grandarbiter.domain.repository.CRRepository
 import kotlinx.coroutines.launch
@@ -28,6 +30,8 @@ class SetUpViewModel(
 
 
     private var cachedRules: List<CREntity>? = null
+    private var cachedTOC: List<TOCEntity>? = null
+    private var cachedGlossary: List<GlossaryEntity>? = null
 
     fun downloadNow() {
         viewModelScope.launch {
@@ -45,6 +49,7 @@ class SetUpViewModel(
             currentSteps[index] = step.copy(status = SetupStepStatus.IN_PROGRESS)
             updateLoadingState(currentSteps, step.type, calculateProgress(index, currentSteps.size))
 
+            var shouldStop = false
             when (step.type) {
                 SetupStepType.CONNECTIVITY_CHECK -> {
                     runCatching {
@@ -54,32 +59,55 @@ class SetUpViewModel(
                         updateLoadingState(currentSteps, step.type, calculateProgress(index + 1, currentSteps.size))
                     }.onFailure {
                         currentSteps[index] = currentSteps[index].copy(status = SetupStepStatus.ERROR)
+                        shouldStop = true
                     }
                 }
                 SetupStepType.CR_DOWNLOAD -> {
                     runCatching {
+                        // Progress for CR_DOWNLOAD starts at 33.3%
+                        // Rules (1/3 of this step)
                         cachedRules = crRepository.downloadCR()
+                        updateLoadingState(currentSteps, step.type, 33.3f + (33.3f / 3f) * 1)
+                        
+                        // TOC (1/3 of this step)
+                        cachedTOC = crRepository.downloadTOC()
+                        updateLoadingState(currentSteps, step.type, 33.3f + (33.3f / 3f) * 2)
+
+                        // Glossary (1/3 of this step)
+                        cachedGlossary = crRepository.downloadGlossary()
+                        updateLoadingState(currentSteps, step.type, 33.3f + (33.3f / 3f) * 3)
                     }.onSuccess {
                         currentSteps[index] = currentSteps[index].copy(status = SetupStepStatus.COMPLETED)
                         updateLoadingState(currentSteps, step.type, calculateProgress(index + 1, currentSteps.size))
                     }.onFailure {
                         currentSteps[index] = currentSteps[index].copy(status = SetupStepStatus.ERROR)
+                        shouldStop = true
                     }
 
                 }
                 SetupStepType.CR_STORE -> {
                     runCatching {
-                        cachedRules?.let {
-                            crRepository.storeRules(it)
-                        }
+                        // Progress for CR_STORE starts at 66.6%
+                        // Rules (1/3 of this step)
+                        cachedRules?.let { crRepository.storeRules(it) }
+                        updateLoadingState(currentSteps, step.type, 66.6f + (33.3f / 3f) * 1)
+
+                        // TOC (1/3 of this step)
+                        cachedTOC?.let { crRepository.storeTOC(it) }
+                        updateLoadingState(currentSteps, step.type, 66.6f + (33.3f / 3f) * 2)
+
+                        // Glossary (1/3 of this step)
+                        cachedGlossary?.let { crRepository.storeGlossary(it) }
                     }.onSuccess {
                         currentSteps[index] = currentSteps[index].copy(status = SetupStepStatus.COMPLETED)
-                        updateLoadingState(currentSteps, step.type, calculateProgress(index + 1, currentSteps.size))
+                        updateLoadingState(currentSteps, step.type, 100f)
                     }.onFailure {
                         currentSteps[index] = currentSteps[index].copy(status = SetupStepStatus.ERROR)
+                        shouldStop = true
                     }
                 }
             }
+            if (shouldStop) break
         }
 
     }

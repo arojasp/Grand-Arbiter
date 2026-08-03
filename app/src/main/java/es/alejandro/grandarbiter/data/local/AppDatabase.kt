@@ -7,13 +7,17 @@ import es.alejandro.grandarbiter.data.local.dao.CRDao
 import es.alejandro.grandarbiter.data.local.dao.CardDao
 import es.alejandro.grandarbiter.data.local.entities.CREntity
 import es.alejandro.grandarbiter.data.local.entities.CardCacheEntity
+import es.alejandro.grandarbiter.data.local.entities.GlossaryEntity
+import es.alejandro.grandarbiter.data.local.entities.TOCEntity
 
 @Database(
     entities = [
         CREntity::class,
-        CardCacheEntity::class
+        CardCacheEntity::class,
+        TOCEntity::class,
+        GlossaryEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

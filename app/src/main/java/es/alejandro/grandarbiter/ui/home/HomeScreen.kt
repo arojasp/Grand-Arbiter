@@ -1,6 +1,7 @@
 package es.alejandro.grandarbiter.ui.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,7 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    onNavigateToDocument: (String) -> Unit = {},
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val elapsedTime = viewModel.elapsedTime
@@ -63,6 +65,7 @@ fun HomeScreen(
         isRunning = isRunning,
         onToggleTimer = viewModel::toggleTimer,
         onResetTimer = viewModel::resetTimer,
+        onNavigateToDocument = onNavigateToDocument,
         modifier = modifier
     )
 }
@@ -74,6 +77,7 @@ fun HomeScreenContent(
     isRunning: Boolean,
     onToggleTimer: () -> Unit,
     onResetTimer: () -> Unit,
+    onNavigateToDocument: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -147,7 +151,10 @@ fun HomeScreenContent(
             }
 
             items(documentItems) { item ->
-                DocumentLibraryCard(item)
+                DocumentLibraryCard(
+                    item = item,
+                    onClick = { onNavigateToDocument(item.id) }
+                )
             }
 
             item {
@@ -174,10 +181,10 @@ fun JudgeCallTimerCard(
     ) {
         Column(
             modifier = Modifier
-                .padding(24.dp)
+                .padding(16.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_timer),
@@ -258,10 +265,13 @@ fun JudgeCallTimerCard(
 @Composable
 fun DocumentLibraryCard(
     item: DocumentLibraryItem,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -343,6 +353,7 @@ fun DocumentLibraryCard(
 }
 
 data class DocumentLibraryItem(
+    val id: String,
     val badge: String,
     val title: String,
     val description: String,
@@ -353,6 +364,7 @@ data class DocumentLibraryItem(
 @Composable
 fun getDocumentLibraryItems() = listOf(
     DocumentLibraryItem(
+        id = "cr",
         badge = stringResource(R.string.home_badge_cr),
         title = stringResource(R.string.home_cr_title),
         description = stringResource(R.string.home_cr_description),
@@ -360,18 +372,21 @@ fun getDocumentLibraryItems() = listOf(
         hasAccent = true
     ),
     DocumentLibraryItem(
+        id = "ipg",
         badge = stringResource(R.string.home_badge_ipg),
         title = stringResource(R.string.home_ipg_title),
         description = stringResource(R.string.home_ipg_description),
         date = stringResource(R.string.home_date_ipg)
     ),
     DocumentLibraryItem(
+        id = "mtr",
         badge = stringResource(R.string.home_badge_mtr),
         title = stringResource(R.string.home_mtr_title),
         description = stringResource(R.string.home_mtr_description),
         date = stringResource(R.string.home_date_mtr)
     ),
     DocumentLibraryItem(
+        id = "jar",
         badge = stringResource(R.string.home_badge_jar),
         title = stringResource(R.string.home_jar_title),
         description = stringResource(R.string.home_jar_description),
@@ -393,7 +408,8 @@ fun HomeScreenPreview() {
             elapsedTime = 0L,
             isRunning = false,
             onToggleTimer = {},
-            onResetTimer = {}
+            onResetTimer = {},
+            onNavigateToDocument = {}
         )
     }
 }

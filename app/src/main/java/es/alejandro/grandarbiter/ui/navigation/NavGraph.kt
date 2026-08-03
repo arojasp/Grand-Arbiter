@@ -5,24 +5,28 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import es.alejandro.grandarbiter.ui.home.HomeScreen
-import es.alejandro.grandarbiter.ui.documents.DocumentReaderScreen
-import es.alejandro.grandarbiter.ui.cardsearch.CardSearchScreen
 import es.alejandro.grandarbiter.ui.cardsearch.CardDetailScreen
-import es.alejandro.grandarbiter.ui.tools.ToolsScreen
-import es.alejandro.grandarbiter.ui.tools.DeckCounterScreen
-import es.alejandro.grandarbiter.ui.tools.JudgeTimerScreen
-import es.alejandro.grandarbiter.ui.tools.DraftTimerScreen
-import es.alejandro.grandarbiter.ui.tools.HeadJudgeAnnouncementScreen
-import es.alejandro.grandarbiter.ui.tools.BannedListsScreen
-import es.alejandro.grandarbiter.ui.tools.QuickReferencesScreen
-import es.alejandro.grandarbiter.ui.tools.QuickReferenceDetailScreen
+import es.alejandro.grandarbiter.ui.cardsearch.CardSearchScreen
+import es.alejandro.grandarbiter.ui.comprehensiverules.ComprehensiveRulesScreen
+import es.alejandro.grandarbiter.ui.documents.DocumentReaderScreen
+import es.alejandro.grandarbiter.ui.home.HomeScreen
+import es.alejandro.grandarbiter.ui.ipg.IpgScreen
 import es.alejandro.grandarbiter.ui.settings.SettingsScreen
 import es.alejandro.grandarbiter.ui.setup.SetUpScreen
+import es.alejandro.grandarbiter.ui.tools.BannedListsScreen
+import es.alejandro.grandarbiter.ui.tools.DeckCounterScreen
+import es.alejandro.grandarbiter.ui.tools.DraftTimerScreen
+import es.alejandro.grandarbiter.ui.tools.HeadJudgeAnnouncementScreen
+import es.alejandro.grandarbiter.ui.tools.JudgeTimerScreen
+import es.alejandro.grandarbiter.ui.tools.QuickReferenceDetailScreen
+import es.alejandro.grandarbiter.ui.tools.QuickReferencesScreen
+import es.alejandro.grandarbiter.ui.tools.ToolsScreen
 
 sealed class Screen(val route: String) {
     object SetUp : Screen("setup")
     object Home : Screen("home")
+    object ComprehensiveRules : Screen("comprehensive_rules")
+    object Ipg : Screen("ipg")
     object DocumentReader : Screen("document_reader/{documentId}") {
         fun createRoute(documentId: String) = "document_reader/$documentId"
     }
@@ -59,10 +63,26 @@ fun AppNavGraph(
         composable(Screen.SetUp.route) {
             SetUpScreen(onSetUpComplete = onSetUpComplete)
         }
-        composable(Screen.Home.route) { HomeScreen() }
+        composable(Screen.Home.route) { 
+            HomeScreen(
+                onNavigateToDocument = { documentId ->
+                    navController.navigate(Screen.DocumentReader.createRoute(documentId))
+                }
+            ) 
+        }
+        composable(Screen.ComprehensiveRules.route) { 
+            ComprehensiveRulesScreen(onBackClick = { navController.popBackStack() }) 
+        }
+        composable(Screen.Ipg.route) { 
+            IpgScreen(onBackClick = { navController.popBackStack() }) 
+        }
         composable(Screen.DocumentReader.route) { backStackEntry ->
             val documentId = backStackEntry.arguments?.getString("documentId") ?: ""
-            DocumentReaderScreen(documentId)
+            when (documentId) {
+                "cr" -> ComprehensiveRulesScreen(onBackClick = { navController.popBackStack() })
+                "ipg" -> IpgScreen(onBackClick = { navController.popBackStack() })
+                else -> DocumentReaderScreen(documentId)
+            }
         }
         composable(Screen.CardSearch.route) { CardSearchScreen() }
         composable(Screen.CardDetail.route) { backStackEntry ->

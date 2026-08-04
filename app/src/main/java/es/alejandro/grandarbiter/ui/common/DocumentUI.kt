@@ -29,10 +29,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.data.local.entities.CREntity
+import es.alejandro.grandarbiter.data.local.entities.NavigationEntity
+import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
 
 data class DocumentSection(
     val id: String,
@@ -347,3 +350,97 @@ private fun DetailCard(
         }
     }
 }
+
+@Preview(showSystemUi = true)
+@Composable
+private fun DocumentSectionCollapsedPreview() {
+    GrandArbiterTheme {
+            DocumentSectionItem(
+                section = sampleDocumentSection,
+                isExpanded = false,
+                onExpandClick = {},
+                expandedSubSectionId = null,
+                onSubSectionClick = {}
+            )
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun DocumentSectionExpandedPreview() {
+    GrandArbiterTheme {
+
+            DocumentSectionItem(
+                section = sampleDocumentSection,
+                isExpanded = true,
+                onExpandClick = {},
+                expandedSubSectionId = "1.1",
+                onSubSectionClick = {}
+            )
+
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun DocumentSubSectionInfractionPreview() {
+    GrandArbiterTheme {
+            DocumentSubSectionItem(
+                subSection = sampleDocumentSection.subSections[0],
+                isExpanded = true,
+                onClick = {}
+            )
+
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun DocumentSubSectionRulesPreview() {
+    GrandArbiterTheme {
+            DocumentSubSectionItem(
+                subSection = sampleDocumentSection.subSections[1],
+                isExpanded = true,
+                onClick = {}
+            )
+
+    }
+}
+
+private val sampleDocumentSection = DocumentSection(
+    id = "1",
+    title = "1. Game Play Errors",
+    subSections = listOf(
+        DocumentSubSection(
+            id = "1.1",
+            title = "1.1 Missed Trigger",
+            details = DocumentDetails(
+                definition = "A triggered ability triggers, but the player controlling the ability is unaware of its existence and/or forgets to announce its effect or make the appropriate choices.",
+                philosophy = "Triggers are not mandatory in the sense that a player is not required to remind their opponent of a trigger they control.",
+                defaultPenalty = "Warning",
+                timeLimit = "+0 mins",
+                upgradeDowngradePath = "If the triggered ability is generally considered detrimental for the player controlling the ability, the penalty is a Warning."
+            )
+        ),
+        DocumentSubSection(
+            id = "1.2",
+            title = "1.2 Looking at Extra Cards",
+            rules = listOf(
+                CREntity(
+                    ruleNumber = "1.2a",
+                    ruleText = "A player is considered to have looked at extra cards if they see a card that they were not supposed to see.",
+                    fragment = "",
+                    examples = listOf("Example 1: A player accidentally flips the top card of their library."),
+                    navigation = NavigationEntity()
+                ),
+                CREntity(
+                    ruleNumber = "1.2b",
+                    ruleText = "If a player looks at extra cards, the cards should be returned to where they were supposed to be.",
+                    fragment = "",
+                    examples = emptyList(),
+                    navigation = NavigationEntity()
+                )
+            )
+        )
+    )
+)

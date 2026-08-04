@@ -1,30 +1,20 @@
 package es.alejandro.grandarbiter.ui.home
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.domain.repository.CRRepository
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import es.alejandro.grandarbiter.domain.timer.TimerManager
+import kotlinx.coroutines.flow.StateFlow
 
 class HomeViewModel(
-    private val crRepository: CRRepository
+    private val crRepository: CRRepository,
+    private val timerManager: TimerManager
 ) : ViewModel() {
 
-    var elapsedTime by mutableLongStateOf(0L)
-        private set
-
-    var isRunning by mutableStateOf(false)
-        private set
-
-    private var timerJob: Job? = null
+    val elapsedTime: StateFlow<Long> = timerManager.elapsedTime
+    val isRunning: StateFlow<Boolean> = timerManager.isRunning
 
     fun toggleTimer() {
-        if (isRunning) {
+        if (isRunning.value) {
             pauseTimer()
         } else {
             startTimer()
@@ -32,28 +22,14 @@ class HomeViewModel(
     }
 
     private fun startTimer() {
-        isRunning = true
-        timerJob = viewModelScope.launch {
-            val startTime = System.currentTimeMillis() - elapsedTime
-            while (isRunning) {
-                elapsedTime = System.currentTimeMillis() - startTime
-                delay(10)
-            }
-        }
+        timerManager.startTimer()
     }
 
     fun pauseTimer() {
-        isRunning = false
-        timerJob?.cancel()
+        timerManager.pauseTimer()
     }
 
     fun resetTimer() {
-        pauseTimer()
-        elapsedTime = 0L
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        timerJob?.cancel()
+        timerManager.resetTimer()
     }
 }

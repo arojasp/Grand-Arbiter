@@ -36,6 +36,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,8 +59,8 @@ fun HomeScreen(
     onNavigateToDocument: (String) -> Unit = {},
     viewModel: HomeViewModel = koinViewModel()
 ) {
-    val elapsedTime = viewModel.elapsedTime
-    val isRunning = viewModel.isRunning
+    val elapsedTime by viewModel.elapsedTime.collectAsState()
+    val isRunning by viewModel.isRunning.collectAsState()
 
     HomeScreenContent(
         elapsedTime = elapsedTime,

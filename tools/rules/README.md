@@ -40,3 +40,25 @@ published, fetch_sources.py says so: re-check every entry and set `verified` aga
 1. `git diff rules/source` to see what changed upstream (the .txt files are readable diffs).
 2. Read `rules/build-report.md`: errors block the build; warnings need a human look.
 3. Run the unit tests, then spot-check the changed sections in the app.
+
+## Publishing a rules update without an app release
+
+The app's Settings › "Check for updates" reads `app/src/main/assets/rules/manifest.json` and, if
+its `bundleVersion` is newer than the installed one, `bundle.json` — both straight from **branch
+`main`** of this repo (raw.githubusercontent.com). So:
+
+1. Rebuild as above (`fetch_sources` → `extract_pdf_docs` → `build_bundle`). `build_bundle.py`
+   bumps `bundleVersion` and rewrites `manifest.json` next to the bundle.
+2. `gradlew :app:testDebugUnitTest` — `BundledRulesAssetTest` validates the bundle and checks the
+   manifest matches it.
+3. Commit on `develop`, then **merge to `main`: that is the publish step.** Users get it the next
+   time they tap "Check for updates" (GitHub may serve the old file for a few minutes).
+
+The whole bundle travels (CR, MTR, IPG, JAR), not just the changed document: the IPG links into
+CR rule numbers, so all four must come from the same build. In the app the bundle goes through the
+same importer as the APK's (schemaVersion check, validator, one transaction), so a broken bundle is
+rejected and the installed rules stay. A bundle with a higher `schemaVersion` than an installed
+app supports is refused by that app ("needs an app update").
+
+Never merge to `main` a bundle that hasn't passed the tests: it reaches users without any store
+review. If you only changed the manifest by hand: `python tools/rules/build_bundle.py --manifest-only`.

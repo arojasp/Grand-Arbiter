@@ -105,6 +105,8 @@ fun AppNavGraph(
             val referenceId = backStackEntry.arguments?.getString("referenceId") ?: ""
             QuickReferenceDetailScreen(referenceId)
         }
-        composable(Screen.Settings.route) { SettingsScreen(onBack = { navController.popBackStack() }) }
+        composable(Screen.Settings.route) {
+            SettingsScreen(onBack = { navController.popBackStack() })
+        }
     }
 }

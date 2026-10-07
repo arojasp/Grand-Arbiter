@@ -32,7 +32,7 @@ class RulesRepositoryImpl(
         dao.observeDocuments().map { rows ->
             rows.mapNotNull { row ->
                 val id = DocumentId.entries.firstOrNull { it.key == row.id } ?: return@mapNotNull null
-                RulesDocumentInfo(id, row.title, LocalDate.parse(row.effectiveDate))
+                RulesDocumentInfo(id, row.title, LocalDate.parse(row.effectiveDate), row.sourceUrl)
             }.sortedBy { it.id.ordinal }
         }
 

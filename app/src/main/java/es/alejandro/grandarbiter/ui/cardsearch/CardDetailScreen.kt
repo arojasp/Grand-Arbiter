@@ -1,9 +1,6 @@
 package es.alejandro.grandarbiter.ui.cardsearch
 
 import android.util.Log
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.ui.platform.LocalContext
-import coil.request.ImageRequest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -20,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,6 +39,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,8 +50,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -62,6 +61,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
 import es.alejandro.grandarbiter.domain.model.cards.CardFace
@@ -288,7 +288,7 @@ private fun RulingCard(ruling: CardRuling) {
                 if (!official) Tag(stringResource(R.string.cards_ruling_scryfall))
                 Spacer(Modifier.weight(1f))
                 if (official) {
-                    Icon(painterResource(R.drawable.ic_gavel), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(12.dp))
+                    Icon(painterResource(R.drawable.ic_book), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(12.dp))
                 }
             }
             OracleText(ruling.text, TextStyle(fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.25.sp), colors.onSurface)
@@ -324,7 +324,7 @@ private fun LegalityItem(item: FormatLegality, modifier: Modifier) {
     val shape = RoundedCornerShape(8.dp)
     Row(
         modifier = modifier
-            .height(38.dp)
+            .heightIn(min = 38.dp)   // grows with Settings › Text size
             // Banned stays at full strength: it matters more than "not legal" to a judge.
             .alpha(if (item.legality == Legality.NOT_LEGAL) 0.6f else 1f)
             .background(colors.surfaceContainerHighest.copy(alpha = 0.3f), shape)

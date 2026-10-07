@@ -27,6 +27,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "rules" / "source"
 OUT = ROOT / "app" / "src" / "main" / "assets" / "rules" / "bundle.json"
+# Small file the app downloads first (from GitHub, branch main) to know whether there is a newer
+# bundle before downloading the whole thing. Must always match bundle.json: BundledRulesAssetTest checks.
+MANIFEST = OUT.with_name("manifest.json")
 REPORT = ROOT / "rules" / "build-report.md"
 SCHEMA_VERSION = 1
 
@@ -495,12 +498,28 @@ def next_bundle_version() -> int:
     return max(today, current + 1)
 
 
+def write_manifest(bundle: dict) -> None:
+    manifest = {
+        "schemaVersion": bundle["schemaVersion"],
+        "bundleVersion": bundle["bundleVersion"],
+        "generatedAt": bundle.get("generatedAt"),
+        "documents": {d["id"]: d["effectiveDate"] for d in bundle["documents"]},
+    }
+    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8", newline="\n")
+    print(f"Wrote {MANIFEST.relative_to(ROOT)}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--bundle-version", type=int,
                     help="yyyyMMddNN; default: today's date + 01")
     ap.add_argument("--check", action="store_true", help="build and report, but don't write the asset")
+    ap.add_argument("--manifest-only", action="store_true",
+                    help="only (re)write manifest.json from the existing bundle.json (no rebuild, no version bump)")
     args = ap.parse_args()
+    if args.manifest_only:
+        write_manifest(json.loads(OUT.read_text(encoding="utf-8")))
+        return 0
 
     rep = Report()
     sources = json.loads((SRC / "sources.json").read_text(encoding="utf-8")) if (SRC / "sources.json").exists() else {}
@@ -580,6 +599,7 @@ def main() -> int:
             f.write("    }" + ("," if di < len(docs) - 1 else "") + "\n")
         f.write("  ]\n}\n")
     print(f"\nWrote {OUT.relative_to(ROOT)} ({OUT.stat().st_size // 1024} KB)")
+    write_manifest(bundle)
     return 0
 
 

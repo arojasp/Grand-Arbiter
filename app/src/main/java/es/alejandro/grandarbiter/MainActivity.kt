@@ -1,10 +1,12 @@
 package es.alejandro.grandarbiter
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -24,8 +26,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val themeMode by viewModel.themeMode.collectAsState()
-            GrandArbiterTheme(themeMode = themeMode) {
+            val settings by viewModel.displaySettings.collectAsState()
+            // Only while the app is in the foreground: the flag goes with the window.
+            LaunchedEffect(settings.keepScreenOn) {
+                if (settings.keepScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+            GrandArbiterTheme(
+                themeMode = settings.themeMode,
+                textScale = settings.textScale,
+                highContrast = settings.highContrast,
+            ) {
                 MainScreen()
             }
         }

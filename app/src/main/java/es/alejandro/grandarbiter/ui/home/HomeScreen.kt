@@ -48,10 +48,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
-import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
 import es.alejandro.grandarbiter.ui.reader.effectiveLabel
-import java.time.LocalDate
+import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
 import org.koin.androidx.compose.koinViewModel
+import java.time.LocalDate
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
@@ -104,15 +104,6 @@ fun HomeScreenContent(
                             letterSpacing = 0.5.sp
                         )
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /* TODO */ }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_gavel),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 },
                 actions = {
                     IconButton(onClick = onOpenSettings) {

@@ -63,3 +63,6 @@ cards/source/
 # ---- Official rules PDFs (Wizards' documents): downloaded by tools/rules/fetch_sources.py.
 # Not redistributed; the extracted .txt files and sources.json (URL + SHA-256) are committed.
 rules/source/*.pdf
+
+# ---- Files the Claude desktop app saves when it sends you a file (not part of the project)
+Claude outputs/

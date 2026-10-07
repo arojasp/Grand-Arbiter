@@ -94,7 +94,7 @@
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
-    <string name="settings_card_data">Card data</string>
+    <string name="settings_card_data">Card database</string>
     <string name="settings_cards">Cards</string>
     <string name="settings_scryfall_date">Scryfall data</string>
     <string name="settings_source">Source</string>
@@ -102,15 +102,37 @@
     <string name="settings_source_scryfall">Downloaded from Scryfall</string>
     <string name="settings_installed">Installed</string>
     <string name="settings_check_updates">Check for updates</string>
-    <string name="settings_update_hint">Downloads about 30 MB from Scryfall, only if there is newer data.</string>
-    <string name="settings_checking">Checking Scryfall…</string>
-    <string name="settings_downloading_cards">Downloading cards… %1$s</string>
-    <string name="settings_downloading_rulings">Downloading rulings… %1$s</string>
-    <string name="settings_importing">Installing… This takes about 20 seconds. You can keep using the app.</string>
-    <string name="settings_up_to_date">Your card data is up to date.</string>
-    <string name="settings_updated">Updated: %1$s cards, Scryfall data from %2$s.</string>
-    <string name="settings_failed">Update failed. Your card data hasn\'t changed.</string>
+    <string name="settings_update_hint">Checks for new rules documents and card data. Downloads only what is newer: card data is about 30 MB.</string>
+    <string name="settings_rules_checking">Documents: checking for a new version…</string>
+    <string name="settings_rules_up_to_date">Documents: up to date.</string>
+    <string name="settings_rules_updated">Documents updated: %1$s.</string>
+    <string name="settings_rules_updated_fixes">Documents updated (corrections, same versions).</string>
+    <string name="settings_rules_needs_app_update">Documents: a newer version needs an app update.</string>
+    <string name="settings_rules_failed">Documents: update failed. Your documents haven\'t changed.</string>
+    <string name="settings_checking">Cards: checking Scryfall…</string>
+    <string name="settings_downloading_cards">Cards: downloading… %1$s</string>
+    <string name="settings_downloading_rulings">Cards: downloading rulings… %1$s</string>
+    <string name="settings_importing">Cards: installing… about 20 seconds. You can keep using the app.</string>
+    <string name="settings_up_to_date">Cards: up to date.</string>
+    <string name="settings_updated">Cards updated: %1$s cards, Scryfall data from %2$s.</string>
+    <string name="settings_failed">Cards: update failed. Your card data hasn\'t changed.</string>
     <string name="settings_about">About</string>
+    <string name="settings_accessibility">Accessibility</string>
+    <string name="settings_text_size">Text size</string>
+    <string name="settings_text_small">Small</string>
+    <string name="settings_text_default">Default</string>
+    <string name="settings_text_large">Large</string>
+    <string name="settings_text_extra_large">Extra large</string>
+    <string name="settings_text_preview">\u201CThis is a preview of the current text size.\u201D</string>
+    <string name="settings_high_contrast">High contrast mode</string>
+    <string name="settings_high_contrast_hint">Increase legibility</string>
+    <string name="settings_keep_screen_on">Keep screen on</string>
+    <string name="settings_keep_screen_on_hint">Prevent sleep while the app is open</string>
+    <string name="settings_documents">Documents</string>
+    <string name="settings_open_pdf">Open the official PDF</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_credits">Credits</string>
+    <string name="settings_credits_text">Developed for the judge community.</string>
     <string name="settings_fan_content">Grand Arbiter is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.</string>
     <string name="settings_scryfall_credit">Card data, rulings, mana symbols and card art come from Scryfall (scryfall.com). Grand Arbiter is not produced by or endorsed by Scryfall.</string>
 

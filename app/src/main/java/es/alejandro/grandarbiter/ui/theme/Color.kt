@@ -110,6 +110,10 @@ val surfaceContainerLightHighContrast = Color(0xFFE4E1E9)
 val surfaceContainerHighLightHighContrast = Color(0xFFD5D3DB)
 val surfaceContainerHighestLightHighContrast = Color(0xFFC7C5CD)
 
+// Figma accent for filled buttons, the selected segment and the Settings title (deeper than primary).
+val GoldDeep = Color(0xFFC9A84C)
+val OnGoldDeep = Color(0xFF3D2E00)
+
 // Dark scheme surfaces/background follow the Figma design (navy, Figma file f13STSp9O4W4SQW3Nz89hA).
 val primaryDark = Color(0xFFE6C364)
 val onPrimaryDark = Color(0xFF3D2E00)

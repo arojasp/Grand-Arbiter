@@ -75,4 +75,21 @@ class BundledRulesAssetTest {
         val ids = bundle().documents.map { it.id }.toSet()
         assertEquals(setOf(DocumentId.CR, DocumentId.MTR, DocumentId.IPG, DocumentId.JAR), ids)
     }
+
+    /**
+     * manifest.json is what the app downloads first to decide whether to fetch the bundle. If it
+     * doesn't match bundle.json, users would be offered the wrong version (or never the new one).
+     * Fix: python tools/rules/build_bundle.py --manifest-only
+     */
+    @Test
+    fun manifest_matchesTheBundle() {
+        val manifestFile = File("src/main/assets/rules/manifest.json")
+        assumeTrue(file.exists() && manifestFile.exists())
+        val b = bundle()
+        val m = Json { ignoreUnknownKeys = false }
+            .decodeFromString<es.alejandro.grandarbiter.data.rules.update.RulesManifest>(manifestFile.readText())
+        assertEquals(b.schemaVersion, m.schemaVersion)
+        assertEquals(b.bundleVersion, m.bundleVersion)
+        assertEquals(b.documents.associate { it.id.key to it.effectiveDate }, m.documents)
+    }
 }

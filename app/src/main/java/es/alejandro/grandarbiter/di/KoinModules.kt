@@ -16,6 +16,9 @@ import es.alejandro.grandarbiter.data.rules.local.RulesBundleImporter
 import es.alejandro.grandarbiter.data.rules.local.RulesDatabase
 import es.alejandro.grandarbiter.data.timer.TimerManagerImpl
 import es.alejandro.grandarbiter.domain.repository.CardDataUpdater
+import es.alejandro.grandarbiter.domain.repository.RulesDataUpdater
+import es.alejandro.grandarbiter.data.rules.update.PublishedRulesClient
+import es.alejandro.grandarbiter.data.rules.update.PublishedRulesUpdater
 import es.alejandro.grandarbiter.domain.repository.CardRepository
 import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import es.alejandro.grandarbiter.domain.timer.TimerManager
@@ -74,6 +77,8 @@ val rulesModule = module {
     single { AssetRulesBundleSource(androidContext()) }
     single { RulesBundleImporter(get(), get()) }
     single<RulesRepository> { RulesRepositoryImpl(get()) }
+    single { PublishedRulesClient(get(), PublishedRulesUpdater.PUBLISHED_RULES_URL) }
+    single<RulesDataUpdater> { PublishedRulesUpdater(get(), get(), get(), get()) }
 }
 
 /** Card data: a separate, disposable DB filled from Scryfall snapshots (see CardsDatabase.kt). */

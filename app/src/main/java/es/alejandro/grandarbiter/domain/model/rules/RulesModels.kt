@@ -11,7 +11,16 @@ data class RulesDocumentInfo(
     val id: DocumentId,
     val title: String,
     val effectiveDate: LocalDate,
-)
+    /** The official file the installed text was built from (CR: the .txt; others: the PDF). */
+    val sourceUrl: String,
+) {
+    /**
+     * The official PDF, to open in a browser. MTR/IPG/JAR sources already are PDFs. The CR source
+     * is Wizards' .txt; Wizards publishes the PDF next to it with the same name.
+     */
+    val pdfUrl: String
+        get() = if (sourceUrl.endsWith(".txt", ignoreCase = true)) sourceUrl.dropLast(4) + ".pdf" else sourceUrl
+}
 
 /**
  * An entry of a document's contents. Level-0 entries are groups (CR "1. Game Concepts",
@@ -70,4 +79,19 @@ fun documentIdOf(sectionId: String): DocumentId {
     val key = sectionId.substringBefore('/')
     return DocumentId.entries.firstOrNull { it.key == key }
         ?: throw IllegalArgumentException("not a rules section id: $sectionId")
+}
+
+/** Progress of a rules-documents update from the published bundle (GitHub, branch main). */
+sealed interface RulesUpdateState {
+    data object Idle : RulesUpdateState
+    data object Checking : RulesUpdateState
+    data object Downloading : RulesUpdateState
+    data object Importing : RulesUpdateState
+    data object UpToDate : RulesUpdateState
+    /** [changed]: documents whose effective date changed, e.g. a new CR. Empty = only fixes. */
+    data class Updated(val changed: List<RulesDocumentInfo>) : RulesUpdateState
+    /** The published bundle uses a newer format than this app understands: update the app. */
+    data object NeedsAppUpdate : RulesUpdateState
+    /** Nothing changed: the installed documents are still the previous ones. */
+    data class Failed(val reason: String) : RulesUpdateState
 }

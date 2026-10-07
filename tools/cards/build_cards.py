@@ -20,6 +20,7 @@ Usage: python tools/cards/build_cards.py
 from __future__ import annotations
 
 import gzip
+import io
 import json
 import sys
 from pathlib import Path
@@ -78,7 +79,9 @@ def write(name: str, rows) -> tuple[int, int]:
     path = OUT / name
     n = 0
     raw = 0
-    with gzip.open(path, "wt", encoding="utf-8", compresslevel=9) as f:
+    # mtime=0: same data -> byte-identical file, so a rebuild doesn't churn git with 6 MB blobs.
+    with gzip.GzipFile(path, "wb", compresslevel=9, mtime=0) as raw_file, \
+            io.TextIOWrapper(raw_file, encoding="utf-8", newline="\n") as f:
         for r in rows:
             line = json.dumps(r, ensure_ascii=False, separators=(",", ":")) + "\n"
             f.write(line)

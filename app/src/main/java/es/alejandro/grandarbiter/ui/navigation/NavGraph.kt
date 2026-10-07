@@ -5,12 +5,17 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import es.alejandro.grandarbiter.ui.cardsearch.CardDetailScreen
 import es.alejandro.grandarbiter.ui.cardsearch.CardSearchScreen
 import es.alejandro.grandarbiter.ui.comprehensiverules.ComprehensiveRulesScreen
-import es.alejandro.grandarbiter.ui.documents.DocumentReaderScreen
 import es.alejandro.grandarbiter.ui.home.HomeScreen
 import es.alejandro.grandarbiter.ui.ipg.IpgScreen
+import es.alejandro.grandarbiter.ui.reader.ARG_ANCHOR
+import es.alejandro.grandarbiter.ui.reader.ReaderContentsScreen
+import es.alejandro.grandarbiter.ui.reader.ReaderPageScreen
+import es.alejandro.grandarbiter.ui.reader.ReaderRoutes
 import es.alejandro.grandarbiter.ui.settings.SettingsScreen
 import es.alejandro.grandarbiter.ui.tools.BannedListsScreen
 import es.alejandro.grandarbiter.ui.tools.DeckCounterScreen
@@ -70,13 +75,24 @@ fun AppNavGraph(
         composable(Screen.Ipg.route) { 
             IpgScreen(onBackClick = { navController.popBackStack() }) 
         }
-        composable(Screen.DocumentReader.route) { backStackEntry ->
-            val documentId = backStackEntry.arguments?.getString("documentId") ?: ""
-            when (documentId) {
-                "cr" -> ComprehensiveRulesScreen(onBackClick = { navController.popBackStack() })
-                "ipg" -> IpgScreen(onBackClick = { navController.popBackStack() })
-                else -> DocumentReaderScreen(documentId)
-            }
+        composable(Screen.DocumentReader.route) {
+            ReaderContentsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenPage = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
+            )
+        }
+        composable(
+            route = ReaderRoutes.PAGE,
+            arguments = listOf(navArgument(ARG_ANCHOR) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) {
+            ReaderPageScreen(
+                onBack = { navController.popBackStack() },
+                onOpenPage = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
+            )
         }
         composable(Screen.CardSearch.route) { CardSearchScreen() }
         composable(Screen.CardDetail.route) { backStackEntry ->

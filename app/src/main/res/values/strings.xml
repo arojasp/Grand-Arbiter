@@ -27,10 +27,6 @@
     <string name="home_badge_ipg">IPG</string>
     <string name="home_badge_mtr">MTR</string>
     <string name="home_badge_jar">JAR</string>
-    <string name="home_date_cr">Feb 2024</string>
-    <string name="home_date_ipg">Oct 2023</string>
-    <string name="home_date_mtr">Nov 2023</string>
-    <string name="home_date_jar">Aug 2023</string>
 
 
     <!-- IPG Screen -->
@@ -43,4 +39,22 @@
     <string name="ipg_upgrade_downgrade_path_label">UPGRADE/DOWNGRADE PATH</string>
     <string name="ipg_penalty_warning">Warning</string>
     <string name="ipg_time_limit_zero">+0 mins</string>
+    <!-- Reader -->
+    <string name="reader_back">Back</string>
+    <string name="reader_search_placeholder">Search words or a number (603.2a, 2.5)…</string>
+    <string name="reader_clear_search">Clear search</string>
+    <string name="reader_overview">Overview</string>
+    <string name="reader_no_results">No matches</string>
+    <string name="reader_not_installed">Preparing the rules…</string>
+    <string name="reader_page_not_found">This section is not in the installed rules.</string>
+    <string name="reader_effective">Effective %1$s</string>
+    <string name="reader_example">Example</string>
+    <string name="reader_example_labeled">Example %1$s</string>
+    <string name="reader_part_with_count">%1$s (%2$d)</string>
+    <string name="penalty_none">No Penalty</string>
+    <string name="penalty_warning">Warning</string>
+    <string name="penalty_game_loss">Game Loss</string>
+    <string name="penalty_match_loss">Match Loss</string>
+    <string name="penalty_disqualification">Disqualification</string>
+
 </resources>

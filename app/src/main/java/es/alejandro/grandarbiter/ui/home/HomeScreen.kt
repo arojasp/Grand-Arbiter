@@ -49,6 +49,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
+import es.alejandro.grandarbiter.ui.reader.effectiveLabel
+import java.time.LocalDate
 import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -61,8 +63,10 @@ fun HomeScreen(
 ) {
     val elapsedTime by viewModel.elapsedTime.collectAsState()
     val isRunning by viewModel.isRunning.collectAsState()
+    val effectiveDates by viewModel.effectiveDates.collectAsState()
 
     HomeScreenContent(
+        effectiveDates = effectiveDates,
         elapsedTime = elapsedTime,
         isRunning = isRunning,
         onToggleTimer = viewModel::toggleTimer,
@@ -75,6 +79,7 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
+    effectiveDates: Map<String, LocalDate>,
     elapsedTime: Long,
     isRunning: Boolean,
     onToggleTimer: () -> Unit,
@@ -124,7 +129,7 @@ fun HomeScreenContent(
             )
         }
     ) { innerPadding ->
-        val documentItems = getDocumentLibraryItems()
+        val documentItems = getDocumentLibraryItems(effectiveDates)
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -364,13 +369,16 @@ data class DocumentLibraryItem(
 )
 
 @Composable
-fun getDocumentLibraryItems() = listOf(
+fun getDocumentLibraryItems(effectiveDates: Map<String, LocalDate>): List<DocumentLibraryItem> {
+    val labels = effectiveDates.mapValues { (_, date) -> effectiveLabel(date) }
+    fun date(id: String) = labels[id].orEmpty()
+    return listOf(
     DocumentLibraryItem(
         id = "cr",
         badge = stringResource(R.string.home_badge_cr),
         title = stringResource(R.string.home_cr_title),
         description = stringResource(R.string.home_cr_description),
-        date = stringResource(R.string.home_date_cr),
+        date = date("cr"),
         hasAccent = true
     ),
     DocumentLibraryItem(
@@ -378,23 +386,24 @@ fun getDocumentLibraryItems() = listOf(
         badge = stringResource(R.string.home_badge_ipg),
         title = stringResource(R.string.home_ipg_title),
         description = stringResource(R.string.home_ipg_description),
-        date = stringResource(R.string.home_date_ipg)
+        date = date("ipg")
     ),
     DocumentLibraryItem(
         id = "mtr",
         badge = stringResource(R.string.home_badge_mtr),
         title = stringResource(R.string.home_mtr_title),
         description = stringResource(R.string.home_mtr_description),
-        date = stringResource(R.string.home_date_mtr)
+        date = date("mtr")
     ),
     DocumentLibraryItem(
         id = "jar",
         badge = stringResource(R.string.home_badge_jar),
         title = stringResource(R.string.home_jar_title),
         description = stringResource(R.string.home_jar_description),
-        date = stringResource(R.string.home_date_jar)
+        date = date("jar")
     )
-)
+    )
+}
 
 private fun formatTime(millis: Long): String {
     val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60
@@ -407,6 +416,7 @@ private fun formatTime(millis: Long): String {
 fun HomeScreenPreview() {
     GrandArbiterTheme {
         HomeScreenContent(
+            effectiveDates = emptyMap(),
             elapsedTime = 0L,
             isRunning = false,
             onToggleTimer = {},

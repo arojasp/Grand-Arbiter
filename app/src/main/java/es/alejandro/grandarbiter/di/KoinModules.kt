@@ -18,6 +18,8 @@ import es.alejandro.grandarbiter.domain.timer.TimerManager
 import es.alejandro.grandarbiter.ui.comprehensiverules.ComprehensiveRulesViewModel
 import es.alejandro.grandarbiter.ui.home.HomeViewModel
 import es.alejandro.grandarbiter.ui.main.MainViewModel
+import es.alejandro.grandarbiter.ui.reader.ReaderContentsViewModel
+import es.alejandro.grandarbiter.ui.reader.ReaderPageViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -92,4 +94,6 @@ val viewModelModule = module {
     viewModelOf(::MainViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::ComprehensiveRulesViewModel)
+    viewModelOf(::ReaderContentsViewModel)
+    viewModelOf(::ReaderPageViewModel)
 }

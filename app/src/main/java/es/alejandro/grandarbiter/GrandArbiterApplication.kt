@@ -3,11 +3,14 @@ package es.alejandro.grandarbiter
 import android.app.Application
 import android.util.Log
 import es.alejandro.grandarbiter.di.appModule
+import es.alejandro.grandarbiter.di.cardsModule
 import es.alejandro.grandarbiter.di.databaseModule
 import es.alejandro.grandarbiter.di.networkModule
 import es.alejandro.grandarbiter.di.repositoryModule
 import es.alejandro.grandarbiter.di.rulesModule
 import es.alejandro.grandarbiter.di.viewModelModule
+import es.alejandro.grandarbiter.data.cards.local.AssetCardDataSource
+import es.alejandro.grandarbiter.data.cards.local.CardImporter
 import es.alejandro.grandarbiter.data.rules.local.AssetRulesBundleSource
 import es.alejandro.grandarbiter.data.rules.local.RulesBundleImporter
 import kotlinx.coroutines.CoroutineScope
@@ -33,6 +36,7 @@ class GrandArbiterApplication : Application() {
                 networkModule,
                 databaseModule,
                 rulesModule,
+                cardsModule,
                 repositoryModule,
                 appModule,
                 viewModelModule
@@ -47,6 +51,17 @@ class GrandArbiterApplication : Application() {
             } catch (e: Exception) {
                 // Never crash the app over this: the previous rules content stays in place.
                 Log.e("RulesImport", "Bundled rules import failed", e)
+            }
+        }
+
+        // Load the card seed on first run, or when the APK ships a seed newer than the installed
+        // data (a Scryfall update that is already newer wins). Takes a few seconds the first time.
+        appScope.launch {
+            try {
+                val result = get<CardImporter>().import(get<AssetCardDataSource>())
+                Log.i("CardImport", result.toString())
+            } catch (e: Exception) {
+                Log.e("CardImport", "Card seed import failed", e)
             }
         }
     }

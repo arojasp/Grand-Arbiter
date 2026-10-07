@@ -65,9 +65,7 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // Retrofit
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
+    // OkHttp (Scryfall bulk downloads)
     implementation(libs.okhttp.logging)
 
     // DataStore

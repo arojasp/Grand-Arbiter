@@ -1,10 +1,12 @@
 package es.alejandro.grandarbiter.di
 
 import androidx.room.Room
+import es.alejandro.grandarbiter.data.cards.CardRepositoryImpl
+import es.alejandro.grandarbiter.data.cards.local.AssetCardDataSource
+import es.alejandro.grandarbiter.data.cards.local.CardImporter
+import es.alejandro.grandarbiter.data.cards.local.CardsDatabase
 import es.alejandro.grandarbiter.data.local.AppDatabase
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
-import es.alejandro.grandarbiter.data.remote.ScryfallService
-import es.alejandro.grandarbiter.data.repository.CardRepositoryImpl
 import es.alejandro.grandarbiter.data.rules.RulesRepositoryImpl
 import es.alejandro.grandarbiter.data.rules.local.AssetRulesBundleSource
 import es.alejandro.grandarbiter.data.rules.local.RulesBundleImporter
@@ -22,29 +24,17 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 val networkModule = module {
     single {
-        HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
+        // HEADERS at most: BODY would buffer and log Scryfall's 25 MB bulk files.
+        HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
     }
 
     single {
         OkHttpClient.Builder()
             .addInterceptor(get<HttpLoggingInterceptor>())
             .build()
-    }
-
-    single<ScryfallService> {
-        Retrofit.Builder()
-            .baseUrl("https://api.scryfall.com/")
-            .client(get())
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(ScryfallService::class.java)
     }
 }
 
@@ -78,8 +68,20 @@ val rulesModule = module {
     single<RulesRepository> { RulesRepositoryImpl(get()) }
 }
 
+/** Card data: a separate, disposable DB filled from Scryfall snapshots (see CardsDatabase.kt). */
+val cardsModule = module {
+    single {
+        Room.databaseBuilder(androidContext(), CardsDatabase::class.java, "cards.db")
+            .fallbackToDestructiveMigration(dropAllTables = true)   // safe: content is re-imported
+            .build()
+    }
+    single { get<CardsDatabase>().cardsDao() }
+    single { AssetCardDataSource(androidContext()) }
+    single { CardImporter(get(), get()) }
+}
+
 val repositoryModule = module {
-    single<CardRepository> { CardRepositoryImpl(get(), get()) }
+    single<CardRepository> { CardRepositoryImpl(get()) }
 }
 
 val appModule = module {

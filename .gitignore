@@ -56,3 +56,6 @@ venv/
 ehthumbs.db
 Thumbs.db
 desktop.ini
+
+# ---- Scryfall bulk downloads (~170 MB, refetched by tools/cards/fetch_scryfall.py)
+cards/source/

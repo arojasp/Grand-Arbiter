@@ -11,7 +11,6 @@ composeBom = "2026.05.01"
 navigationCompose = "2.9.8"
 koin = "4.2.1"
 room = "2.8.4"
-retrofit = "3.0.0"
 okhttp = "5.3.2"
 datastore = "1.2.1"
 coil = "2.7.0"
@@ -46,8 +45,6 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }

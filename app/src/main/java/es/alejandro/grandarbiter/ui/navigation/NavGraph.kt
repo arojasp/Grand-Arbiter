@@ -16,7 +16,7 @@ import es.alejandro.grandarbiter.ui.reader.ReaderPageScreen
 import es.alejandro.grandarbiter.ui.reader.ReaderRoutes
 import es.alejandro.grandarbiter.ui.settings.SettingsScreen
 import es.alejandro.grandarbiter.ui.tools.banned.BannedListsScreen
-import es.alejandro.grandarbiter.ui.tools.DeckCounterScreen
+import es.alejandro.grandarbiter.ui.tools.deckcounter.DeckCounterScreen
 import es.alejandro.grandarbiter.ui.tools.DraftTimerScreen
 import es.alejandro.grandarbiter.ui.tools.announcement.HeadJudgeAnnouncementScreen
 import es.alejandro.grandarbiter.ui.tools.QuickReferenceDetailScreen
@@ -98,7 +98,7 @@ fun AppNavGraph(
                 onOpenSettings = { navController.navigate(Screen.Settings.route) },
             )
         }
-        composable(Screen.DeckCounter.route) { DeckCounterScreen() }
+        composable(Screen.DeckCounter.route) { DeckCounterScreen(onBack = { navController.popBackStack() }) }
         composable(Screen.DraftTimer.route) { DraftTimerScreen() }
         composable(Screen.HeadJudgeAnnouncement.route) {
             HeadJudgeAnnouncementScreen(

@@ -193,4 +193,24 @@
     <string name="hj_venue">Venue info</string>
     <string name="hj_venue_hint">Add venue notes: restrooms, water, food… Saved on this device.</string>
 
+    <!-- Deck counter -->
+    <string name="deck_format_constructed">Constructed</string>
+    <string name="deck_format_limited">Limited</string>
+    <string name="deck_format_commander">Commander</string>
+    <string name="deck_pile_main">Main deck</string>
+    <string name="deck_pile_side">Sideboard</string>
+    <string name="deck_status_short">%1$d short of %2$d</string>
+    <string name="deck_status_ok">Legal size (%1$d or more)</string>
+    <string name="deck_status_exact_ok">Exactly %1$d</string>
+    <string name="deck_status_over">%1$d over (must be exactly %2$d)</string>
+    <string name="deck_status_side_ok">Within the %1$d-card limit</string>
+    <string name="deck_status_side_over">%1$d over the %2$d-card limit</string>
+    <string name="deck_status_no_limit">No size limit</string>
+    <string name="deck_history_empty">Tap the number of copies of each card</string>
+    <string name="deck_add">Add %1$d</string>
+    <string name="deck_undo_last">Undo</string>
+    <string name="deck_reset">Reset</string>
+    <string name="deck_reset_done">Count reset</string>
+    <string name="deck_undo">Undo</string>
+
 </resources>

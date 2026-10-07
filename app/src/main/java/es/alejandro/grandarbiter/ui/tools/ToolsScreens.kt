@@ -6,11 +6,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
 
 @Composable
-fun DeckCounterScreen() {
-    Text(text = "Deck Counter")
-}
-
-@Composable
 fun DraftTimerScreen() {
     Text(text = "Draft Timer")
 }
@@ -23,14 +18,6 @@ fun QuickReferencesScreen() {
 @Composable
 fun QuickReferenceDetailScreen(referenceId: String) {
     Text(text = "Quick Reference: $referenceId")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DeckCounterScreenPreview() {
-    GrandArbiterTheme {
-        DeckCounterScreen()
-    }
 }
 
 @Preview(showBackground = true)

@@ -79,8 +79,6 @@ dependencies {
     // Serialization (rules bundle)
     implementation(libs.kotlinx.serialization.json)
 
-    // PDFBox
-    implementation(libs.pdfbox.android)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

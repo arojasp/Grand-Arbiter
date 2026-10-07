@@ -32,30 +32,6 @@
     <string name="home_date_mtr">Nov 2023</string>
     <string name="home_date_jar">Aug 2023</string>
 
-    <!-- Setup Screen -->
-    <string name="setup_title">Setting up Grand Arbiter</string>
-    <string name="setup_subtitle">This will only happen once. Please keep the app open.</string>
-    <string name="setup_step_connectivity_title">Checking connectivity</string>
-    <string name="setup_step_connectivity_subtitle">Verifying internet connection</string>
-    <string name="setup_step_downloading_title">Downloading documents</string>
-    <string name="setup_step_downloading_subtitle">Fetching latest versions from the server</string>
-    <string name="setup_step_processing_cr_title">Processing Comprehensive Rules</string>
-    <string name="setup_step_processing_cr_subtitle">Parsing and indexing CR · This may take a moment</string>
-    <string name="setup_step_processing_ipg_title">Processing IPG</string>
-    <string name="setup_step_processing_ipg_subtitle">Parsing Infraction Procedure Guide</string>
-    <string name="setup_step_processing_mtr_title">Processing MTR</string>
-    <string name="setup_step_processing_mtr_subtitle">Parsing Magic Tournament Rules</string>
-    <string name="setup_step_processing_oar_title">Processing oAR</string>
-    <string name="setup_step_processing_oar_subtitle">Parsing Judging at Regular</string>
-    <string name="setup_step_finalizing_title">Finalizing</string>
-    <string name="setup_step_finalizing_subtitle">Saving everything to local database</string>
-    <string name="setup_footer_note">Do not close the app during this process.</string>
-    <string name="connectivity_check_title">Checking connectivity</string>
-    <string name="connectivity_check_subtitle">Verifying internet connection</string>
-    <string name="cr_download_title">Downloading CR</string>
-    <string name="cr_download_subtitle">Fetching last version of the Comprehensive Rules</string>
-    <string name="cr_store_title">Saving CR</string>
-    <string name="cr_store_subtitle">Storing Comprehensive Rules on the database</string>
 
     <!-- IPG Screen -->
     <string name="ipg_title">IPG</string>

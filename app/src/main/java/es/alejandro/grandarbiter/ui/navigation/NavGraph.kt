@@ -12,7 +12,6 @@ import es.alejandro.grandarbiter.ui.documents.DocumentReaderScreen
 import es.alejandro.grandarbiter.ui.home.HomeScreen
 import es.alejandro.grandarbiter.ui.ipg.IpgScreen
 import es.alejandro.grandarbiter.ui.settings.SettingsScreen
-import es.alejandro.grandarbiter.ui.setup.SetUpScreen
 import es.alejandro.grandarbiter.ui.tools.BannedListsScreen
 import es.alejandro.grandarbiter.ui.tools.DeckCounterScreen
 import es.alejandro.grandarbiter.ui.tools.DraftTimerScreen
@@ -23,7 +22,6 @@ import es.alejandro.grandarbiter.ui.tools.QuickReferencesScreen
 import es.alejandro.grandarbiter.ui.tools.ToolsScreen
 
 sealed class Screen(val route: String) {
-    object SetUp : Screen("setup")
     object Home : Screen("home")
     object ComprehensiveRules : Screen("comprehensive_rules")
     object Ipg : Screen("ipg")
@@ -52,7 +50,6 @@ fun AppNavGraph(
     navController: NavHostController,
     startDestination: String,
     modifier: Modifier = Modifier,
-    onSetUpComplete: () -> Unit = {}
 ) {
     NavHost(
         navController = navController,
@@ -60,9 +57,6 @@ fun AppNavGraph(
         modifier = modifier
     ) {
 
-        composable(Screen.SetUp.route) {
-            SetUpScreen(onSetUpComplete = onSetUpComplete)
-        }
         composable(Screen.Home.route) { 
             HomeScreen(
                 onNavigateToDocument = { documentId ->

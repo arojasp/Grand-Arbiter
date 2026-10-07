@@ -14,7 +14,6 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,28 +29,15 @@ import es.alejandro.grandarbiter.domain.model.ThemeMode
 import es.alejandro.grandarbiter.ui.navigation.AppNavGraph
 import es.alejandro.grandarbiter.ui.navigation.Screen
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
-    val startDestination by viewModel.startDestination.collectAsState()
-
-    if (startDestination == null) {
-        return
-    }
-
-    MainScreenContent(
-        startDestination = startDestination!!,
-        onSetUpComplete = {
-            viewModel.setSetUpDone()
-        }
-    )
+fun MainScreen() {
+    MainScreenContent(startDestination = Screen.Home.route)
 }
 
 @Composable
 fun MainScreenContent(
     startDestination: String,
-    onSetUpComplete: () -> Unit
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -105,12 +91,6 @@ fun MainScreenContent(
             navController = navController,
             modifier = Modifier.padding(innerPadding),
             startDestination = startDestination,
-            onSetUpComplete = {
-                onSetUpComplete()
-                navController.navigate(Screen.Home.route) {
-                    popUpTo(Screen.SetUp.route) { inclusive = true }
-                }
-            }
         )
     }
 }
@@ -120,10 +100,7 @@ fun MainScreenContent(
 @Composable
 fun MainScreenDarkPreview() {
     GrandArbiterTheme(themeMode = ThemeMode.DARK) {
-        MainScreenContent(
-            startDestination = Screen.Home.route,
-            onSetUpComplete = {}
-        )
+        MainScreenContent(startDestination = Screen.Home.route)
     }
 }
 
@@ -131,9 +108,6 @@ fun MainScreenDarkPreview() {
 @Composable
 fun MainScreenLightPreview() {
     GrandArbiterTheme(themeMode = ThemeMode.LIGHT) {
-        MainScreenContent(
-            startDestination = Screen.Home.route,
-            onSetUpComplete = {}
-        )
+        MainScreenContent(startDestination = Screen.Home.route)
     }
 }

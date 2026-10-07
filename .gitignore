@@ -1,28 +1,53 @@
-# Build artifacts
+# ---- Gradle / build output
+.gradle/
+build/
+out/
 bin/
 gen/
-out/
-build/
-.gradle/
+.kotlin/
 .navigation/
+captures/
+.externalNativeBuild/
+.cxx/
 
-# IDE files
+# ---- Android packaging output
+*.apk
+*.aab
+*.ap_
+*.dex
+/app/release/
+/app/debug/
+output-metadata.json
+
+# ---- Signing keys and local secrets (never commit these)
+*.jks
+*.keystore
+keystore.properties
+local.properties
+
+# ---- IDE (Android Studio / IntelliJ, VS Code)
 .idea/
 *.iml
 *.iws
 *.ipr
 .shelf/
+.vscode/
 .settings/
 .project
 .classpath
 
-# Local properties
-local.properties
+# ---- AI-tool scratch files
+.artifacts/
 
-# Log files
+# ---- Python (tools/rules)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ---- Logs, dumps, OS files
 *.log
-
-# OS generated files
+*.hprof
 .DS_Store
 .DS_Store?
 ._*
@@ -30,10 +55,4 @@ local.properties
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# Captures
-captures/
-
-# External Native Build
-.externalNativeBuild/
-.cxx/
+desktop.ini

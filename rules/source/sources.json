@@ -1,0 +1,19 @@
+{
+  "fetchedAt": "2026-10-07T09:54:08Z",
+  "cr": {
+    "url": "https://media.wizards.com/2026/downloads/MagicCompRules%2020260925.txt",
+    "sha256": "8d860e451f20f38865b725b42d82feb714c725373dd8f3b32b8652b3eeb070ca"
+  },
+  "mtr": {
+    "url": "https://media.wizards.com/ContentResources/WPN/MTG_MTR_2026_Feb27_EN.pdf",
+    "sha256": "a627fb8c8568d8fbb0d4bd6ffeaee460501c07b80b6928cf8c038d708ad0602e"
+  },
+  "ipg": {
+    "url": "https://media.wizards.com/ContentResources/WPN/MTG_IPG_2024Sep23_EN.pdf",
+    "sha256": "056b1687bae4a6c5d7bc4fe4e15d66613e725197cc2a45e18084c2eaf1b5aae0"
+  },
+  "jar": {
+    "url": "https://media.wizards.com/ContentResources/WPN/MTG_JAR_2024Sep23_EN.pdf",
+    "sha256": "d53b1d35c1fffa522cea74d8835b52c9633a08cc505c4fd239b0643ed2712df6"
+  }
+}

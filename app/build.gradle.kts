@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -74,6 +75,9 @@ dependencies {
 
     // Coil
     implementation(libs.coil.compose)
+
+    // Serialization (rules bundle)
+    implementation(libs.kotlinx.serialization.json)
 
     // PDFBox
     implementation(libs.pdfbox.android)

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": 2026100701,
+  "generatedAt": "2026-10-07T10:00:00Z",
+  "documents": [
+    {
+      "id": "cr",
+      "title": "Comprehensive Rules",
+      "effectiveDate": "2026-08-07",
+      "sourceUrl": "https://media.wizards.com/…/MagicCompRules.txt",
+      "sections": [
+        { "id": "cr/6", "number": "6", "title": "Spells, Abilities, and Effects" },
+        { "id": "cr/603", "parentId": "cr/6", "number": "603", "title": "Handling Triggered Abilities" },
+        { "id": "cr/603.1", "parentId": "cr/603", "number": "603.1",
+          "blocks": [ { "type": "p", "text": "<rule text>" } ] },
+        { "id": "cr/603.2", "parentId": "cr/603", "number": "603.2",
+          "blocks": [
+            { "type": "p", "text": "<rule text>" },
+            { "type": "example", "text": "<example text>" }
+          ] }
+      ],
+      "glossary": [
+        { "term": "Triggered Ability", "definition": "<definition> See [rule 603](ref:cr/603)." }
+      ]
+    },
+    {
+      "id": "ipg",
+      "title": "Magic Infraction Procedure Guide",
+      "effectiveDate": "2024-09-23",
+      "sourceUrl": "https://media.wizards.com/ContentResources/WPN/MTG_IPG_2024Sep23_EN.pdf",
+      "sections": [
+        { "id": "ipg/2", "number": "2", "title": "Game Play Errors",
+          "blocks": [ { "type": "p", "text": "<chapter intro>" } ] },
+        { "id": "ipg/2.1", "parentId": "ipg/2", "number": "2.1", "title": "Game Play Error — Missed Trigger",
+          "infraction": { "category": "game_play_error", "penalty": "none" },
+          "blocks": [
+            { "type": "heading", "text": "Definition", "role": "definition" },
+            { "type": "p", "text": "<official text, may link [603.1](ref:cr/603.1)>" },
+            { "type": "heading", "text": "Examples", "role": "examples" },
+            { "type": "example", "label": "A", "text": "<example A>" },
+            { "type": "heading", "text": "Philosophy", "role": "philosophy" },
+            { "type": "p", "text": "<philosophy>" },
+            { "type": "heading", "text": "Additional Remedy", "role": "additional_remedy" },
+            { "type": "list", "ordered": false, "items": ["<item>", "<item>"] }
+          ] }
+      ]
+    },
+    {
+      "id": "jar",
+      "title": "Judging at Regular REL",
+      "effectiveDate": "2024-08-05",
+      "sourceUrl": "https://…/MTG_JAR_….pdf",
+      "sections": [
+        { "id": "jar/common-issues", "title": "Common Issues",
+          "blocks": [ { "type": "p", "text": "<intro>" } ] },
+        { "id": "jar/missed-triggers", "parentId": "jar/common-issues", "title": "Missed Triggers",
+          "blocks": [ { "type": "p", "text": "<fix> — at Competitive REL see [IPG 2.1](ref:ipg/2.1)" } ] }
+      ]
+    }
+  ]
+}

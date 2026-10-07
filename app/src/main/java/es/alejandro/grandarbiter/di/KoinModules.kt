@@ -7,6 +7,9 @@ import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.data.remote.AcademyRuinsService
 import es.alejandro.grandarbiter.data.remote.ScryfallService
 import es.alejandro.grandarbiter.data.repository.CRRepositoryImpl
+import es.alejandro.grandarbiter.data.rules.local.AssetRulesBundleSource
+import es.alejandro.grandarbiter.data.rules.local.RulesBundleImporter
+import es.alejandro.grandarbiter.data.rules.local.RulesDatabase
 import es.alejandro.grandarbiter.data.repository.CardRepositoryImpl
 import es.alejandro.grandarbiter.data.timer.TimerManagerImpl
 import es.alejandro.grandarbiter.domain.connectivity.ConnectivityObserver
@@ -72,6 +75,18 @@ val databaseModule = module {
     single { get<AppDatabase>().cardDao() }
     
     single { SettingsDataStore(androidContext()) }
+}
+
+/** Rules content: a separate, disposable DB rebuilt from the bundle (see RulesDatabase.kt). */
+val rulesModule = module {
+    single {
+        Room.databaseBuilder(androidContext(), RulesDatabase::class.java, "rules.db")
+            .fallbackToDestructiveMigration(dropAllTables = true)   // safe: content is re-imported
+            .build()
+    }
+    single { get<RulesDatabase>().rulesDao() }
+    single { AssetRulesBundleSource(androidContext()) }
+    single { RulesBundleImporter(get(), get()) }
 }
 
 val repositoryModule = module {

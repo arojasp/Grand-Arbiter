@@ -43,4 +43,31 @@
     <string name="penalty_match_loss">Match Loss</string>
     <string name="penalty_disqualification">Disqualification</string>
 
+    <!-- Card search -->
+    <string name="cards_search_placeholder">Card name…</string>
+    <string name="cards_search_text_placeholder">Words in name, type or rules text…</string>
+    <string name="cards_search_in_text">Search rules text</string>
+    <string name="cards_preparing">Preparing card data… This only takes a while the first time.</string>
+    <string name="cards_count">%1$s cards</string>
+    <string name="cards_data_from">Scryfall data from %1$s</string>
+    <string name="cards_no_results">No cards found</string>
+    <string name="cards_token">Token</string>
+    <string name="cards_not_found">This card is not in the installed card data.</string>
+    <string name="cards_image_unavailable">The image needs a connection</string>
+    <string name="cards_legality">Legality</string>
+    <string name="cards_rulings">Rulings</string>
+    <string name="cards_no_rulings">No rulings for this card.</string>
+    <string name="cards_ruling_scryfall">Scryfall note</string>
+    <string name="cards_reserved">Reserved List</string>
+    <string name="cards_game_changer">Game Changer</string>
+    <string name="cards_loyalty">Loyalty %1$s</string>
+    <string name="cards_defense">Defense %1$s</string>
+    <string name="cards_hand_life">Hand %1$s, life %2$s</string>
+    <string name="cards_attribution">Card data and images from Scryfall. Card text and images © Wizards of the Coast.</string>
+    <string name="cards_open_scryfall">View on Scryfall</string>
+    <string name="legality_legal">Legal</string>
+    <string name="legality_restricted">Restricted</string>
+    <string name="legality_banned">Banned</string>
+    <string name="legality_not_legal">Not legal</string>
+
 </resources>

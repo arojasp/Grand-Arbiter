@@ -84,10 +84,11 @@ fun AppNavGraph(
                 onOpenPage = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
             )
         }
-        composable(Screen.CardSearch.route) { CardSearchScreen() }
-        composable(Screen.CardDetail.route) { backStackEntry ->
-            val cardId = backStackEntry.arguments?.getString("cardId") ?: ""
-            CardDetailScreen(cardId)
+        composable(Screen.CardSearch.route) {
+            CardSearchScreen(onOpenCard = { oracleId -> navController.navigate(Screen.CardDetail.createRoute(oracleId)) })
+        }
+        composable(Screen.CardDetail.route) {
+            CardDetailScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Tools.route) { ToolsScreen() }
         composable(Screen.DeckCounter.route) { DeckCounterScreen() }

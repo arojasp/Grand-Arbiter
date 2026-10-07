@@ -366,13 +366,18 @@ fun ReaderTopBar(title: String, subtitle: String?, onBack: () -> Unit) {
 }
 
 @Composable
-fun ReaderSearchField(query: String, onQueryChange: (String) -> Unit, modifier: Modifier = Modifier) {
+fun ReaderSearchField(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String = stringResource(R.string.reader_search_placeholder),
+) {
     TextField(
         value = query,
         onValueChange = onQueryChange,
         placeholder = {
             Text(
-                text = stringResource(R.string.reader_search_placeholder),
+                text = placeholder,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 fontSize = 14.sp,
             )

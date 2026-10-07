@@ -5,6 +5,7 @@ import es.alejandro.grandarbiter.data.cards.local.CardsDao
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
+import es.alejandro.grandarbiter.domain.model.cards.FormatBanList
 import es.alejandro.grandarbiter.domain.repository.CardRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -21,6 +22,10 @@ class CardRepositoryImpl(private val dao: CardsDao) : CardRepository {
     override suspend fun card(oracleId: String): CardDetail? {
         val entity = dao.card(oracleId) ?: return null
         return CardMapper.toDetail(entity, dao.rulings(oracleId))
+    }
+
+    override fun observeBanLists(): Flow<List<FormatBanList>> = dao.observeMeta().map { meta ->
+        if (meta == null) emptyList() else CardMapper.banLists(dao.bannedOrRestricted())
     }
 
     override fun observeDataInfo(): Flow<CardDataInfo?> = dao.observeMeta().map { m ->

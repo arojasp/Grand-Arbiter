@@ -55,6 +55,25 @@ enum class Legality { LEGAL, RESTRICTED, BANNED, NOT_LEGAL }
 
 data class FormatLegality(val format: String, val legality: Legality)
 
+/** Cards banned as a whole category rather than by name. NONE = an actual, named ban. */
+enum class BanCategory { NONE, UN_CARD, CONSPIRACY, ANTE }
+
+/** A banned or restricted card in one format. */
+data class BanListEntry(
+    val oracleId: String,
+    val name: String,
+    val legality: Legality,
+    val category: BanCategory = BanCategory.NONE,
+)
+
+/** One format's banned + restricted cards, by name. [official]: managed by Wizards. */
+data class FormatBanList(val format: String, val official: Boolean, val entries: List<BanListEntry>) {
+    /** The bans and restrictions a judge looks for. */
+    val named: List<BanListEntry> get() = entries.filter { it.category == BanCategory.NONE }
+    /** Ante, Conspiracy and Un-cards: listed apart, as Wizards does. */
+    val byCategory: List<BanListEntry> get() = entries.filter { it.category != BanCategory.NONE }
+}
+
 /** [source] is "wotc" (official) or "scryfall" (Scryfall's own notes). */
 data class CardRuling(val date: String, val source: String, val text: String)
 

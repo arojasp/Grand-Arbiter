@@ -89,6 +89,7 @@
     <string name="cards_open_scryfall">View on Scryfall</string>
     <string name="legality_legal">Legal</string>
     <string name="legality_restricted">Restricted</string>
+    <string name="legality_banned_as_commander">Banned as commander</string>
     <string name="legality_banned">Banned</string>
     <string name="legality_not_legal">Not legal</string>
 
@@ -135,5 +136,30 @@
     <string name="settings_credits_text">Developed for the judge community.</string>
     <string name="settings_fan_content">Grand Arbiter is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.</string>
     <string name="settings_scryfall_credit">Card data, rulings, mana symbols and card art come from Scryfall (scryfall.com). Grand Arbiter is not produced by or endorsed by Scryfall.</string>
+
+    <!-- Tools -->
+    <string name="tools_active">Active tools</string>
+    <string name="tools_active_caption">In-tournament</string>
+    <string name="tools_references">References</string>
+    <string name="tools_references_caption">Knowledge base</string>
+    <string name="tools_coming_soon">Coming soon</string>
+    <string name="tools_deck_counter">Deck Counter</string>
+    <string name="tools_deck_counter_desc">Validate deck and sideboard composition</string>
+    <string name="tools_announcement">Head Judge Announcement</string>
+    <string name="tools_announcement_desc">Display tournament announcements full screen</string>
+    <string name="tools_draft_timer">Draft Timer</string>
+    <string name="tools_draft_timer_desc">Configurable timer for Booster, Rochester and Winston drafts</string>
+    <string name="tools_banned_lists">Banned &amp; Restricted Lists</string>
+    <string name="tools_banned_lists_desc">Up-to-date ban lists per format</string>
+    <string name="tools_quick_references">Quick References</string>
+    <string name="banned_title">Banned &amp; Restricted</string>
+    <string name="banned_search_placeholder">Search cards or formats</string>
+    <string name="banned_data_from">From Scryfall card data, %1$s</string>
+    <string name="banned_community">Community formats</string>
+    <string name="banned_categories">+ %1$d cards banned by category</string>
+    <string name="banned_category_un">Un-cards (acorn, stickers, attractions)</string>
+    <string name="banned_category_conspiracy">Conspiracy cards</string>
+    <string name="banned_category_ante">Cards that play for ante</string>
+    <string name="tools_quick_references_desc">Layers, stack order, combat steps and more</string>
 
 </resources>

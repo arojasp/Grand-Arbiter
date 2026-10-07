@@ -42,6 +42,7 @@ data class CardEntity(
     val artCropUrl: String?,         // art only; shown with the artist (Scryfall guidelines)
     val artist: String?,
     val setCode: String?,
+    val setType: String?,            // Scryfall set_type: "funny" = Un-sets (acorn, stickers, attractions)
     val gameChanger: Boolean,
     val reserved: Boolean,
     val isToken: Boolean,
@@ -92,6 +93,15 @@ data class CardHit(
 
 data class RulingRow(val date: String, val source: String, val text: String)
 
+data class LegalityRow(
+    val oracleId: String,
+    val name: String,
+    val legalities: String,
+    val typeLine: String? = null,
+    val oracleText: String? = null,
+    val setType: String? = null,
+)
+
 @Dao
 interface CardsDao {
 
@@ -125,6 +135,13 @@ interface CardsDao {
     @Query("SELECT * FROM cards_meta WHERE id = 0")
     suspend fun meta(): CardsMetaEntity?
 
+    /** Cards banned or restricted in at least one paper format (a few hundred rows). */
+    @Query(
+        "SELECT oracleId, name, legalities, typeLine, oracleText, setType FROM card " +
+            "WHERE legalities LIKE '%=banned%' OR legalities LIKE '%=restricted%' ORDER BY name"
+    )
+    suspend fun bannedOrRestricted(): List<LegalityRow>
+
     @Query("SELECT * FROM cards_meta WHERE id = 0")
     fun observeMeta(): Flow<CardsMetaEntity?>
 
@@ -146,7 +163,7 @@ interface CardsDao {
 
 @Database(
     entities = [CardEntity::class, CardFts::class, RulingEntity::class, CardRulingEntity::class, CardsMetaEntity::class],
-    version = 2,                     // 2: artCropUrl, artist. Destructive: the seed re-imports itself.
+    version = 3,                     // 2: artCropUrl, artist. 3: setType. Destructive: the seed re-imports itself.
     exportSchema = false,
 )
 abstract class CardsDatabase : RoomDatabase() {

@@ -5,6 +5,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import es.alejandro.grandarbiter.R
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -66,6 +67,13 @@ object CardText {
 
     /** Scryfall's updated_at -> date. Null if unparseable. */
     fun date(updatedAt: String): LocalDate? = runCatching { OffsetDateTime.parse(updatedAt).toLocalDate() }.getOrNull()
+
+    /**
+     * Label for a "restricted" status. Scryfall reuses "restricted" in Duel Commander for cards
+     * banned only as commander (legal in the 99); everywhere else it's the Vintage-style 1-copy limit.
+     */
+    fun restrictedLabel(format: String): Int =
+        if (format == "duel") R.string.legality_banned_as_commander else R.string.legality_restricted
 
     /** Scryfall legality keys -> names judges use. */
     fun formatName(key: String): String = when (key) {

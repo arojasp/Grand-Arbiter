@@ -4,7 +4,10 @@ import es.alejandro.grandarbiter.data.cards.scryfall.CardFilter
 import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallCard
 import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallFace
 import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallJson
+import es.alejandro.grandarbiter.domain.model.cards.BanCategory
+import es.alejandro.grandarbiter.domain.model.cards.BanListEntry
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
+import es.alejandro.grandarbiter.domain.model.cards.FormatBanList
 import es.alejandro.grandarbiter.domain.model.cards.CardFace
 import es.alejandro.grandarbiter.domain.model.cards.CardRuling
 import es.alejandro.grandarbiter.domain.model.cards.FormatLegality
@@ -47,6 +50,7 @@ object CardMapper {
             artCropUrl = c.imageUris?.artCrop ?: faces.firstOrNull()?.imageUris?.artCrop,
             artist = c.artist.nonBlank() ?: faces.mapNotNull { it.artist.nonBlank() }.distinct().joinToString(" & ").nonBlank(),
             setCode = c.set,
+            setType = c.setType,
             gameChanger = c.gameChanger,
             reserved = c.reserved,
             isToken = c.layout in TOKEN_LAYOUTS || c.typeLine?.contains("Token") == true,
@@ -82,6 +86,42 @@ object CardMapper {
             rulings = rulings.map { CardRuling(it.date, it.source, it.text) },
             scryfallUrl = "https://scryfall.com/search?q=oracleid%3A${e.oracleId}",
         )
+    }
+
+    /** Formats Wizards manages; the rest of CardFilter.PAPER_FORMATS are community formats. */
+    val OFFICIAL_FORMATS = setOf("standard", "pioneer", "modern", "legacy", "vintage", "pauper", "commander")
+
+    /**
+     * Per-format banned/restricted lists from the stored legalities. Every paper format appears,
+     * empty ones too (Standard can have none). Official formats first, each in CardFilter order.
+     * Note: Legacy/Vintage include ante, Conspiracy and the 2020 "offensive" cards one by one,
+     * where Wizards' page lists them as categories.
+     */
+    fun banLists(rows: List<LegalityRow>): List<FormatBanList> {
+        val byFormat = CardFilter.PAPER_FORMATS.associateWith { mutableListOf<BanListEntry>() }
+        for (row in rows) {
+            for (fl in parseLegalities(row.legalities)) {
+                if (fl.legality == Legality.BANNED || fl.legality == Legality.RESTRICTED) {
+                    byFormat[fl.format]?.add(BanListEntry(row.oracleId, row.name, fl.legality, banCategory(row)))
+                }
+            }
+        }
+        return CardFilter.PAPER_FORMATS
+            .map { f -> FormatBanList(f, f in OFFICIAL_FORMATS, byFormat.getValue(f).sortedBy { it.name.lowercase() }) }
+            .sortedBy { !it.official }   // stable: keeps CardFilter order inside each group
+    }
+
+    private val ANTE = Regex("""\bante\b""", RegexOption.IGNORE_CASE)
+
+    /**
+     * Wizards' lists name these as categories ("all cards with ante", "Conspiracy cards", Un-cards
+     * with the acorn stamp / stickers / attractions), not one by one; the app groups them the same way.
+     */
+    fun banCategory(row: LegalityRow): BanCategory = when {
+        row.setType == "funny" -> BanCategory.UN_CARD
+        row.typeLine?.contains("Conspiracy") == true -> BanCategory.CONSPIRACY
+        row.oracleText?.let { ANTE.containsMatchIn(it) } == true -> BanCategory.ANTE
+        else -> BanCategory.NONE
     }
 
     fun parseLegalities(stored: String): List<FormatLegality> =

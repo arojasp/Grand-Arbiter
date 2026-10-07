@@ -15,11 +15,10 @@ import es.alejandro.grandarbiter.ui.reader.ReaderContentsScreen
 import es.alejandro.grandarbiter.ui.reader.ReaderPageScreen
 import es.alejandro.grandarbiter.ui.reader.ReaderRoutes
 import es.alejandro.grandarbiter.ui.settings.SettingsScreen
-import es.alejandro.grandarbiter.ui.tools.BannedListsScreen
+import es.alejandro.grandarbiter.ui.tools.banned.BannedListsScreen
 import es.alejandro.grandarbiter.ui.tools.DeckCounterScreen
 import es.alejandro.grandarbiter.ui.tools.DraftTimerScreen
 import es.alejandro.grandarbiter.ui.tools.HeadJudgeAnnouncementScreen
-import es.alejandro.grandarbiter.ui.tools.JudgeTimerScreen
 import es.alejandro.grandarbiter.ui.tools.QuickReferenceDetailScreen
 import es.alejandro.grandarbiter.ui.tools.QuickReferencesScreen
 import es.alejandro.grandarbiter.ui.tools.ToolsScreen
@@ -35,7 +34,6 @@ sealed class Screen(val route: String) {
     }
     object Tools : Screen("tools")
     object DeckCounter : Screen("deck_counter")
-    object JudgeTimer : Screen("judge_timer")
     object DraftTimer : Screen("draft_timer")
     object HeadJudgeAnnouncement : Screen("head_judge_announcement")
     object BannedLists : Screen("banned_lists")
@@ -94,12 +92,21 @@ fun AppNavGraph(
         composable(Screen.CardDetail.route) {
             CardDetailScreen(onBack = { navController.popBackStack() })
         }
-        composable(Screen.Tools.route) { ToolsScreen() }
+        composable(Screen.Tools.route) {
+            ToolsScreen(
+                onOpen = { route -> navController.navigate(route) },
+                onOpenSettings = { navController.navigate(Screen.Settings.route) },
+            )
+        }
         composable(Screen.DeckCounter.route) { DeckCounterScreen() }
-        composable(Screen.JudgeTimer.route) { JudgeTimerScreen() }
         composable(Screen.DraftTimer.route) { DraftTimerScreen() }
         composable(Screen.HeadJudgeAnnouncement.route) { HeadJudgeAnnouncementScreen() }
-        composable(Screen.BannedLists.route) { BannedListsScreen() }
+        composable(Screen.BannedLists.route) {
+            BannedListsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenCard = { oracleId -> navController.navigate(Screen.CardDetail.createRoute(oracleId)) },
+            )
+        }
         composable(Screen.QuickReferences.route) { QuickReferencesScreen() }
         composable(Screen.QuickReferenceDetail.route) { backStackEntry ->
             val referenceId = backStackEntry.arguments?.getString("referenceId") ?: ""

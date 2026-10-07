@@ -317,7 +317,7 @@ private fun LegalityItem(item: FormatLegality, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
     val (container, content, label) = when (item.legality) {
         Legality.LEGAL -> Triple(LegalContainer, LegalContent, R.string.legality_legal)
-        Legality.RESTRICTED -> Triple(colors.primaryContainer, colors.primary, R.string.legality_restricted)
+        Legality.RESTRICTED -> Triple(colors.primaryContainer, colors.primary, CardText.restrictedLabel(item.format))
         Legality.BANNED -> Triple(colors.errorContainer, colors.error, R.string.legality_banned)
         Legality.NOT_LEGAL -> Triple(colors.errorContainer, colors.error, R.string.legality_not_legal)
     }

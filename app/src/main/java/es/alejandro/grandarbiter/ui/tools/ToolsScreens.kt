@@ -16,11 +16,6 @@ fun DraftTimerScreen() {
 }
 
 @Composable
-fun HeadJudgeAnnouncementScreen() {
-    Text(text = "Announcements")
-}
-
-@Composable
 fun QuickReferencesScreen() {
     Text(text = "Quick References")
 }
@@ -43,14 +38,6 @@ fun DeckCounterScreenPreview() {
 fun DraftTimerScreenPreview() {
     GrandArbiterTheme {
         DraftTimerScreen()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HeadJudgeAnnouncementScreenPreview() {
-    GrandArbiterTheme {
-        HeadJudgeAnnouncementScreen()
     }
 }
 

@@ -1,0 +1,71 @@
+package es.alejandro.grandarbiter.ui.tools.announcement
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
+import es.alejandro.grandarbiter.data.rules.bundle.Block
+import es.alejandro.grandarbiter.domain.repository.RulesRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
+enum class Rel { REGULAR, COMPETITIVE, PROFESSIONAL }
+
+/** The topics a Head Judge covers, in order. Ticked as they're announced; reset each round. */
+enum class AnnouncementTopic { WELCOME, JUDGES, CHECK_DECKLISTS, COLLECT_DECKLISTS, PLAYERS, ROUNDS }
+
+/** MTR Appendix E as installed: the table and the note on byes, plus the page to open. */
+data class RoundsTable(val table: Block.Table, val notes: List<Block>, val pageId: String)
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class AnnouncementViewModel(
+    private val state: SavedStateHandle,
+    rules: RulesRepository,
+    private val settings: SettingsDataStore,
+) : ViewModel() {
+
+    val checked: StateFlow<Set<String>> = state.getStateFlow(KEY_CHECKED, emptySet<String>())
+    val rel: StateFlow<String?> = state.getStateFlow(KEY_REL, null as String?)
+    val roundMinutes: StateFlow<Int> = state.getStateFlow(KEY_MINUTES, 50)
+
+    /**
+     * Read from the installed MTR, not hardcoded: it changes with the MTR (a rules update brings
+     * it). Re-read whenever the installed documents change. Null if the MTR has no such table.
+     */
+    val roundsTable: StateFlow<RoundsTable?> = rules.observeDocuments()
+        .flatMapLatest {
+            flow {
+                val page = rules.page(APPENDIX_E)
+                val blocks = page?.root?.blocks.orEmpty()
+                val table = blocks.filterIsInstance<Block.Table>().firstOrNull()
+                emit(table?.let { RoundsTable(it, blocks.dropWhile { b -> b !== it }.drop(1), APPENDIX_E) })
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val venueNote: StateFlow<String> = settings.venueNote
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
+
+    fun toggle(topic: AnnouncementTopic) {
+        val now = checked.value
+        state[KEY_CHECKED] = if (topic.name in now) now - topic.name else now + topic.name
+    }
+
+    fun resetChecklist() { state[KEY_CHECKED] = emptySet<String>() }
+    fun setRel(value: Rel) { state[KEY_REL] = value.name }
+    fun setRoundMinutes(value: Int) { state[KEY_MINUTES] = value }
+    fun setVenueNote(value: String) = viewModelScope.launch { settings.setVenueNote(value) }
+
+    companion object {
+        const val APPENDIX_E = "mtr/appendix-e"
+        val ROUND_MINUTES = listOf(40, 50, 60)   // MTR Appendix B: 40 minimum, 50 recommended
+        private const val KEY_CHECKED = "checked"
+        private const val KEY_REL = "rel"
+        private const val KEY_MINUTES = "minutes"
+    }
+}

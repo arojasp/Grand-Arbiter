@@ -162,4 +162,35 @@
     <string name="banned_category_ante">Cards that play for ante</string>
     <string name="tools_quick_references_desc">Layers, stack order, combat steps and more</string>
 
+    <!-- Head Judge announcement -->
+    <string name="hj_title">HJ Announcement</string>
+    <string name="hj_reset">Reset checklist</string>
+    <string name="hj_topic_welcome">Welcome</string>
+    <string name="hj_topic_judges">Names of judges</string>
+    <string name="hj_topic_check_decklists">Check decklists</string>
+    <string name="hj_topic_collect_decklists">Collect decklists / distribute products</string>
+    <string name="hj_topic_players">Number of players</string>
+    <string name="hj_topic_rounds">Number of rounds</string>
+    <string name="hj_rel">Enforcement level (REL)</string>
+    <string name="hj_rel_regular">Regular</string>
+    <string name="hj_rel_competitive">Competitive</string>
+    <string name="hj_rel_professional">Professional</string>
+    <string name="hj_round_time">Round time</string>
+    <string name="hj_minutes">%1$d min</string>
+    <string name="hj_tardiness">Tardiness</string>
+    <string name="hj_tardiness_pick_rel">Select the REL to see when the penalty applies.</string>
+    <string name="hj_tardiness_competitive">Not seated when the round starts: Game Loss (Warning within the first minute). After 10 minutes: Match Loss, and dropped unless they report to the Head Judge or Scorekeeper before the round ends. (IPG 3.1)</string>
+    <string name="hj_tardiness_regular">More than 10 minutes late: the player forfeits the match, and is dropped at the end of the round if still absent. (JAR)</string>
+    <string name="hj_rounds">Rounds &amp; structure</string>
+    <string name="hj_rounds_source">MTR Appendix E</string>
+    <string name="hj_reminder_shuffle">Shuffle your opponent\'s deck and offer a final cut after every search.</string>
+    <string name="hj_reminder_pace">Maintain a reasonable pace of play to ensure rounds finish on time.</string>
+    <string name="hj_reminder_communication">Ensure clear communication of all game states and triggered abilities.</string>
+    <string name="hj_reminder_results">Report results immediately using the provided event link or slips.</string>
+    <string name="hj_player_instruction">Player instruction</string>
+    <string name="hj_call_judge">Raise your hand and call</string>
+    <string name="hj_judge">JUDGE!</string>
+    <string name="hj_venue">Venue info</string>
+    <string name="hj_venue_hint">Add venue notes: restrooms, water, food… Saved on this device.</string>
+
 </resources>

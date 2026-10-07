@@ -20,6 +20,7 @@ class SettingsDataStore(private val context: Context) {
     private val TEXT_SCALE = stringPreferencesKey("text_scale")
     private val HIGH_CONTRAST = booleanPreferencesKey("high_contrast")
     private val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
+    private val VENUE_NOTE = stringPreferencesKey("hj_venue_note")
 
     val displaySettings: Flow<DisplaySettings> = context.dataStore.data.map { p ->
         DisplaySettings(
@@ -31,6 +32,10 @@ class SettingsDataStore(private val context: Context) {
     }.distinctUntilChanged()
 
     val themeMode: Flow<ThemeMode> = displaySettings.map { it.themeMode }.distinctUntilChanged()
+
+    /** Head Judge announcement: venue notes (restrooms, water…) kept between rounds and events. */
+    val venueNote: Flow<String> = context.dataStore.data.map { it[VENUE_NOTE].orEmpty() }.distinctUntilChanged()
+    suspend fun setVenueNote(note: String) = set(VENUE_NOTE, note)
 
     suspend fun setThemeMode(mode: ThemeMode) = set(THEME_MODE, mode.name)
     suspend fun setTextScale(scale: TextScale) = set(TEXT_SCALE, scale.name)

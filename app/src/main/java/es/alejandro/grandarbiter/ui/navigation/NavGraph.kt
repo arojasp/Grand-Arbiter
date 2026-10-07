@@ -18,7 +18,7 @@ import es.alejandro.grandarbiter.ui.settings.SettingsScreen
 import es.alejandro.grandarbiter.ui.tools.banned.BannedListsScreen
 import es.alejandro.grandarbiter.ui.tools.DeckCounterScreen
 import es.alejandro.grandarbiter.ui.tools.DraftTimerScreen
-import es.alejandro.grandarbiter.ui.tools.HeadJudgeAnnouncementScreen
+import es.alejandro.grandarbiter.ui.tools.announcement.HeadJudgeAnnouncementScreen
 import es.alejandro.grandarbiter.ui.tools.QuickReferenceDetailScreen
 import es.alejandro.grandarbiter.ui.tools.QuickReferencesScreen
 import es.alejandro.grandarbiter.ui.tools.ToolsScreen
@@ -100,7 +100,12 @@ fun AppNavGraph(
         }
         composable(Screen.DeckCounter.route) { DeckCounterScreen() }
         composable(Screen.DraftTimer.route) { DraftTimerScreen() }
-        composable(Screen.HeadJudgeAnnouncement.route) { HeadJudgeAnnouncementScreen() }
+        composable(Screen.HeadJudgeAnnouncement.route) {
+            HeadJudgeAnnouncementScreen(
+                onBack = { navController.popBackStack() },
+                onOpenRules = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
+            )
+        }
         composable(Screen.BannedLists.route) {
             BannedListsScreen(
                 onBack = { navController.popBackStack() },

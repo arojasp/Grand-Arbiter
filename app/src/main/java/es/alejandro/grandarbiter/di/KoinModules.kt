@@ -30,6 +30,7 @@ import es.alejandro.grandarbiter.ui.reader.ReaderContentsViewModel
 import es.alejandro.grandarbiter.ui.reader.ReaderPageViewModel
 import es.alejandro.grandarbiter.ui.settings.SettingsViewModel
 import es.alejandro.grandarbiter.ui.tools.banned.BannedListsViewModel
+import es.alejandro.grandarbiter.ui.tools.announcement.AnnouncementViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -113,4 +114,5 @@ val viewModelModule = module {
     viewModelOf(::CardDetailViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::BannedListsViewModel)
+    viewModelOf(::AnnouncementViewModel)
 }

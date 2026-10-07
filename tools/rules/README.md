@@ -10,6 +10,11 @@ python tools/rules/build_bundle.py       # offline, stdlib: bundle + rules/build
 .\gradlew :app:testDebugUnitTest         # BundledRulesAssetTest = strict decode + validator (the gate)
 ```
 
+The PDFs stay local (`rules/source/*.pdf` is gitignored): git keeps the extracted `.txt` files,
+which are what the bundle is built from and what you review in diffs, plus `sources.json` with
+each PDF's URL and SHA-256. To rebuild from scratch, run `fetch_sources.py` first.
+
+
 | Document | Source | Notes |
 |---|---|---|
 | CR  | official TXT (`cr.txt`) | parsed by build_bundle.py |

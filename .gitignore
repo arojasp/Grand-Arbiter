@@ -59,3 +59,7 @@ desktop.ini
 
 # ---- Scryfall bulk downloads (~170 MB, refetched by tools/cards/fetch_scryfall.py)
 cards/source/
+
+# ---- Official rules PDFs (Wizards' documents): downloaded by tools/rules/fetch_sources.py.
+# Not redistributed; the extracted .txt files and sources.json (URL + SHA-256) are committed.
+rules/source/*.pdf

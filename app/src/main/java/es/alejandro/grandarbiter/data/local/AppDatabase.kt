@@ -2,26 +2,33 @@ package es.alejandro.grandarbiter.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import es.alejandro.grandarbiter.data.local.dao.CRDao
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import es.alejandro.grandarbiter.data.local.dao.CardDao
-import es.alejandro.grandarbiter.data.local.entities.CREntity
 import es.alejandro.grandarbiter.data.local.entities.CardCacheEntity
-import es.alejandro.grandarbiter.data.local.entities.GlossaryEntity
-import es.alejandro.grandarbiter.data.local.entities.TOCEntity
 
+/**
+ * App/user data. Rules content lives in its own database (data.rules.local.RulesDatabase).
+ * Keep real migrations here: this is where judge data will live, so it must never be wiped.
+ */
 @Database(
     entities = [
-        CREntity::class,
         CardCacheEntity::class,
-        TOCEntity::class,
-        GlossaryEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun crDao(): CRDao
     abstract fun cardDao(): CardDao
+
+    companion object {
+        /** v7: the old CR tables moved to rules.db; drop them, keep everything else. */
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS comprehensive_rules")
+                db.execSQL("DROP TABLE IF EXISTS glossary")
+                db.execSQL("DROP TABLE IF EXISTS table_of_contents")
+            }
+        }
+    }
 }

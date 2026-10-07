@@ -4,18 +4,15 @@ import androidx.room.Room
 import es.alejandro.grandarbiter.data.local.AppDatabase
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.data.remote.ScryfallService
-import es.alejandro.grandarbiter.data.repository.CRRepositoryImpl
+import es.alejandro.grandarbiter.data.repository.CardRepositoryImpl
 import es.alejandro.grandarbiter.data.rules.RulesRepositoryImpl
 import es.alejandro.grandarbiter.data.rules.local.AssetRulesBundleSource
 import es.alejandro.grandarbiter.data.rules.local.RulesBundleImporter
 import es.alejandro.grandarbiter.data.rules.local.RulesDatabase
-import es.alejandro.grandarbiter.data.repository.CardRepositoryImpl
 import es.alejandro.grandarbiter.data.timer.TimerManagerImpl
-import es.alejandro.grandarbiter.domain.repository.CRRepository
 import es.alejandro.grandarbiter.domain.repository.CardRepository
 import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import es.alejandro.grandarbiter.domain.timer.TimerManager
-import es.alejandro.grandarbiter.ui.comprehensiverules.ComprehensiveRulesViewModel
 import es.alejandro.grandarbiter.ui.home.HomeViewModel
 import es.alejandro.grandarbiter.ui.main.MainViewModel
 import es.alejandro.grandarbiter.ui.reader.ReaderContentsViewModel
@@ -58,11 +55,11 @@ val databaseModule = module {
             AppDatabase::class.java,
             "judge_companion_db"
         )
-            .fallbackToDestructiveMigration()
+            .addMigrations(AppDatabase.MIGRATION_6_7)
+            .fallbackToDestructiveMigration(dropAllTables = false)
             .build()
     }
 
-    single { get<AppDatabase>().crDao() }
     single { get<AppDatabase>().cardDao() }
     
     single { SettingsDataStore(androidContext()) }
@@ -82,7 +79,6 @@ val rulesModule = module {
 }
 
 val repositoryModule = module {
-    single<CRRepository> { CRRepositoryImpl(get()) }
     single<CardRepository> { CardRepositoryImpl(get(), get()) }
 }
 
@@ -93,7 +89,6 @@ val appModule = module {
 val viewModelModule = module {
     viewModelOf(::MainViewModel)
     viewModelOf(::HomeViewModel)
-    viewModelOf(::ComprehensiveRulesViewModel)
     viewModelOf(::ReaderContentsViewModel)
     viewModelOf(::ReaderPageViewModel)
 }

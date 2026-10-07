@@ -1,16 +1,12 @@
 <resources>
     <string name="app_name">Grand Arbiter</string>
     <string name="nav_home">Home</string>
-    <string name="nav_documents">Documents</string>
     <string name="nav_card_search">Card Search</string>
-    <string name="nav_oracle_search">Oracle Search</string>
     <string name="nav_tools">Tools</string>
-    <string name="splash_text">Grand Arbiter</string>
 
     <!-- Home Screen -->
     <string name="home_judge_call">Judge Call</string>
     <string name="home_time_to_add">TIME TO ADD</string>
-    <string name="home_timer_placeholder">00:00:00</string>
     <string name="home_start_timer">Start Timer</string>
     <string name="home_pause_timer">Pause Timer</string>
     <string name="home_reset_timer">Reset</string>
@@ -29,16 +25,6 @@
     <string name="home_badge_jar">JAR</string>
 
 
-    <!-- IPG Screen -->
-    <string name="ipg_title">IPG</string>
-    <string name="ipg_search_placeholder">Search rules, penalties, or sections…</string>
-    <string name="ipg_definition_label">DEFINITION</string>
-    <string name="ipg_philosophy_label">PHILOSOPHY</string>
-    <string name="ipg_default_penalty_label">DEFAULT PENALTY</string>
-    <string name="ipg_time_limit_label">TIME LIMIT</string>
-    <string name="ipg_upgrade_downgrade_path_label">UPGRADE/DOWNGRADE PATH</string>
-    <string name="ipg_penalty_warning">Warning</string>
-    <string name="ipg_time_limit_zero">+0 mins</string>
     <!-- Reader -->
     <string name="reader_back">Back</string>
     <string name="reader_search_placeholder">Search words or a number (603.2a, 2.5)…</string>

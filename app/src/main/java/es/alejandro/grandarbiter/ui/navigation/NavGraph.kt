@@ -9,9 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import es.alejandro.grandarbiter.ui.cardsearch.CardDetailScreen
 import es.alejandro.grandarbiter.ui.cardsearch.CardSearchScreen
-import es.alejandro.grandarbiter.ui.comprehensiverules.ComprehensiveRulesScreen
 import es.alejandro.grandarbiter.ui.home.HomeScreen
-import es.alejandro.grandarbiter.ui.ipg.IpgScreen
 import es.alejandro.grandarbiter.ui.reader.ARG_ANCHOR
 import es.alejandro.grandarbiter.ui.reader.ReaderContentsScreen
 import es.alejandro.grandarbiter.ui.reader.ReaderPageScreen
@@ -28,8 +26,6 @@ import es.alejandro.grandarbiter.ui.tools.ToolsScreen
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
-    object ComprehensiveRules : Screen("comprehensive_rules")
-    object Ipg : Screen("ipg")
     object DocumentReader : Screen("document_reader/{documentId}") {
         fun createRoute(documentId: String) = "document_reader/$documentId"
     }
@@ -68,12 +64,6 @@ fun AppNavGraph(
                     navController.navigate(Screen.DocumentReader.createRoute(documentId))
                 }
             ) 
-        }
-        composable(Screen.ComprehensiveRules.route) { 
-            ComprehensiveRulesScreen(onBackClick = { navController.popBackStack() }) 
-        }
-        composable(Screen.Ipg.route) { 
-            IpgScreen(onBackClick = { navController.popBackStack() }) 
         }
         composable(Screen.DocumentReader.route) {
             ReaderContentsScreen(

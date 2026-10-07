@@ -117,6 +117,25 @@ interface RulesDao {
     @Query("SELECT * FROM rules_section WHERE id = :id")
     suspend fun section(id: String): RulesSectionEntity?
 
+    @Query("SELECT * FROM rules_document WHERE id = :documentId")
+    suspend fun document(documentId: String): RulesDocumentEntity?
+
+    /** Where a page that starts at [after] ends: the next section at the same or a higher level. */
+    @Query(
+        "SELECT MIN(ordinal) FROM rules_section WHERE documentId = :documentId " +
+            "AND ordinal > :after AND level <= :level"
+    )
+    suspend fun nextOrdinalAtOrAbove(documentId: String, after: Int, level: Int): Int?
+
+    @Query(
+        "SELECT * FROM rules_section WHERE documentId = :documentId " +
+            "AND ordinal >= :from AND ordinal < :toExclusive ORDER BY ordinal"
+    )
+    suspend fun range(documentId: String, from: Int, toExclusive: Int): List<RulesSectionEntity>
+
+    @Query("SELECT COUNT(*) FROM rules_section WHERE parentId = :id")
+    suspend fun childCount(id: String): Int
+
     @Query("SELECT * FROM rules_section WHERE parentId = :id ORDER BY ordinal")
     suspend fun children(id: String): List<RulesSectionEntity>
 
@@ -131,7 +150,7 @@ interface RulesDao {
     @Query(
         """
         SELECT s.id, s.documentId, s.number, s.title,
-               snippet(rules_section_fts, '[', ']', '…', -1, 12) AS snippet
+               snippet(rules_section_fts, char(2), char(3), '…', -1, 12) AS snippet
         FROM rules_section_fts
         JOIN rules_section s ON s.rowid = rules_section_fts.rowid
         WHERE rules_section_fts MATCH :query

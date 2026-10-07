@@ -5,6 +5,7 @@ import es.alejandro.grandarbiter.data.local.AppDatabase
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.data.remote.ScryfallService
 import es.alejandro.grandarbiter.data.repository.CRRepositoryImpl
+import es.alejandro.grandarbiter.data.rules.RulesRepositoryImpl
 import es.alejandro.grandarbiter.data.rules.local.AssetRulesBundleSource
 import es.alejandro.grandarbiter.data.rules.local.RulesBundleImporter
 import es.alejandro.grandarbiter.data.rules.local.RulesDatabase
@@ -12,6 +13,7 @@ import es.alejandro.grandarbiter.data.repository.CardRepositoryImpl
 import es.alejandro.grandarbiter.data.timer.TimerManagerImpl
 import es.alejandro.grandarbiter.domain.repository.CRRepository
 import es.alejandro.grandarbiter.domain.repository.CardRepository
+import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import es.alejandro.grandarbiter.domain.timer.TimerManager
 import es.alejandro.grandarbiter.ui.comprehensiverules.ComprehensiveRulesViewModel
 import es.alejandro.grandarbiter.ui.home.HomeViewModel
@@ -74,6 +76,7 @@ val rulesModule = module {
     single { get<RulesDatabase>().rulesDao() }
     single { AssetRulesBundleSource(androidContext()) }
     single { RulesBundleImporter(get(), get()) }
+    single<RulesRepository> { RulesRepositoryImpl(get()) }
 }
 
 val repositoryModule = module {

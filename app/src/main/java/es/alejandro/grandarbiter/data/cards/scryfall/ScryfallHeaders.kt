@@ -13,7 +13,11 @@ class ScryfallHeadersInterceptor(private val userAgent: String = USER_AGENT) : I
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         if (!isScryfall(request.url.host)) return chain.proceed(request)
-        val accept = if (request.url.host == API_HOST) "application/json;q=0.9,*/*;q=0.8" else "image/avif,image/webp,image/*,*/*;q=0.8"
+        val accept = when (request.url.host) {
+            API_HOST -> "application/json;q=0.9,*/*;q=0.8"
+            IMAGE_HOST -> "image/avif,image/webp,image/*,*/*;q=0.8"
+            else -> "*/*"                       // data.scryfall.io bulk files
+        }
         return chain.proceed(
             request.newBuilder()
                 .header("User-Agent", userAgent)
@@ -25,6 +29,7 @@ class ScryfallHeadersInterceptor(private val userAgent: String = USER_AGENT) : I
     companion object {
         const val USER_AGENT = "GrandArbiter/1.0 (judge reference app; https://github.com/arojasp/Grand-Arbiter)"
         private const val API_HOST = "api.scryfall.com"
+        private const val IMAGE_HOST = "cards.scryfall.io"
         fun isScryfall(host: String) = host == "scryfall.com" || host.endsWith(".scryfall.com") || host.endsWith(".scryfall.io")
     }
 }

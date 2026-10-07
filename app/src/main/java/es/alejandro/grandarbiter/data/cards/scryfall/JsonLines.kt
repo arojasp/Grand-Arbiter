@@ -19,3 +19,14 @@ inline fun InputStream.forEachJsonLine(gzipped: Boolean = true, action: (String)
         }
     }
 }
+
+/** Gunzips if the stream starts with the gzip magic bytes, so a source works whether or not the
+ *  server (or OkHttp) already decompressed it. */
+fun InputStream.decompressedIfGzip(): InputStream {
+    val buffered = java.io.BufferedInputStream(this, 64 * 1024)
+    buffered.mark(2)
+    val b1 = buffered.read()
+    val b2 = buffered.read()
+    buffered.reset()
+    return if (b1 == 0x1f && b2 == 0x8b) GZIPInputStream(buffered, 64 * 1024) else buffered
+}

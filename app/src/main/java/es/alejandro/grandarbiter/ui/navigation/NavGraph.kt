@@ -62,7 +62,8 @@ fun AppNavGraph(
             HomeScreen(
                 onNavigateToDocument = { documentId ->
                     navController.navigate(Screen.DocumentReader.createRoute(documentId))
-                }
+                },
+                onOpenSettings = { navController.navigate(Screen.Settings.route) },
             ) 
         }
         composable(Screen.DocumentReader.route) {
@@ -104,6 +105,6 @@ fun AppNavGraph(
             val referenceId = backStackEntry.arguments?.getString("referenceId") ?: ""
             QuickReferenceDetailScreen(referenceId)
         }
-        composable(Screen.Settings.route) { SettingsScreen() }
+        composable(Screen.Settings.route) { SettingsScreen(onBack = { navController.popBackStack() }) }
     }
 }

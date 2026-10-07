@@ -68,6 +68,12 @@ import es.alejandro.grandarbiter.domain.model.cards.CardFace
 import es.alejandro.grandarbiter.domain.model.cards.CardRuling
 import es.alejandro.grandarbiter.domain.model.cards.FormatLegality
 import es.alejandro.grandarbiter.domain.model.cards.Legality
+import es.alejandro.grandarbiter.ui.components.Label
+import es.alejandro.grandarbiter.ui.components.LabelStyle
+import es.alejandro.grandarbiter.ui.components.Panel
+import es.alejandro.grandarbiter.ui.components.Section
+import es.alejandro.grandarbiter.ui.components.Tag
+import es.alejandro.grandarbiter.ui.components.outlined
 import org.koin.androidx.compose.koinViewModel
 
 /*
@@ -75,7 +81,6 @@ import org.koin.androidx.compose.koinViewModel
  * Order: header (name, cost, type, stats) · oracle text · rulings · legality · card image (collapsed).
  */
 
-private val LabelStyle = TextStyle(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium, letterSpacing = 1.1.sp)
 private val LegalContainer = Color(0x6614532D)   // Figma: rgba(20,83,45,0.4)
 private val LegalContent = Color(0xFF86EFAC)
 
@@ -432,33 +437,4 @@ private fun Attribution(scryfallUrl: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
         TextButton(onClick = { uriHandler.openUri(scryfallUrl) }) { Text(stringResource(R.string.cards_open_scryfall)) }
     }
-}
-
-// ---------------------------------------------------------------- building blocks
-
-@Composable
-private fun Label(text: String, modifier: Modifier = Modifier) {
-    Text(text.uppercase(), style = LabelStyle, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = modifier)
-}
-
-/** A section heading (11sp, uppercase) above its content. */
-@Composable
-private fun Section(title: String, content: @Composable () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Label(title, Modifier.padding(start = 4.dp))
-        content()
-    }
-}
-
-/** Bordered surface: the Figma blocks (1dp #4D4637 border). */
-@Composable
-private fun Panel(color: Color, shape: Shape, contentModifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(color)
-            .outlined(shape, MaterialTheme.colorScheme.outlineVariant)
-            .then(contentModifier)
-    ) { content() }
 }

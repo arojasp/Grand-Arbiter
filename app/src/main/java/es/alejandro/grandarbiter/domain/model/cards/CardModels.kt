@@ -66,3 +66,18 @@ data class CardDataInfo(
     val importedAt: Long,
     val cardCount: Int,
 )
+
+/** Progress of a manual "check for updates" against Scryfall. */
+sealed interface CardUpdateState {
+    data object Idle : CardUpdateState
+    data object Checking : CardUpdateState
+    data class Downloading(val part: Part, val bytes: Long, val totalBytes: Long?) : CardUpdateState {
+        enum class Part { CARDS, RULINGS }
+    }
+    /** Writing into the database: ~20 s, the old data stays readable meanwhile. */
+    data object Importing : CardUpdateState
+    data class UpToDate(val oracleUpdatedAt: String) : CardUpdateState
+    data class Updated(val cards: Int, val oracleUpdatedAt: String) : CardUpdateState
+    /** Nothing changed: the installed data is still the previous one. */
+    data class Failed(val reason: String) : CardUpdateState
+}

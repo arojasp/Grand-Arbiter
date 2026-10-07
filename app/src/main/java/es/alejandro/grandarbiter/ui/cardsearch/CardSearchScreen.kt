@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
+import es.alejandro.grandarbiter.ui.components.Tag
 import org.koin.androidx.compose.koinViewModel
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
@@ -318,27 +319,7 @@ private fun EndOfRecords(text: String, modifier: Modifier = Modifier) {
 
 // ---------------------------------------------------------------- shared bits
 
-/** Small uppercase tag: TOKEN, SCRYFALL NOTE, RESERVED LIST… */
-@Composable
-internal fun Tag(
-    text: String,
-    container: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
-    content: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-) {
-    Surface(shape = RoundedCornerShape(4.dp), color = container) {
-        Text(
-            text.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.sp, lineHeight = 15.sp),
-            color = content,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-        )
-    }
-}
-
 @Composable
 internal fun Centered(content: @Composable () -> Unit) {
     Box(modifier = Modifier.fillMaxSize().padding(bottom = 48.dp), contentAlignment = Alignment.Center) { content() }
 }
-
-/** 1dp outline in the design's border color. */
-internal fun Modifier.outlined(shape: androidx.compose.ui.graphics.Shape, color: Color): Modifier = border(1.dp, color, shape)

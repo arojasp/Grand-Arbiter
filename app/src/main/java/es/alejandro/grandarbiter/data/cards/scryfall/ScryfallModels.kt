@@ -74,3 +74,17 @@ data class ScryfallRuling(
     @SerialName("published_at") val publishedAt: String,
     val comment: String,
 )
+
+/** https://api.scryfall.com/bulk-data: the catalog of daily bulk files. */
+@Serializable
+data class BulkDataList(val data: List<BulkDataEntry> = emptyList())
+
+@Serializable
+data class BulkDataEntry(
+    val type: String,                                              // "oracle_cards", "rulings"…
+    @SerialName("updated_at") val updatedAt: String,
+    val uri: String? = null,                                       // details of this entry
+    @SerialName("jsonl_download_uri") val jsonlDownloadUri: String? = null,
+    @SerialName("download_uri") val downloadUri: String? = null,
+    @SerialName("compressed_size") val compressedSize: Long? = null,
+)

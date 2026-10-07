@@ -59,6 +59,7 @@ import java.util.concurrent.TimeUnit
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onNavigateToDocument: (String) -> Unit = {},
+    onOpenSettings: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val elapsedTime by viewModel.elapsedTime.collectAsState()
@@ -72,6 +73,7 @@ fun HomeScreen(
         onToggleTimer = viewModel::toggleTimer,
         onResetTimer = viewModel::resetTimer,
         onNavigateToDocument = onNavigateToDocument,
+        onOpenSettings = onOpenSettings,
         modifier = modifier
     )
 }
@@ -85,7 +87,8 @@ fun HomeScreenContent(
     onToggleTimer: () -> Unit,
     onResetTimer: () -> Unit,
     onNavigateToDocument: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenSettings: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -112,7 +115,7 @@ fun HomeScreenContent(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO */ }) {
+                    IconButton(onClick = onOpenSettings) {
                         Icon(
                             painter = painterResource(R.drawable.ic_settings),
                             contentDescription = null,

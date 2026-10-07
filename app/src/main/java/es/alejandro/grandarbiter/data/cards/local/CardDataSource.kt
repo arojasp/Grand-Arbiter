@@ -5,6 +5,8 @@ import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallJson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import es.alejandro.grandarbiter.data.cards.scryfall.decompressedIfGzip
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.util.zip.GZIPInputStream
@@ -62,4 +64,16 @@ class AssetCardDataSource(
     } catch (_: FileNotFoundException) {
         GZIPInputStream(context.assets.open("$dir/$file.gz"), 64 * 1024)
     }
+}
+
+/** A snapshot downloaded from Scryfall into two local files (gzipped or not). */
+class FileCardDataSource(
+    private val version: CardDataVersion,
+    private val oracleCards: File,
+    private val rulings: File,
+) : CardDataSource {
+    override val name = "scryfall"
+    override suspend fun version(): CardDataVersion = version
+    override fun openOracleCards(): InputStream = oracleCards.inputStream().decompressedIfGzip()
+    override fun openRulings(): InputStream = rulings.inputStream().decompressedIfGzip()
 }

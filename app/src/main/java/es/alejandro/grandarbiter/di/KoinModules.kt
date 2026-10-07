@@ -6,6 +6,8 @@ import es.alejandro.grandarbiter.data.cards.local.AssetCardDataSource
 import es.alejandro.grandarbiter.data.cards.local.CardImporter
 import es.alejandro.grandarbiter.data.cards.local.CardsDatabase
 import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallHeadersInterceptor
+import es.alejandro.grandarbiter.data.cards.update.ScryfallBulkClient
+import es.alejandro.grandarbiter.data.cards.update.ScryfallCardUpdater
 import es.alejandro.grandarbiter.data.local.AppDatabase
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.data.rules.RulesRepositoryImpl
@@ -13,6 +15,7 @@ import es.alejandro.grandarbiter.data.rules.local.AssetRulesBundleSource
 import es.alejandro.grandarbiter.data.rules.local.RulesBundleImporter
 import es.alejandro.grandarbiter.data.rules.local.RulesDatabase
 import es.alejandro.grandarbiter.data.timer.TimerManagerImpl
+import es.alejandro.grandarbiter.domain.repository.CardDataUpdater
 import es.alejandro.grandarbiter.domain.repository.CardRepository
 import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import es.alejandro.grandarbiter.domain.timer.TimerManager
@@ -22,6 +25,7 @@ import es.alejandro.grandarbiter.ui.home.HomeViewModel
 import es.alejandro.grandarbiter.ui.main.MainViewModel
 import es.alejandro.grandarbiter.ui.reader.ReaderContentsViewModel
 import es.alejandro.grandarbiter.ui.reader.ReaderPageViewModel
+import es.alejandro.grandarbiter.ui.settings.SettingsViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -82,6 +86,8 @@ val cardsModule = module {
     single { get<CardsDatabase>().cardsDao() }
     single { AssetCardDataSource(androidContext()) }
     single { CardImporter(get(), get()) }
+    single { ScryfallBulkClient(get()) }
+    single<CardDataUpdater> { ScryfallCardUpdater(get(), get(), get(), androidContext().cacheDir) }
 }
 
 val repositoryModule = module {
@@ -99,4 +105,5 @@ val viewModelModule = module {
     viewModelOf(::ReaderPageViewModel)
     viewModelOf(::CardSearchViewModel)
     viewModelOf(::CardDetailViewModel)
+    viewModelOf(::SettingsViewModel)
 }

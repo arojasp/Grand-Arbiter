@@ -43,6 +43,7 @@ data class ScryfallCard(
     @SerialName("set_type") val setType: String? = null,
     @SerialName("card_faces") val cardFaces: List<ScryfallFace> = emptyList(),
     @SerialName("image_uris") val imageUris: ScryfallImages? = null,
+    val artist: String? = null,
 )
 
 @Serializable
@@ -57,10 +58,14 @@ data class ScryfallFace(
     val defense: String? = null,
     val colors: List<String>? = null,
     @SerialName("image_uris") val imageUris: ScryfallImages? = null,
+    val artist: String? = null,
 )
 
 @Serializable
-data class ScryfallImages(val normal: String? = null)
+data class ScryfallImages(
+    val normal: String? = null,
+    @SerialName("art_crop") val artCrop: String? = null,
+)
 
 @Serializable
 data class ScryfallRuling(

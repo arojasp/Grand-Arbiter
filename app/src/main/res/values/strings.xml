@@ -44,6 +44,32 @@
     <string name="penalty_disqualification">Disqualification</string>
 
     <!-- Card search -->
+    <string name="cards_title">Oracle Search</string>
+    <string name="cards_details">Card details</string>
+    <string name="cards_settings">Settings</string>
+    <string name="cards_filter">Search options</string>
+    <plurals name="cards_found">
+        <item quantity="one">%1$d card found</item>
+        <item quantity="other">%1$d cards found</item>
+    </plurals>
+    <string name="cards_found_many">%1$d+ cards found</string>
+    <string name="cards_end">End of Oracle records</string>
+    <string name="cards_label_name">Card name</string>
+    <string name="cards_label_mana">Mana cost</string>
+    <string name="cards_label_type">Type</string>
+    <string name="cards_label_pt">Power / Toughness</string>
+    <string name="cards_label_loyalty">Loyalty</string>
+    <string name="cards_label_defense">Defense</string>
+    <string name="cards_label_hand_life">Hand / Life</string>
+    <string name="cards_oracle_text">Oracle text</string>
+    <string name="cards_no_text">This card has no rules text.</string>
+    <string name="cards_official_rulings">Official rulings</string>
+    <string name="cards_rulings_total">%1$d Total</string>
+    <string name="cards_card_image">Card art</string>
+    <string name="cards_show_image">Show card art</string>
+    <string name="cards_hide_image">Hide card art</string>
+    <string name="cards_art_credit">Illustrated by %1$s · © Wizards of the Coast</string>
+    <string name="cards_art_copyright">© Wizards of the Coast</string>
     <string name="cards_search_placeholder">Card name…</string>
     <string name="cards_search_text_placeholder">Words in name, type or rules text…</string>
     <string name="cards_search_in_text">Search rules text</string>
@@ -55,14 +81,10 @@
     <string name="cards_not_found">This card is not in the installed card data.</string>
     <string name="cards_image_unavailable">The image needs a connection</string>
     <string name="cards_legality">Legality</string>
-    <string name="cards_rulings">Rulings</string>
     <string name="cards_no_rulings">No rulings for this card.</string>
     <string name="cards_ruling_scryfall">Scryfall note</string>
     <string name="cards_reserved">Reserved List</string>
     <string name="cards_game_changer">Game Changer</string>
-    <string name="cards_loyalty">Loyalty %1$s</string>
-    <string name="cards_defense">Defense %1$s</string>
-    <string name="cards_hand_life">Hand %1$s, life %2$s</string>
     <string name="cards_attribution">Card data and images from Scryfall. Card text and images © Wizards of the Coast.</string>
     <string name="cards_open_scryfall">View on Scryfall</string>
     <string name="legality_legal">Legal</string>

@@ -32,9 +32,9 @@ OUT = ROOT / "app" / "src" / "main" / "assets" / "cards"
 CARD_FIELDS = ("oracle_id", "name", "layout", "mana_cost", "cmc", "type_line", "oracle_text",
                "power", "toughness", "loyalty", "defense", "hand_modifier", "life_modifier",
                "colors", "color_identity", "keywords", "legalities", "game_changer", "reserved",
-               "games", "set", "set_type", "card_faces", "image_uris")
+               "games", "set", "set_type", "card_faces", "image_uris", "artist")
 FACE_FIELDS = ("name", "mana_cost", "type_line", "oracle_text", "power", "toughness",
-               "loyalty", "defense", "colors", "image_uris")
+               "loyalty", "defense", "colors", "image_uris", "artist")
 RULING_FIELDS = ("oracle_id", "source", "published_at", "comment")
 LEGAL_FORMATS = ("standard", "pioneer", "modern", "legacy", "vintage", "pauper", "commander",
                  "oathbreaker", "duel", "premodern", "oldschool", "predh", "paupercommander")
@@ -48,9 +48,15 @@ def jsonl(path: Path):
                 yield json.loads(line)
 
 
+# normal = whole card; art_crop = the art only (shown in the app with the artist's name, as
+# Scryfall's guidelines require for art crops).
+IMAGE_SIZES = ("normal", "art_crop")
+
+
 def images(d: dict) -> dict | None:
-    normal = (d.get("image_uris") or {}).get("normal")
-    return {"normal": normal} if normal else None
+    uris = d.get("image_uris") or {}
+    kept = {k: uris[k] for k in IMAGE_SIZES if uris.get(k)}
+    return kept or None
 
 
 def strip(d: dict, fields) -> dict:

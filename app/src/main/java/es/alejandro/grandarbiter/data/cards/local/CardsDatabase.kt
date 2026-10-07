@@ -39,6 +39,8 @@ data class CardEntity(
     val legalities: String,          // "standard=legal;modern=banned;…" paper formats, fixed order
     val facesJson: String?,          // List<ScryfallFace> as JSON, multi-faced cards only
     val imageUrl: String?,
+    val artCropUrl: String?,         // art only; shown with the artist (Scryfall guidelines)
+    val artist: String?,
     val setCode: String?,
     val gameChanger: Boolean,
     val reserved: Boolean,
@@ -144,7 +146,7 @@ interface CardsDao {
 
 @Database(
     entities = [CardEntity::class, CardFts::class, RulingEntity::class, CardRulingEntity::class, CardsMetaEntity::class],
-    version = 1,
+    version = 2,                     // 2: artCropUrl, artist. Destructive: the seed re-imports itself.
     exportSchema = false,
 )
 abstract class CardsDatabase : RoomDatabase() {

@@ -30,4 +30,21 @@ class CardTextTest {
         assertEquals(LocalDate.of(2026, 10, 7), CardText.date("2026-10-07T09:01:59.955+00:00"))
 
     @Test fun formatNames() = assertEquals("Duel Commander", CardText.formatName("duel"))
+
+    @Test fun symbols_areFoundOnce() =
+        assertEquals(listOf("T", "G", "W/U"), CardText.symbols("{T}: Add {G}. {G}{W/U}"))
+
+    @Test fun manaCost_splitsFaces() =
+        assertEquals(listOf(listOf("R"), listOf("1", "R")), CardText.manaCost("{R} // {1}{R}"))
+
+    @Test fun inlineSymbols_becomePlaceholders_andKeepItalics() {
+        val a = CardText.oracle("{T}: Add {G}. (Reminder {G}.)", inlineSymbols = true)
+        val ids = a.getStringAnnotations(0, a.length).map { it.item }
+        assertEquals(listOf("mana:T", "mana:G", "mana:G"), ids)
+        assertEquals(listOf("(Reminder ", ".)"), a.spanStyles.filter { it.item.fontStyle == FontStyle.Italic }
+            .map { a.text.substring(it.start, it.end) })
+    }
+
+    @Test fun braceWithoutSymbol_staysText() =
+        assertEquals("a { b", CardText.oracle("a { b", inlineSymbols = true).text)
 }

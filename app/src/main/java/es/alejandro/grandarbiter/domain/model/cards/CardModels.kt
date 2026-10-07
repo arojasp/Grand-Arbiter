@@ -26,6 +26,9 @@ data class CardDetail(
     val faces: List<CardFace>,
     /** Online only: Scryfall's CDN. Null for cards Scryfall has no image for. */
     val imageUrl: String?,
+    /** Online only: the art alone. Must be shown with [artist] (Scryfall guidelines). */
+    val artCropUrl: String?,
+    val artist: String?,
     val legalities: List<FormatLegality>,
     val gameChanger: Boolean,
     val reserved: Boolean,
@@ -44,6 +47,8 @@ data class CardFace(
     val loyalty: String?,
     val defense: String?,
     val imageUrl: String?,
+    val artCropUrl: String?,
+    val artist: String?,
 )
 
 enum class Legality { LEGAL, RESTRICTED, BANNED, NOT_LEGAL }

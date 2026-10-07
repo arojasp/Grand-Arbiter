@@ -72,4 +72,30 @@ class CardMapperTest {
         assertEquals("WG", e.colorIdentity)
         assertTrue(e.isToken)
     }
+
+    @Test
+    fun artCropAndArtist_perFace_withCardLevelFallback() {
+        val card = transform.copy(
+            artist = null,
+            cardFaces = listOf(
+                transform.cardFaces[0].copy(imageUris = ScryfallImages("https://img/f.jpg", "https://art/f.jpg"), artist = "Ann"),
+                transform.cardFaces[1].copy(imageUris = ScryfallImages("https://img/b.jpg", "https://art/b.jpg"), artist = "Bob"),
+            ),
+        )
+        val e = CardMapper.toEntity(card)
+        assertEquals("https://art/f.jpg", e.artCropUrl)
+        assertEquals("Ann & Bob", e.artist)
+        val d = CardMapper.toDetail(e, emptyList())
+        assertEquals(listOf("https://art/f.jpg", "https://art/b.jpg"), d.faces.map { it.artCropUrl })
+        assertEquals(listOf("Ann", "Bob"), d.faces.map { it.artist })
+    }
+
+    @Test
+    fun singleFaced_usesCardLevelArt() {
+        val e = CardMapper.toEntity(
+            ScryfallCard(oracleId = "s", name = "S", imageUris = ScryfallImages("https://img/s.jpg", "https://art/s.jpg"), artist = "Cy")
+        )
+        assertEquals("https://art/s.jpg", e.artCropUrl)
+        assertEquals("Cy", e.artist)
+    }
 }

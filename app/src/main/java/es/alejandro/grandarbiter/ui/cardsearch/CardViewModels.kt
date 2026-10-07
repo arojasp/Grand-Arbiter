@@ -43,16 +43,18 @@ class CardSearchViewModel(
 
     val results: StateFlow<List<CardSummary>> = combine(query.debounce(200), inText, dataState) { q, t, d -> Triple(q, t, d) }
         .mapLatest { (q, t, d) ->
-            if (q.isBlank() || d !is CardDataState.Ready) emptyList() else repository.search(q, inText = t)
+            if (q.isBlank() || d !is CardDataState.Ready) emptyList() else repository.search(q, inText = t, limit = LIMIT)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun onQueryChange(value: String) { savedStateHandle[KEY_QUERY] = value }
     fun onInTextChange(value: Boolean) { savedStateHandle[KEY_IN_TEXT] = value }
 
-    private companion object {
-        const val KEY_QUERY = "query"
-        const val KEY_IN_TEXT = "inText"
+    companion object {
+        /** Results shown; at the limit the header says "100+". */
+        const val LIMIT = 100
+        private const val KEY_QUERY = "query"
+        private const val KEY_IN_TEXT = "inText"
     }
 }
 

@@ -44,6 +44,8 @@ object CardMapper {
             legalities = CardFilter.PAPER_FORMATS.joinToString(";") { "$it=${c.legalities[it] ?: "not_legal"}" },
             facesJson = if (faces.isEmpty()) null else json.encodeToString(faceList, faces),
             imageUrl = c.imageUris?.normal ?: faces.firstOrNull()?.imageUris?.normal,
+            artCropUrl = c.imageUris?.artCrop ?: faces.firstOrNull()?.imageUris?.artCrop,
+            artist = c.artist.nonBlank() ?: faces.mapNotNull { it.artist.nonBlank() }.distinct().joinToString(" & ").nonBlank(),
             setCode = c.set,
             gameChanger = c.gameChanger,
             reserved = c.reserved,
@@ -68,9 +70,11 @@ object CardMapper {
             lifeModifier = e.lifeModifier,
             faces = faces.map {
                 CardFace(it.name, it.manaCost.nonBlank(), it.typeLine, it.oracleText, it.power, it.toughness,
-                    it.loyalty, it.defense, it.imageUris?.normal)
+                    it.loyalty, it.defense, it.imageUris?.normal, it.imageUris?.artCrop, it.artist.nonBlank() ?: e.artist)
             },
             imageUrl = e.imageUrl,
+            artCropUrl = e.artCropUrl,
+            artist = e.artist,
             legalities = parseLegalities(e.legalities),
             gameChanger = e.gameChanger,
             reserved = e.reserved,

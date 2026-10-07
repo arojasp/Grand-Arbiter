@@ -2,6 +2,9 @@ package es.alejandro.grandarbiter
 
 import android.app.Application
 import android.util.Log
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import okhttp3.OkHttpClient
 import es.alejandro.grandarbiter.di.appModule
 import es.alejandro.grandarbiter.di.cardsModule
 import es.alejandro.grandarbiter.di.databaseModule
@@ -22,10 +25,17 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
-class GrandArbiterApplication : Application() {
+class GrandArbiterApplication : Application(), ImageLoaderFactory {
 
     /** App-lifetime work that must not be cancelled with a screen. */
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    /** Coil uses the app's OkHttpClient, which adds the headers Scryfall's image CDN requires. */
+    override fun newImageLoader(): ImageLoader =
+        ImageLoader.Builder(this)
+            .okHttpClient { get<OkHttpClient>() }
+            .crossfade(true)
+            .build()
 
     override fun onCreate() {
         super.onCreate()

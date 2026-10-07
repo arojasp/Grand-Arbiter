@@ -5,6 +5,7 @@ import es.alejandro.grandarbiter.data.cards.CardRepositoryImpl
 import es.alejandro.grandarbiter.data.cards.local.AssetCardDataSource
 import es.alejandro.grandarbiter.data.cards.local.CardImporter
 import es.alejandro.grandarbiter.data.cards.local.CardsDatabase
+import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallHeadersInterceptor
 import es.alejandro.grandarbiter.data.local.AppDatabase
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.data.rules.RulesRepositoryImpl
@@ -35,6 +36,7 @@ val networkModule = module {
 
     single {
         OkHttpClient.Builder()
+            .addInterceptor(ScryfallHeadersInterceptor())   // Scryfall answers 400 without them
             .addInterceptor(get<HttpLoggingInterceptor>())
             .build()
     }

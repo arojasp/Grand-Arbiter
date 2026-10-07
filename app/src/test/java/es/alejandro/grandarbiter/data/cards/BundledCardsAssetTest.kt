@@ -8,6 +8,8 @@ import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallCard
 import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallJson
 import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallRuling
 import es.alejandro.grandarbiter.data.cards.scryfall.forEachJsonLine
+import es.alejandro.grandarbiter.ui.cardsearch.CardText
+import es.alejandro.grandarbiter.ui.cardsearch.manaDrawable
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
@@ -51,6 +53,28 @@ class BundledCardsAssetTest {
         var n = 0
         file.inputStream().forEachJsonLine { ScryfallJson.decodeFromString<ScryfallRuling>(it); n++ }
         assertTrue("only $n rulings", n > 10_000)
+    }
+
+    /**
+     * Every symbol the cards and rulings use has an official drawable. Fails when Scryfall adds a
+     * symbol: run tools/cards/fetch_symbols.py + build_symbols.py. (The app still shows a drawn
+     * fallback, but a release should ship the real one.)
+     */
+    @Test
+    fun seed_everySymbolHasADrawable() {
+        val cards = File(dir, "oracle-cards.jsonl.gz")
+        val rulings = File(dir, "rulings.jsonl.gz")
+        assumeTrue(cards.exists() && rulings.exists())
+        val used = HashSet<String>()
+        cards.inputStream().forEachJsonLine { line ->
+            val c = ScryfallJson.decodeFromString<ScryfallCard>(line)
+            val texts = listOfNotNull(c.manaCost, c.oracleText) + c.cardFaces.flatMap { listOfNotNull(it.manaCost, it.oracleText) }
+            texts.forEach { used += CardText.symbols(it) }
+        }
+        rulings.inputStream().forEachJsonLine { used += CardText.symbols(ScryfallJson.decodeFromString<ScryfallRuling>(it).comment) }
+        val missing = used.filter { manaDrawable(it) == null }.toSet()
+        // Known oddities: an Un-card printing lowercase symbols, and a ruling quoting "{(b/r)}".
+        assertEquals(emptySet<String>(), missing - setOf("w", "u", "b", "r", "g", "(b/r)", "(r/g)"))
     }
 
     @Test

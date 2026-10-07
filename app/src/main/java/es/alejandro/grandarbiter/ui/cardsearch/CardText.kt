@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.ui.cardsearch
 
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -10,27 +11,54 @@ import java.time.OffsetDateTime
 /** Oracle text with reminder text (parenthesised) in italics, as printed. Pure, unit-tested. */
 object CardText {
 
-    fun oracle(text: String): AnnotatedString = buildAnnotatedString {
-        var depth = 0
+    /** Inline-content id prefix for a mana symbol: "mana:R" for {R}. */
+    const val SYMBOL_PREFIX = "mana:"
+    private val SYMBOL = Regex("""\{([^{}]{1,10})\}""")
+
+    /** The symbols in a text, without braces: "{T}: Add {G}." -> [T, G]. */
+    fun symbols(text: String): List<String> = SYMBOL.findAll(text).map { it.groupValues[1] }.distinct().toList()
+
+    /**
+     * Oracle text with reminder text (parenthesised) in italics, as printed. With [inlineSymbols],
+     * every {X} becomes an inline-content placeholder ([SYMBOL_PREFIX] + X) drawn as a mana symbol.
+     */
+    fun oracle(text: String, inlineSymbols: Boolean = false): AnnotatedString = buildAnnotatedString {
         val italic = SpanStyle(fontStyle = FontStyle.Italic)
+        var depth = 0
         val buf = StringBuilder()
-        fun flush(inReminder: Boolean) {
+        fun flush() {
             if (buf.isEmpty()) return
-            if (inReminder) pushStyle(italic)
+            if (depth > 0) pushStyle(italic)
             append(buf.toString())
-            if (inReminder) pop()
+            if (depth > 0) pop()
             buf.clear()
         }
-        for (ch in text) {
+        var i = 0
+        while (i < text.length) {
+            val ch = text[i]
+            if (ch == '{' && inlineSymbols) {
+                val match = SYMBOL.matchAt(text, i)
+                if (match != null) {
+                    flush()
+                    appendInlineContent(SYMBOL_PREFIX + match.groupValues[1], match.value)
+                    i = match.range.last + 1
+                    continue
+                }
+            }
             when (ch) {
-                '(' -> { flush(depth > 0); depth++; buf.append(ch) }
-                ')' -> { buf.append(ch); flush(depth > 0); if (depth > 0) depth-- }
-                '\n' -> { flush(depth > 0); depth = 0; buf.append(ch) }   // never carry italics across lines
+                '(' -> { flush(); depth++; buf.append(ch) }
+                ')' -> { buf.append(ch); flush(); if (depth > 0) depth-- }
+                '\n' -> { flush(); depth = 0; buf.append(ch) }   // never carry italics across lines
                 else -> buf.append(ch)
             }
+            i++
         }
-        flush(depth > 0)
+        flush()
     }
+
+    /** "{2}{U} // {3}" -> [[2, U], [3]]: one list per face. */
+    fun manaCost(cost: String): List<List<String>> =
+        cost.split(" // ").map { face -> SYMBOL.findAll(face).map { it.groupValues[1] }.toList() }.filter { it.isNotEmpty() }
 
     /** "3/2", or null for non-creatures. */
     fun powerToughness(power: String?, toughness: String?): String? =

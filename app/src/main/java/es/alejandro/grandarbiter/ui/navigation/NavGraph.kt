@@ -85,7 +85,10 @@ fun AppNavGraph(
             )
         }
         composable(Screen.CardSearch.route) {
-            CardSearchScreen(onOpenCard = { oracleId -> navController.navigate(Screen.CardDetail.createRoute(oracleId)) })
+            CardSearchScreen(
+                onOpenCard = { oracleId -> navController.navigate(Screen.CardDetail.createRoute(oracleId)) },
+                onOpenSettings = { navController.navigate(Screen.Settings.route) },
+            )
         }
         composable(Screen.CardDetail.route) {
             CardDetailScreen(onBack = { navController.popBackStack() })

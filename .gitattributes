@@ -20,3 +20,5 @@
 
 # Rules sources are kept byte-for-byte exactly as downloaded: rules/source/sources.json stores their SHA-256
 rules/source/** -text
+# Published data the app verifies by SHA: always LF, whatever core.autocrlf says.
+app/src/main/assets/rules/** text eol=lf

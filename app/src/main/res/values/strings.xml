@@ -265,8 +265,19 @@
     <string name="reader_glossary">Glossary</string>
     <string name="tools_release_notes">Release Notes</string>
     <string name="tools_release_notes_desc">Official notes for each set</string>
-    <string name="release_notes_caption">Wizards of the Coast\'s official release notes for each set, newest first. They open in your browser.</string>
+    <string name="release_notes_caption">Wizards of the Coast\'s official release notes for each set, newest first, readable offline.</string>
     <string name="release_notes_latest">Latest</string>
     <string name="release_notes_open">Open %1$s release notes</string>
     <string name="glossary_search_placeholder">Search a term</string>
+    <string name="home_badge_release_notes">RN</string>
+    <string name="home_release_notes_description">Official notes for each set: general notes and card clarifications</string>
+    <string name="home_release_notes_latest">Latest: %1$s</string>
+    <string name="release_notes_open_browser">Open in browser</string>
+    <string name="release_notes_offline">Couldn\'t load the release notes. Check your connection: pages you\'ve opened before may still be available offline.</string>
+    <string name="release_notes_retry">Retry</string>
+    <string name="release_notes_modified">Release notes · updated %1$s</string>
+    <string name="release_notes_view_original">View original</string>
+    <string name="release_notes_online_only">This set\'s release notes aren\'t available offline yet. You can read the original online.</string>
+    <string name="release_notes_search">Search a card or text</string>
+    <string name="release_notes_online">Online</string>
 </resources>

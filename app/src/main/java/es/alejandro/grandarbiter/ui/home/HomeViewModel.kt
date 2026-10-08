@@ -2,6 +2,7 @@ package es.alejandro.grandarbiter.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import es.alejandro.grandarbiter.data.releasenotes.ReleaseNotesRepository
 import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import es.alejandro.grandarbiter.domain.timer.TimerManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,12 +14,23 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class HomeViewModel(
     rulesRepository: RulesRepository,
     private val timerManager: TimerManager,
+    releaseNotes: ReleaseNotesRepository,
 ) : ViewModel() {
+
+    /** Name of the newest set with release notes, for the Home card. */
+    val latestReleaseNotes: StateFlow<String?> = releaseNotes.sets
+        .map { it.firstOrNull()?.name }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    init {
+        viewModelScope.launch { releaseNotes.load() }
+    }
 
     /** Effective date of each installed document, by id ("cr", "ipg", …). */
     val effectiveDates: StateFlow<Map<String, LocalDate>> = rulesRepository.observeDocuments()

@@ -65,9 +65,11 @@ fun HomeScreen(
     val elapsedTime by viewModel.elapsedTime.collectAsState()
     val isRunning by viewModel.isRunning.collectAsState()
     val effectiveDates by viewModel.effectiveDates.collectAsState()
+    val latestReleaseNotes by viewModel.latestReleaseNotes.collectAsState()
 
     HomeScreenContent(
         effectiveDates = effectiveDates,
+        latestReleaseNotes = latestReleaseNotes,
         elapsedTime = elapsedTime,
         isRunning = isRunning,
         onToggleTimer = viewModel::toggleTimer,
@@ -82,6 +84,7 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     effectiveDates: Map<String, LocalDate>,
+    latestReleaseNotes: String? = null,
     elapsedTime: Long,
     isRunning: Boolean,
     onToggleTimer: () -> Unit,
@@ -123,7 +126,7 @@ fun HomeScreenContent(
             )
         }
     ) { innerPadding ->
-        val documentItems = getDocumentLibraryItems(effectiveDates)
+        val documentItems = getDocumentLibraryItems(effectiveDates, latestReleaseNotes)
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -363,7 +366,7 @@ data class DocumentLibraryItem(
 )
 
 @Composable
-fun getDocumentLibraryItems(effectiveDates: Map<String, LocalDate>): List<DocumentLibraryItem> {
+fun getDocumentLibraryItems(effectiveDates: Map<String, LocalDate>, latestReleaseNotes: String? = null): List<DocumentLibraryItem> {
     val labels = effectiveDates.mapValues { (_, date) -> effectiveLabel(date) }
     fun date(id: String) = labels[id].orEmpty()
     return listOf(
@@ -395,9 +398,19 @@ fun getDocumentLibraryItems(effectiveDates: Map<String, LocalDate>): List<Docume
         title = stringResource(R.string.home_jar_title),
         description = stringResource(R.string.home_jar_description),
         date = date("jar")
+    ),
+    DocumentLibraryItem(
+        id = RELEASE_NOTES_ID,
+        badge = stringResource(R.string.home_badge_release_notes),
+        title = stringResource(R.string.tools_release_notes),
+        description = stringResource(R.string.home_release_notes_description),
+        date = latestReleaseNotes?.let { stringResource(R.string.home_release_notes_latest, it) }.orEmpty()
     )
     )
 }
+
+/** Not a rules document: Home routes it to the release notes list. */
+const val RELEASE_NOTES_ID = "release_notes"
 
 private fun formatTime(millis: Long): String {
     val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60

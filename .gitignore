@@ -66,3 +66,6 @@ rules/source/*.pdf
 
 # ---- Files the Claude desktop app saves when it sends you a file (not part of the project)
 Claude outputs/
+
+# ---- Release notes HTML downloaded from Wizards (pipeline input, never committed)
+tools/releasenotes/source/

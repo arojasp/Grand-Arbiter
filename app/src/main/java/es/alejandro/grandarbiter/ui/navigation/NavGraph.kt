@@ -1,5 +1,7 @@
 package es.alejandro.grandarbiter.ui.navigation
 
+import android.net.Uri
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -30,6 +32,10 @@ import es.alejandro.grandarbiter.ui.reader.ARG_TERM
 import es.alejandro.grandarbiter.ui.reader.GlossaryRoutes
 import es.alejandro.grandarbiter.ui.reader.GlossaryScreen
 import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNotesScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteViewerScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteSetScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ARG_SET_CODE
+import es.alejandro.grandarbiter.ui.home.RELEASE_NOTES_ID
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -46,6 +52,12 @@ sealed class Screen(val route: String) {
     object HeadJudgeAnnouncement : Screen("head_judge_announcement")
     object BannedLists : Screen("banned_lists")
     object ReleaseNotes : Screen("release_notes")
+    object ReleaseNoteSet : Screen("release_notes/{$ARG_SET_CODE}") {
+        fun createRoute(code: String) = "release_notes/${Uri.encode(code)}"
+    }
+    object ReleaseNoteViewer : Screen("release_notes/{$ARG_SET_CODE}/original") {
+        fun createRoute(code: String) = "release_notes/${Uri.encode(code)}/original"
+    }
     object QuickReferences : Screen(QuickReferenceRoutes.LIST)
     object Settings : Screen("settings")
 }
@@ -65,7 +77,10 @@ fun AppNavGraph(
         composable(Screen.Home.route) { 
             HomeScreen(
                 onNavigateToDocument = { documentId ->
-                    navController.navigate(Screen.DocumentReader.createRoute(documentId))
+                    navController.navigate(
+                        if (documentId == RELEASE_NOTES_ID) Screen.ReleaseNotes.route
+                        else Screen.DocumentReader.createRoute(documentId)
+                    )
                 },
                 onOpenSettings = { navController.navigate(Screen.Settings.route) },
             ) 
@@ -122,7 +137,19 @@ fun AppNavGraph(
                 onOpenRules = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
             )
         }
-        composable(Screen.ReleaseNotes.route) { ReleaseNotesScreen(onBack = { navController.popBackStack() }) }
+        composable(Screen.ReleaseNotes.route) {
+            ReleaseNotesScreen(
+                onBack = { navController.popBackStack() },
+                onOpenSet = { set -> navController.navigate(Screen.ReleaseNoteSet.createRoute(set.code)) },
+            )
+        }
+        composable(Screen.ReleaseNoteSet.route) {
+            ReleaseNoteSetScreen(
+                onBack = { navController.popBackStack() },
+                onViewOriginal = { code -> navController.navigate(Screen.ReleaseNoteViewer.createRoute(code)) },
+            )
+        }
+        composable(Screen.ReleaseNoteViewer.route) { ReleaseNoteViewerScreen(onBack = { navController.popBackStack() }) }
         composable(Screen.BannedLists.route) {
             BannedListsScreen(
                 onBack = { navController.popBackStack() },

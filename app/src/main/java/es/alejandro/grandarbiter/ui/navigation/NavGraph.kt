@@ -19,8 +19,12 @@ import es.alejandro.grandarbiter.ui.tools.banned.BannedListsScreen
 import es.alejandro.grandarbiter.ui.tools.deckcounter.DeckCounterScreen
 import es.alejandro.grandarbiter.ui.tools.DraftTimerScreen
 import es.alejandro.grandarbiter.ui.tools.announcement.HeadJudgeAnnouncementScreen
-import es.alejandro.grandarbiter.ui.tools.QuickReferenceDetailScreen
-import es.alejandro.grandarbiter.ui.tools.QuickReferencesScreen
+import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceDetailScreen
+import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceEditScreen
+import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceRoutes
+import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferencesScreen
+import es.alejandro.grandarbiter.ui.tools.quickrefs.ARG_REFERENCE
+import es.alejandro.grandarbiter.ui.tools.quickrefs.ARG_REFERENCE_DOCUMENT
 import es.alejandro.grandarbiter.ui.tools.ToolsScreen
 
 sealed class Screen(val route: String) {
@@ -37,10 +41,7 @@ sealed class Screen(val route: String) {
     object DraftTimer : Screen("draft_timer")
     object HeadJudgeAnnouncement : Screen("head_judge_announcement")
     object BannedLists : Screen("banned_lists")
-    object QuickReferences : Screen("quick_references")
-    object QuickReferenceDetail : Screen("quick_reference_detail/{referenceId}") {
-        fun createRoute(referenceId: String) = "quick_reference_detail/$referenceId"
-    }
+    object QuickReferences : Screen(QuickReferenceRoutes.LIST)
     object Settings : Screen("settings")
 }
 
@@ -112,10 +113,45 @@ fun AppNavGraph(
                 onOpenCard = { oracleId -> navController.navigate(Screen.CardDetail.createRoute(oracleId)) },
             )
         }
-        composable(Screen.QuickReferences.route) { QuickReferencesScreen() }
-        composable(Screen.QuickReferenceDetail.route) { backStackEntry ->
-            val referenceId = backStackEntry.arguments?.getString("referenceId") ?: ""
-            QuickReferenceDetailScreen(referenceId)
+        composable(Screen.QuickReferences.route) {
+            QuickReferencesScreen(
+                onBack = { navController.popBackStack() },
+                onOpen = { id -> navController.navigate(QuickReferenceRoutes.detail(id)) },
+                onCreate = { document -> navController.navigate(QuickReferenceRoutes.create(document)) },
+            )
+        }
+        composable(
+            QuickReferenceRoutes.DETAIL,
+            arguments = listOf(navArgument(ARG_REFERENCE) { type = NavType.StringType }),
+        ) {
+            QuickReferenceDetailScreen(
+                onBack = { navController.popBackStack() },
+                onEdit = { id -> navController.navigate(QuickReferenceRoutes.edit(id)) },
+                onOpenPage = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
+            )
+        }
+        composable(
+            QuickReferenceRoutes.EDIT,
+            arguments = listOf(
+                navArgument(ARG_REFERENCE) { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument(ARG_REFERENCE_DOCUMENT) { type = NavType.StringType; nullable = true; defaultValue = null },
+            ),
+        ) {
+            QuickReferenceEditScreen(
+                onClose = { navController.popBackStack() },
+                onSaved = { id, created ->
+                    if (created) {
+                        // New reference: show it, and Back from there returns to the list.
+                        navController.navigate(QuickReferenceRoutes.detail(id)) {
+                            popUpTo(QuickReferenceRoutes.EDIT) { inclusive = true }
+                        }
+                    } else {
+                        navController.popBackStack()
+                    }
+                },
+                // The detail behind the editor is gone too: back to the list.
+                onDeleted = { navController.popBackStack(QuickReferenceRoutes.LIST, inclusive = false) },
+            )
         }
         composable(Screen.Settings.route) {
             SettingsScreen(onBack = { navController.popBackStack() })

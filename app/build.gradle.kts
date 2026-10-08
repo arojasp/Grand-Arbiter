@@ -34,7 +34,13 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true   // VERSION_CODE, compared with the published manifest's minVersionCode
     }
+}
+
+// Room schema JSON per database version (AppDatabase from v8): reviewable in git, usable for migration tests.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 kotlin {
@@ -76,6 +82,9 @@ dependencies {
 
     // Serialization (rules bundle)
     implementation(libs.kotlinx.serialization.json)
+
+    // Google Play In-App Updates (only works for installs from Play)
+    implementation(libs.play.app.update.ktx)
 
 
     testImplementation(libs.junit)

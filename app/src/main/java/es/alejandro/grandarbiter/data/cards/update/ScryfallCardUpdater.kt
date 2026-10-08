@@ -1,11 +1,10 @@
 package es.alejandro.grandarbiter.data.cards.update
 
-import android.util.Log
 import es.alejandro.grandarbiter.data.cards.local.CardDataVersion
 import es.alejandro.grandarbiter.data.cards.local.CardImportResult
-import es.alejandro.grandarbiter.data.cards.local.CardImporter
-import es.alejandro.grandarbiter.data.cards.local.CardsDao
 import es.alejandro.grandarbiter.data.cards.local.FileCardDataSource
+import es.alejandro.grandarbiter.data.update.AndroidUpdateLog
+import es.alejandro.grandarbiter.data.update.UpdateLog
 import es.alejandro.grandarbiter.domain.model.cards.CardUpdateState
 import es.alejandro.grandarbiter.domain.model.cards.CardUpdateState.Downloading.Part
 import es.alejandro.grandarbiter.domain.repository.CardDataUpdater
@@ -32,10 +31,10 @@ import java.io.IOException
  */
 class ScryfallCardUpdater(
     private val client: ScryfallBulkClient,
-    private val importer: CardImporter,
-    private val dao: CardsDao,
+    private val installed: InstalledCards,
     private val workDir: File,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+    private val log: UpdateLog = AndroidUpdateLog(TAG),
 ) : CardDataUpdater {
 
     private val _state = MutableStateFlow<CardUpdateState>(CardUpdateState.Idle)
@@ -56,9 +55,9 @@ class ScryfallCardUpdater(
             val oracle = catalog.firstOrNull { it.type == "oracle_cards" } ?: return failed("no oracle_cards in Scryfall's catalog")
             val rulings = catalog.firstOrNull { it.type == "rulings" } ?: return failed("no rulings in Scryfall's catalog")
             val remote = CardDataVersion(oracle.updatedAt, rulings.updatedAt)
-            val installed = dao.meta()?.let { CardDataVersion(it.oracleUpdatedAt, it.rulingsUpdatedAt) }
-            if (installed != null && !remote.isNewerThan(installed)) {
-                return CardUpdateState.UpToDate(installed.oracleUpdatedAt)
+            val installedVersion = installed.version()
+            if (installedVersion != null && !remote.isNewerThan(installedVersion)) {
+                return CardUpdateState.UpToDate(installedVersion.oracleUpdatedAt)
             }
 
             dir.deleteRecursively()
@@ -73,9 +72,9 @@ class ScryfallCardUpdater(
             }
 
             _state.value = CardUpdateState.Importing
-            when (val result = importer.import(FileCardDataSource(remote, oracleFile, rulingsFile))) {
+            when (val result = installed.import(FileCardDataSource(remote, oracleFile, rulingsFile))) {
                 is CardImportResult.Imported -> {
-                    Log.i(TAG, result.toString())
+                    log.info(result.toString())
                     CardUpdateState.Updated(result.cards, remote.oracleUpdatedAt)
                 }
                 is CardImportResult.UpToDate -> CardUpdateState.UpToDate(result.installed.oracleUpdatedAt)
@@ -88,13 +87,16 @@ class ScryfallCardUpdater(
             failed(e.message ?: e.javaClass.simpleName, e)
         } catch (e: SerializationException) {
             failed("unexpected answer from Scryfall", e)
+        } catch (e: Exception) {
+            // E.g. SQLiteFullException after a 30 MB download: must end as Failed, not crash the app.
+            failed(e.message ?: e.javaClass.simpleName, e)
         } finally {
             dir.deleteRecursively()   // ~30 MB: never leave it in the cache
         }
     }
 
     private fun failed(reason: String, e: Throwable? = null): CardUpdateState.Failed {
-        Log.w(TAG, "Card update failed: $reason", e)
+        log.warn("Card update failed: $reason", e)
         return CardUpdateState.Failed(reason)
     }
 

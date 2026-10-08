@@ -12,9 +12,12 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,13 +34,14 @@ import es.alejandro.grandarbiter.ui.navigation.Screen
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
 
 @Composable
-fun MainScreen() {
-    MainScreenContent(startDestination = Screen.Home.route)
+fun MainScreen(snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }) {
+    MainScreenContent(startDestination = Screen.Home.route, snackbarHostState = snackbarHostState)
 }
 
 @Composable
 fun MainScreenContent(
     startDestination: String,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -50,6 +54,7 @@ fun MainScreenContent(
     )
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },   // app-wide: rules updated, app update ready
         bottomBar = {
             val showBottomBar = items.any { item ->
                 currentDestination?.hierarchy?.any { it.route == item.route } == true

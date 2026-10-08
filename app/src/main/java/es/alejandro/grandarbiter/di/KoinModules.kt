@@ -37,6 +37,14 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
+import es.alejandro.grandarbiter.BuildConfig
+import es.alejandro.grandarbiter.data.cards.update.RoomInstalledCards
+import es.alejandro.grandarbiter.data.rules.update.RoomInstalledRules
+import es.alejandro.grandarbiter.data.quickrefs.QuickReferenceRepositoryImpl
+import es.alejandro.grandarbiter.domain.repository.QuickReferenceRepository
+import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceDetailViewModel
+import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceEditViewModel
+import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferencesViewModel
 
 val networkModule = module {
     single {
@@ -59,12 +67,14 @@ val databaseModule = module {
             AppDatabase::class.java,
             "judge_companion_db"
         )
-            .addMigrations(AppDatabase.MIGRATION_6_7)
-            .fallbackToDestructiveMigration(dropAllTables = false)
+            .addMigrations(AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8)
+            .addCallback(AppDatabase.SEED_PRESETS)
+            // No destructive fallback: this database holds the judge's own data.
             .build()
     }
 
     single { get<AppDatabase>().cardDao() }
+    single { get<AppDatabase>().quickReferenceDao() }
     
     single { SettingsDataStore(androidContext()) }
 }
@@ -81,7 +91,7 @@ val rulesModule = module {
     single { RulesBundleImporter(get(), get()) }
     single<RulesRepository> { RulesRepositoryImpl(get()) }
     single { PublishedRulesClient(get(), PublishedRulesUpdater.PUBLISHED_RULES_URL) }
-    single<RulesDataUpdater> { PublishedRulesUpdater(get(), get(), get(), get()) }
+    single<RulesDataUpdater> { PublishedRulesUpdater(get(), RoomInstalledRules(get(), get(), get()), BuildConfig.VERSION_CODE) }
 }
 
 /** Card data: a separate, disposable DB filled from Scryfall snapshots (see CardsDatabase.kt). */
@@ -95,11 +105,12 @@ val cardsModule = module {
     single { AssetCardDataSource(androidContext()) }
     single { CardImporter(get(), get()) }
     single { ScryfallBulkClient(get()) }
-    single<CardDataUpdater> { ScryfallCardUpdater(get(), get(), get(), androidContext().cacheDir) }
+    single<CardDataUpdater> { ScryfallCardUpdater(get(), RoomInstalledCards(get(), get()), androidContext().cacheDir) }
 }
 
 val repositoryModule = module {
     single<CardRepository> { CardRepositoryImpl(get()) }
+    single<QuickReferenceRepository> { QuickReferenceRepositoryImpl(get(), get(), get()) }
 }
 
 val appModule = module {
@@ -117,4 +128,7 @@ val viewModelModule = module {
     viewModelOf(::BannedListsViewModel)
     viewModelOf(::AnnouncementViewModel)
     viewModelOf(::DeckCounterViewModel)
+    viewModelOf(::QuickReferencesViewModel)
+    viewModelOf(::QuickReferenceDetailViewModel)
+    viewModelOf(::QuickReferenceEditViewModel)
 }

@@ -15,6 +15,11 @@ data class RulesManifest(
     val bundleVersion: Long,
     val generatedAt: String? = null,
     val documents: Map<String, String> = emptyMap(),   // "cr" -> "2026-09-25"
+    /**
+     * Oldest app versionCode that may keep running without updating (set by hand with
+     * build_bundle.py --min-version-code). Older apps get the mandatory in-app update.
+     */
+    val minVersionCode: Int = 0,
 )
 
 /**

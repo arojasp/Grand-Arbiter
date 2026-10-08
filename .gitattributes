@@ -1,0 +1,22 @@
+# Line endings: the repository stores LF. Windows editors may write CRLF; git normalises on commit,
+# so a line-ending-only change never shows up as a modified file.
+* text=auto eol=lf
+
+# Windows scripts need CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files: never touch their bytes, never try to diff them
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.jar binary
+*.pdf binary
+*.jks binary
+*.keystore binary
+
+# Rules sources are kept byte-for-byte exactly as downloaded: rules/source/sources.json stores their SHA-256
+rules/source/** -text

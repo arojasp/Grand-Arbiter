@@ -1,0 +1,118 @@
+{
+  "_comment": "One entry per IPG infraction. A judge checks each penalty against the official PDF and sets verified to true. The build fails if this disagrees with the PDF.",
+  "2.1": {
+    "title": "Game Play Error — Missed Trigger",
+    "penalty": "No Penalty",
+    "verified": false
+  },
+  "2.2": {
+    "title": "Game Play Error — Looking at Extra Cards",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "2.3": {
+    "title": "Game Play Error — Hidden Card Error",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "2.4": {
+    "title": "Game Play Error — Mulligan Procedure Error",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "2.5": {
+    "title": "Game Play Error — Game Rule Violation",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "2.6": {
+    "title": "Game Play Error — Failure to Maintain Game State",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "3.1": {
+    "title": "Tournament Error — Tardiness",
+    "penalty": "Game Loss",
+    "verified": false
+  },
+  "3.2": {
+    "title": "Tournament Error — Outside Assistance",
+    "penalty": "Match Loss",
+    "verified": false
+  },
+  "3.3": {
+    "title": "Tournament Error — Slow Play",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "3.4": {
+    "title": "Tournament Error — Decklist Problem",
+    "penalty": "Game Loss",
+    "verified": false
+  },
+  "3.5": {
+    "title": "Tournament Error — Deck Problem",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "3.6": {
+    "title": "Tournament Error — Limited Procedure Violation",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "3.7": {
+    "title": "Tournament Error — Communication Policy Violation",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "3.8": {
+    "title": "Tournament Error — Marked Cards",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "3.9": {
+    "title": "Tournament Error — Insufficient Shuffling",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "4.1": {
+    "title": "Unsporting Conduct — Minor",
+    "penalty": "Warning",
+    "verified": false
+  },
+  "4.2": {
+    "title": "Unsporting Conduct — Major",
+    "penalty": "Match Loss",
+    "verified": false
+  },
+  "4.3": {
+    "title": "Unsporting Conduct — Improperly Determining a Winner",
+    "penalty": "Match Loss",
+    "verified": false
+  },
+  "4.4": {
+    "title": "Unsporting Conduct — Bribery and Wagering",
+    "penalty": "Match Loss",
+    "verified": false
+  },
+  "4.5": {
+    "title": "Unsporting Conduct — Aggressive Behavior",
+    "penalty": "Disqualification",
+    "verified": false
+  },
+  "4.6": {
+    "title": "Unsporting Conduct — Theft of Tournament Material",
+    "penalty": "Disqualification",
+    "verified": false
+  },
+  "4.7": {
+    "title": "Unsporting Conduct — Stalling",
+    "penalty": "Disqualification",
+    "verified": false
+  },
+  "4.8": {
+    "title": "Unsporting Conduct — Cheating",
+    "penalty": "Disqualification",
+    "verified": false
+  }
+}

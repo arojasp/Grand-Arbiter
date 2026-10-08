@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -64,9 +65,7 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // Retrofit
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
+    // OkHttp (Scryfall bulk downloads)
     implementation(libs.okhttp.logging)
 
     // DataStore
@@ -75,8 +74,9 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
-    // PDFBox
-    implementation(libs.pdfbox.android)
+    // Serialization (rules bundle)
+    implementation(libs.kotlinx.serialization.json)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

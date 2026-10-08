@@ -14,7 +14,6 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,16 +29,16 @@ import es.alejandro.grandarbiter.domain.model.ThemeMode
 import es.alejandro.grandarbiter.ui.navigation.AppNavGraph
 import es.alejandro.grandarbiter.ui.navigation.Screen
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
-    val startDestination by viewModel.startDestination.collectAsState()
+fun MainScreen() {
+    MainScreenContent(startDestination = Screen.Home.route)
+}
 
-    if (startDestination == null) {
-        return
-    }
-
+@Composable
+fun MainScreenContent(
+    startDestination: String,
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -91,13 +90,7 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
         AppNavGraph(
             navController = navController,
             modifier = Modifier.padding(innerPadding),
-            startDestination = startDestination!!,
-            onSetUpComplete = {
-                viewModel.setSetUpDone()
-                navController.navigate(Screen.Home.route) {
-                    popUpTo(Screen.SetUp.route) { inclusive = true }
-                }
-            }
+            startDestination = startDestination,
         )
     }
 }
@@ -107,7 +100,7 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
 @Composable
 fun MainScreenDarkPreview() {
     GrandArbiterTheme(themeMode = ThemeMode.DARK) {
-        MainScreen()
+        MainScreenContent(startDestination = Screen.Home.route)
     }
 }
 
@@ -115,6 +108,6 @@ fun MainScreenDarkPreview() {
 @Composable
 fun MainScreenLightPreview() {
     GrandArbiterTheme(themeMode = ThemeMode.LIGHT) {
-        MainScreen()
+        MainScreenContent(startDestination = Screen.Home.route)
     }
 }

@@ -6,10 +6,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import es.alejandro.grandarbiter.domain.model.TextScale
 import es.alejandro.grandarbiter.domain.model.ThemeMode
 
 private val LightColorScheme = lightColorScheme(
@@ -88,9 +93,35 @@ private val DarkColorScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
 
+/**
+ * High contrast: same navy surfaces, but near-white text, brighter gold and strong borders.
+ * (The full generated *HighContrast palettes in Color.kt use the old brown background.)
+ */
+private val DarkHighContrastScheme = DarkColorScheme.copy(
+    primary = Color(0xFFFFD978),
+    onSurface = onSurfaceDarkHighContrast,
+    onBackground = onSurfaceDarkHighContrast,
+    onSurfaceVariant = Color(0xFFF1E8D8),
+    outline = outlineDarkHighContrast,
+    outlineVariant = outlineVariantDarkHighContrast,
+    error = errorDarkHighContrast,
+)
+
+private val LightHighContrastScheme = LightColorScheme.copy(
+    primary = primaryLightHighContrast,
+    onSurface = onSurfaceLightHighContrast,
+    onBackground = onSurfaceLightHighContrast,
+    onSurfaceVariant = onSurfaceVariantLightHighContrast,
+    outline = outlineLightHighContrast,
+    outlineVariant = outlineVariantLightHighContrast,
+    error = errorLightHighContrast,
+)
+
 @Composable
 fun GrandArbiterTheme(
     themeMode: ThemeMode = ThemeMode.DARK,
+    textScale: TextScale = TextScale.DEFAULT,
+    highContrast: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val darkTheme = when (themeMode) {
@@ -100,7 +131,9 @@ fun GrandArbiterTheme(
     }
 
     val colorScheme = when {
+        darkTheme && highContrast -> DarkHighContrastScheme
         darkTheme -> DarkColorScheme
+        highContrast -> LightHighContrastScheme
         else -> LightColorScheme
     }
 
@@ -112,9 +145,13 @@ fun GrandArbiterTheme(
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    // Text size: scale every sp on top of the user's system font size.
+    val density = LocalDensity.current
+    CompositionLocalProvider(LocalDensity provides Density(density.density, density.fontScale * textScale.factor)) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

@@ -13,12 +13,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
@@ -59,6 +61,9 @@ import es.alejandro.grandarbiter.ui.components.Panel
 import es.alejandro.grandarbiter.ui.components.Tag
 import es.alejandro.grandarbiter.ui.components.outlined
 import es.alejandro.grandarbiter.ui.reader.BlockView
+import es.alejandro.grandarbiter.ui.reader.CopyRuleButton
+import es.alejandro.grandarbiter.ui.reader.RuleText
+import es.alejandro.grandarbiter.ui.reader.rememberCopyText
 import es.alejandro.grandarbiter.ui.reader.InlineMarkup
 import es.alejandro.grandarbiter.ui.reader.displayNumber
 import es.alejandro.grandarbiter.ui.theme.GoldDeep
@@ -131,6 +136,10 @@ private fun DetailContent(
     onEdit: () -> Unit,
     modifier: Modifier,
 ) {
+    val copy = rememberCopyText()
+    val onCopy: (PageSection) -> Unit = { section ->
+        copy(RuleText.reference(section, detail.documentId), RuleText.of(section, detail.documentId))
+    }
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
@@ -148,12 +157,12 @@ private fun DetailContent(
                 val root = rule.sections.first()
                 val target = rule.target
                 item(key = "$index:lead") {
-                    LeadCard(root, onRefClick) { target?.let { onOpenPage(PageRef(it.pageId, root.id)) } }
+                    LeadCard(root, onRefClick, onCopy) { target?.let { onOpenPage(PageRef(it.pageId, root.id)) } }
                 }
                 // Children of the rule, each with its own descendants.
                 val groups = groupChildren(rule.sections)
                 items(groups, key = { "$index:${it.first().id}" }) { group ->
-                    SubruleCard(group, onRefClick) { section -> target?.let { onOpenPage(PageRef(it.pageId, section.id)) } }
+                    SubruleCard(group, onRefClick, onCopy) { section -> target?.let { onOpenPage(PageRef(it.pageId, section.id)) } }
                 }
             }
             rule.note?.takeIf { it.isNotBlank() }?.let { note ->
@@ -190,7 +199,7 @@ private fun DocumentChip(detail: QuickReferenceDetail) {
 }
 
 @Composable
-private fun LeadCard(section: PageSection, onRefClick: (String) -> Unit, onClick: () -> Unit) {
+private fun LeadCard(section: PageSection, onRefClick: (String) -> Unit, onCopy: (PageSection) -> Unit, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(12.dp)
     Row(
@@ -198,25 +207,32 @@ private fun LeadCard(section: PageSection, onRefClick: (String) -> Unit, onClick
             .outlined(shape, colors.outlineVariant).clickable(onClick = onClick)
     ) {
         Box(Modifier.width(4.dp).fillMaxHeight().background(GoldDeep))
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeading(section, prominent = true)
-            section.blocks.forEach { BlockView(it, onRefClick) }
+        SelectionContainer {
+            Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                HeadingWithCopy(section, prominent = true) { onCopy(section) }
+                Column(Modifier.padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    section.blocks.forEach { BlockView(it, onRefClick) }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun SubruleCard(group: List<PageSection>, onRefClick: (String) -> Unit, onOpen: (PageSection) -> Unit) {
+private fun SubruleCard(group: List<PageSection>, onRefClick: (String) -> Unit, onCopy: (PageSection) -> Unit, onOpen: (PageSection) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val head = group.first()
-    Panel {
-        Column(Modifier.fillMaxWidth().clickable { onOpen(head) }.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeading(head, prominent = false)
-            head.blocks.forEach { BlockView(it, onRefClick) }
+    Panel { SelectionContainer { Column {
+        Column(Modifier.fillMaxWidth().clickable { onOpen(head) }.padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            HeadingWithCopy(head, prominent = false) { onCopy(head) }
+            Column(Modifier.padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                head.blocks.forEach { BlockView(it, onRefClick) }
+            }
         }
         group.drop(1).forEachIndexed { i, sub ->
             HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = colors.outlineVariant.copy(alpha = if (i == 0) 0.6f else 0.3f))
-            Row(Modifier.fillMaxWidth().clickable { onOpen(sub) }.padding(horizontal = 16.dp, vertical = 10.dp)) {
+            Row(Modifier.fillMaxWidth().clickable { onOpen(sub) }.padding(start = 16.dp, end = 4.dp, top = 10.dp, bottom = 10.dp)) {
                 Text(displayNumber(sub.number).orEmpty(),
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                     color = colors.primary, modifier = Modifier.widthIn(min = 48.dp))
@@ -225,8 +241,17 @@ private fun SubruleCard(group: List<PageSection>, onRefClick: (String) -> Unit, 
                     sub.title?.let { Text(InlineMarkup.plainText(it), style = MaterialTheme.typography.titleSmall, color = colors.onSurface) }
                     sub.blocks.forEach { BlockView(it, onRefClick) }
                 }
+                CopyRuleButton(displayNumber(sub.number).orEmpty(), { onCopy(sub) }, Modifier.offset(y = (-10).dp))
             }
         }
+    } } }
+}
+
+@Composable
+private fun HeadingWithCopy(section: PageSection, prominent: Boolean, onCopy: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.weight(1f)) { SectionHeading(section, prominent) }
+        CopyRuleButton(displayNumber(section.number) ?: section.title.orEmpty(), onCopy)
     }
 }
 

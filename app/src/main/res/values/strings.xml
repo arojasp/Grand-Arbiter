@@ -258,4 +258,8 @@
     <string name="app_update_required_message">This version of Grand Arbiter is too old to keep the rules documents up to date. Until you update, you can keep using the documents already installed.</string>
     <string name="app_update_now">Update</string>
     <string name="app_update_later">Not now</string>
+
+    <!-- Copy / select rules -->
+    <string name="reader_copy">Copy %1$s</string>
+    <string name="reader_copied">%1$s copied</string>
 </resources>

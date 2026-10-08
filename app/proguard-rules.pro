@@ -19,3 +19,21 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# ---- Grand Arbiter ---------------------------------------------------------------------------
+# Readable crash stack traces in Play Console (with the mapping file in the AAB).
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# kotlinx.serialization: the library ships its own rules; these keep the generated serializers
+# of OUR models (rules bundle, manifest, Scryfall) even under R8 full mode, as its README advises.
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+-keepclassmembers @kotlinx.serialization.Serializable class es.alejandro.grandarbiter.** {
+    *** Companion;
+    *** INSTANCE;
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keep,includedescriptorclasses class es.alejandro.grandarbiter.**$$serializer { *; }
+
+# Room, Koin (constructor DSL, no reflection), OkHttp, Coil and Play In-App Updates ship their
+# own consumer rules: nothing to add here.

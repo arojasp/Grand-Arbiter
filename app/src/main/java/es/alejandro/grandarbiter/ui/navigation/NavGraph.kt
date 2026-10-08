@@ -34,6 +34,9 @@ import es.alejandro.grandarbiter.ui.reader.GlossaryScreen
 import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNotesScreen
 import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteViewerScreen
 import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteSetScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteCardScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ARG_SECTION
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ARG_CARD_INDEX
 import es.alejandro.grandarbiter.ui.tools.releasenotes.ARG_SET_CODE
 import es.alejandro.grandarbiter.ui.home.RELEASE_NOTES_ID
 
@@ -54,6 +57,9 @@ sealed class Screen(val route: String) {
     object ReleaseNotes : Screen("release_notes")
     object ReleaseNoteSet : Screen("release_notes/{$ARG_SET_CODE}") {
         fun createRoute(code: String) = "release_notes/${Uri.encode(code)}"
+    }
+    object ReleaseNoteCard : Screen("release_notes/{$ARG_SET_CODE}/card/{$ARG_SECTION}/{$ARG_CARD_INDEX}") {
+        fun createRoute(code: String, section: Int, index: Int) = "release_notes/${Uri.encode(code)}/card/$section/$index"
     }
     object ReleaseNoteViewer : Screen("release_notes/{$ARG_SET_CODE}/original") {
         fun createRoute(code: String) = "release_notes/${Uri.encode(code)}/original"
@@ -147,8 +153,10 @@ fun AppNavGraph(
             ReleaseNoteSetScreen(
                 onBack = { navController.popBackStack() },
                 onViewOriginal = { code -> navController.navigate(Screen.ReleaseNoteViewer.createRoute(code)) },
+                onOpenCard = { code, section, index -> navController.navigate(Screen.ReleaseNoteCard.createRoute(code, section, index)) },
             )
         }
+        composable(Screen.ReleaseNoteCard.route) { ReleaseNoteCardScreen(onBack = { navController.popBackStack() }) }
         composable(Screen.ReleaseNoteViewer.route) { ReleaseNoteViewerScreen(onBack = { navController.popBackStack() }) }
         composable(Screen.BannedLists.route) {
             BannedListsScreen(

@@ -31,11 +31,38 @@ class ReleaseNotesItemsTest {
             items.filterIsInstance<NotesItem.Section>().map { it.title })
     }
 
+    @Test fun onlyCardSpecificSections_areCardLists() {
+        val sections = ReleaseNotesItems.build(doc, "").filterIsInstance<NotesItem.Section>()
+        assertEquals(listOf(false, true), sections.map { it.cardList })
+        assertEquals(3, sections[1].cards)
+    }
+
+    @Test fun cardSpecificCards_areRows_otherBlocksStayFull() {
+        val items = ReleaseNotesItems.build(doc, "")
+        assertTrue(items.filterIsInstance<NotesItem.Block>().all { it.section == 0 })      // General Notes: full
+        assertEquals(listOf("Ajani Resolute", "Bloodline Recollector", "Echo of Ajani"),
+            items.filterIsInstance<NotesItem.CardRow>().map { it.name })
+    }
+
+    @Test fun accordion_showsHeadersAlways_andOnlyExpandedContent() {
+        val items = ReleaseNotesItems.build(doc, "")
+        assertEquals(2, ReleaseNotesItems.visible(items, emptySet()).size)          // both headers, nothing else
+        val open = ReleaseNotesItems.visible(items, setOf(1))
+        assertEquals(5, open.size)                                                    // 2 headers + 3 card rows
+        assertTrue(open.drop(2).all { it is NotesItem.CardRow })
+    }
+
     @Test fun search_cardNamesFirst_thenText() {
-        val found = ReleaseNotesItems.build(doc, "ajani").map { ((it as NotesItem.Block).block as Card).name }
+        val found = ReleaseNotesItems.build(doc, "ajani").map { (it as NotesItem.CardRow).name }
         assertEquals(listOf("Ajani Resolute", "Echo of Ajani"), found)   // both names match: original order
         val text = ReleaseNotesItems.build(doc, "standard")
-        assertTrue(text.single() is NotesItem.Block)
+        assertTrue(text.single() is NotesItem.Block)                     // General Notes paragraph, in full
+    }
+
+    @Test fun cardLookup_byPosition() {
+        assertEquals("Bloodline Recollector", ReleaseNotesItems.card(doc, 1, 1)?.name)
+        assertEquals(null, ReleaseNotesItems.card(doc, 0, 0))            // a paragraph, not a card
+        assertEquals(null, ReleaseNotesItems.card(doc, 9, 0))            // document changed under the link
     }
 
     @Test fun copyText_isPlain_withSource() {

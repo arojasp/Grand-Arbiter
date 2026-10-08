@@ -43,6 +43,7 @@ import es.alejandro.grandarbiter.data.releasenotes.ReleaseNotesRepository
 import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNotesViewModel
 import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteViewerViewModel
 import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteSetViewModel
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteCardViewModel
 import es.alejandro.grandarbiter.BuildConfig
 import es.alejandro.grandarbiter.data.cards.update.RoomInstalledCards
 import es.alejandro.grandarbiter.data.rules.update.RoomInstalledRules
@@ -142,6 +143,7 @@ val viewModelModule = module {
     viewModelOf(::ReleaseNotesViewModel)
     viewModelOf(::ReleaseNoteViewerViewModel)
     viewModelOf(::ReleaseNoteSetViewModel)
+    viewModelOf(::ReleaseNoteCardViewModel)
     viewModelOf(::GlossaryViewModel)
     viewModelOf(::QuickReferenceDetailViewModel)
     viewModelOf(::QuickReferenceEditViewModel)

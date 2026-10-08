@@ -280,4 +280,12 @@
     <string name="release_notes_online_only">This set\'s release notes aren\'t available offline yet. You can read the original online.</string>
     <string name="release_notes_search">Search a card or text</string>
     <string name="release_notes_online">Online</string>
+    <plurals name="release_notes_cards">
+        <item quantity="one">%1$d card</item>
+        <item quantity="other">%1$d cards</item>
+    </plurals>
+    <string name="release_notes_notes">Notes</string>
+    <string name="release_notes_card_not_found">This card isn\'t in the installed release notes anymore. Go back and open it again.</string>
+    <string name="release_notes_card_source">From the %1$s release notes.</string>
+    <string name="release_notes_card_source_dated">From the %1$s release notes, revision of %2$s.</string>
 </resources>

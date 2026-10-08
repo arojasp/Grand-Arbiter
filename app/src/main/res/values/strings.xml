@@ -213,4 +213,53 @@
     <string name="deck_reset_done">Count reset</string>
     <string name="deck_undo">Undo</string>
 
+
+    <!-- Quick references -->
+    <string name="qr_new">New quick reference</string>
+    <string name="qr_close_menu">Close menu</string>
+    <string name="qr_more">More options</string>
+    <string name="qr_restore">Restore built-in references</string>
+    <string name="qr_restore_message">Adds back the built-in references you deleted (Layers, Steps to Cast a Spell, Copiable Values). Your own references are not changed.</string>
+    <string name="qr_restore_confirm">Restore</string>
+    <string name="qr_cancel">Cancel</string>
+    <string name="qr_no_rules">no rules yet</string>
+    <string name="qr_empty">No quick references. Use + to create one from the CR, IPG, MTR or JAR.</string>
+    <string name="qr_edit">Edit</string>
+    <string name="qr_your_note">Your note</string>
+    <string name="qr_rule_missing">Rule %1$s isn\'t in the installed %2$s. It may have been renumbered in an update: edit this reference to replace it.</string>
+    <string name="qr_detail_empty">This reference has no rules yet. Tap to add some.</string>
+    <string name="qr_new_title">New reference</string>
+    <string name="qr_edit_title">Edit reference</string>
+    <string name="qr_save">Save</string>
+    <string name="qr_field_title">Title</string>
+    <string name="qr_rules_count">Rules (%1$d)</string>
+    <string name="qr_rules_empty">Search below to add rules.</string>
+    <string name="qr_add_rules">Add rules</string>
+    <string name="qr_search_placeholder">Search the %1$s by number or text</string>
+    <string name="qr_add_rule">Add rule</string>
+    <string name="qr_added">Added</string>
+    <string name="qr_move_up">Move up</string>
+    <string name="qr_move_down">Move down</string>
+    <string name="qr_remove_rule">Remove rule</string>
+    <string name="qr_note_placeholder">Personal note (optional)</string>
+    <string name="qr_delete">Delete reference</string>
+    <string name="qr_delete_title">Delete \u201c%1$s\u201d?</string>
+    <string name="qr_delete_message">The reference and your notes will be deleted. Built-in references can be restored later, but without your notes.</string>
+    <string name="qr_discard_title">Discard your changes?</string>
+    <string name="qr_discard">Discard</string>
+    <string name="qr_keep_editing">Keep editing</string>
+
+    <!-- App and documents updates -->
+    <string name="rules_updated_one">%1$s updated (effective %2$s)</string>
+    <string name="rules_updated_many">Rules documents updated: %1$s</string>
+    <string name="app_update_ready">A new version of Grand Arbiter is ready</string>
+    <string name="app_update_restart">Restart</string>
+    <string name="app_update_required_title">Update required</string>
+    <string name="app_update_required_message">This version of Grand Arbiter is too old to keep the rules documents up to date. Until you update, you can keep using the documents already installed.</string>
+    <string name="app_update_now">Update</string>
+    <string name="app_update_later">Not now</string>
+
+    <!-- Copy / select rules -->
+    <string name="reader_copy">Copy %1$s</string>
+    <string name="reader_copied">%1$s copied</string>
 </resources>

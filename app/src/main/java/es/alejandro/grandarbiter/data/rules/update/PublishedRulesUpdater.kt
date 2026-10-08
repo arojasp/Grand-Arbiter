@@ -1,14 +1,11 @@
 package es.alejandro.grandarbiter.data.rules.update
 
-import android.util.Log
 import es.alejandro.grandarbiter.data.rules.bundle.RulesBundle
 import es.alejandro.grandarbiter.data.rules.local.ImportResult
-import es.alejandro.grandarbiter.data.rules.local.RulesBundleImporter
-import es.alejandro.grandarbiter.data.rules.local.RulesBundleSource
-import es.alejandro.grandarbiter.data.rules.local.RulesDao
+import es.alejandro.grandarbiter.data.update.AndroidUpdateLog
+import es.alejandro.grandarbiter.data.update.UpdateLog
 import es.alejandro.grandarbiter.domain.model.rules.RulesUpdateState
 import es.alejandro.grandarbiter.domain.repository.RulesDataUpdater
-import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +14,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
 import java.io.IOException
@@ -32,14 +28,17 @@ import java.io.IOException
  */
 class PublishedRulesUpdater(
     private val client: PublishedRulesClient,
-    private val importer: RulesBundleImporter,
-    private val dao: RulesDao,
-    private val repository: RulesRepository,
+    private val installed: InstalledRules,
+    /** BuildConfig.VERSION_CODE, compared with the manifest's minVersionCode. */
+    private val appVersionCode: Int,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+    private val log: UpdateLog = AndroidUpdateLog(TAG),
 ) : RulesDataUpdater {
 
     private val _state = MutableStateFlow<RulesUpdateState>(RulesUpdateState.Idle)
     override val state: StateFlow<RulesUpdateState> = _state.asStateFlow()
+    private val _appUpdateRequired = MutableStateFlow(false)
+    override val appUpdateRequired: StateFlow<Boolean> = _appUpdateRequired.asStateFlow()
     private var job: Job? = null
 
     @Synchronized
@@ -52,18 +51,21 @@ class PublishedRulesUpdater(
         _state.value = RulesUpdateState.Checking
         return try {
             val manifest = client.manifest() ?: return RulesUpdateState.UpToDate   // nothing published yet
-            if (manifest.schemaVersion > RulesBundle.SUPPORTED_SCHEMA_VERSION) return RulesUpdateState.NeedsAppUpdate
-            val installed = dao.installedBundleVersion()
-            if (installed != null && manifest.bundleVersion <= installed) return RulesUpdateState.UpToDate
+            val schemaTooNew = manifest.schemaVersion > RulesBundle.SUPPORTED_SCHEMA_VERSION
+            if (schemaTooNew || manifest.minVersionCode > appVersionCode) _appUpdateRequired.value = true
+            // A minVersionCode alone doesn't stop the documents: they still update below.
+            if (schemaTooNew) return RulesUpdateState.NeedsAppUpdate
+            val installedVersion = installed.bundleVersion()
+            if (installedVersion != null && manifest.bundleVersion <= installedVersion) return RulesUpdateState.UpToDate
 
-            val before = repository.observeDocuments().first().associate { it.id to it.effectiveDate }
+            val before = installed.documents().associate { it.id to it.effectiveDate }
             _state.value = RulesUpdateState.Downloading
             val text = client.bundle()
             _state.value = RulesUpdateState.Importing
-            when (val result = importer.import(RulesBundleSource { text })) {
+            when (val result = installed.import(text)) {
                 is ImportResult.Imported -> {
-                    Log.i(TAG, result.toString())
-                    val after = repository.observeDocuments().first()
+                    log.info(result.toString())
+                    val after = installed.documents()
                     RulesUpdateState.Updated(after.filter { before[it.id] != it.effectiveDate })
                 }
                 is ImportResult.UpToDate -> RulesUpdateState.UpToDate
@@ -76,11 +78,15 @@ class PublishedRulesUpdater(
             failed(e.message ?: e.javaClass.simpleName, e)
         } catch (e: SerializationException) {
             failed("unexpected manifest format", e)
+        } catch (e: Exception) {
+            // Anything else (e.g. SQLiteFullException, a RuntimeException) must end as Failed:
+            // uncaught, it would crash the app and leave the state stuck in Importing.
+            failed(e.message ?: e.javaClass.simpleName, e)
         }
     }
 
     private fun failed(reason: String, e: Throwable? = null): RulesUpdateState.Failed {
-        Log.w(TAG, "Rules update failed: $reason", e)
+        log.warn("Rules update failed: $reason", e)
         return RulesUpdateState.Failed(reason)
     }
 

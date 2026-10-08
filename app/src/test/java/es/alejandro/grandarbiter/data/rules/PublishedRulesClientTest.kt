@@ -28,6 +28,7 @@ class PublishedRulesClientTest {
         val m = client(200, """{"schemaVersion":1,"bundleVersion":2026100801,"documents":{"cr":"2026-09-25"},"extra":1}""").manifest()!!
         assertEquals(2026100801L, m.bundleVersion)
         assertEquals("2026-09-25", m.documents["cr"])
+        assertEquals(0, m.minVersionCode)   // older manifests: no forced app update
     }
 
     @Test fun nothingPublishedYet_isNull() = runBlocking {

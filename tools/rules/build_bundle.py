@@ -498,12 +498,22 @@ def next_bundle_version() -> int:
     return max(today, current + 1)
 
 
-def write_manifest(bundle: dict) -> None:
+def current_min_version_code() -> int:
+    """minVersionCode is set by hand (--min-version-code) and survives every rebuild."""
+    try:
+        return int(json.loads(MANIFEST.read_text(encoding="utf-8")).get("minVersionCode", 0))
+    except (FileNotFoundError, ValueError):
+        return 0
+
+
+def write_manifest(bundle: dict, min_version_code: int | None = None) -> None:
     manifest = {
         "schemaVersion": bundle["schemaVersion"],
         "bundleVersion": bundle["bundleVersion"],
         "generatedAt": bundle.get("generatedAt"),
         "documents": {d["id"]: d["effectiveDate"] for d in bundle["documents"]},
+        # Apps with a lower versionCode get the mandatory in-app update (once merged to main).
+        "minVersionCode": current_min_version_code() if min_version_code is None else min_version_code,
     }
     MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(f"Wrote {MANIFEST.relative_to(ROOT)}")
@@ -516,9 +526,11 @@ def main() -> int:
     ap.add_argument("--check", action="store_true", help="build and report, but don't write the asset")
     ap.add_argument("--manifest-only", action="store_true",
                     help="only (re)write manifest.json from the existing bundle.json (no rebuild, no version bump)")
+    ap.add_argument("--min-version-code", type=int,
+                    help="force apps below this versionCode to update (kept in later rebuilds); 0 = none")
     args = ap.parse_args()
     if args.manifest_only:
-        write_manifest(json.loads(OUT.read_text(encoding="utf-8")))
+        write_manifest(json.loads(OUT.read_text(encoding="utf-8")), args.min_version_code)
         return 0
 
     rep = Report()
@@ -599,7 +611,7 @@ def main() -> int:
             f.write("    }" + ("," if di < len(docs) - 1 else "") + "\n")
         f.write("  ]\n}\n")
     print(f"\nWrote {OUT.relative_to(ROOT)} ({OUT.stat().st_size // 1024} KB)")
-    write_manifest(bundle)
+    write_manifest(bundle, args.min_version_code)
     return 0
 
 

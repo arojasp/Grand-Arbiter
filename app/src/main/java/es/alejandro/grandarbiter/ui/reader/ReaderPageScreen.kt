@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -111,6 +113,12 @@ private fun PageContent(page: RulesPage, anchorId: String?, onRefClick: (String)
         }
     }
     val expanded = remember(page) { mutableStateMapOf<Int, Boolean>() }
+    val copy = rememberCopyText()
+    val penalty = page.root.infraction?.let { stringResource(penaltyLabel(it.penalty)) }
+    val copySection: (PageSection) -> Unit = { section ->
+        copy(RuleText.reference(section, page.documentId),
+            RuleText.of(section, page.documentId, penalty.takeIf { section.id == page.root.id }))
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -119,30 +127,50 @@ private fun PageContent(page: RulesPage, anchorId: String?, onRefClick: (String)
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(items, key = { it.key }) { item ->
-            when (item) {
-                is PageItem.Header -> PageHeader(item.section)
-                is PageItem.Part ->
-                    if (item.part.role == null) {
-                        BlockColumn(item.part.blocks, onRefClick)
-                    } else {
-                        val isExpanded = expanded[item.index] ?: item.part.expandedByDefault
-                        PartCard(item.part, isExpanded, onToggle = { expanded[item.index] = !isExpanded }, onRefClick = onRefClick)
-                    }
-                is PageItem.RootBlocks -> BlockColumn(item.blocks, onRefClick)
-                is PageItem.Section -> SectionRow(item.section, highlighted = item.section.id == anchorId, onRefClick = onRefClick)
-            }
+            // Per item: Compose can't keep a selection across lazy items that scroll away.
+            SelectionContainer { PageItemView(item, page, anchorId, expanded, onRefClick, copySection) }
         }
     }
 }
 
 @Composable
-private fun PageHeader(section: PageSection) {
+private fun PageItemView(
+    item: PageItem,
+    page: RulesPage,
+    anchorId: String?,
+    expanded: MutableMap<Int, Boolean>,
+    onRefClick: (String) -> Unit,
+    onCopy: (PageSection) -> Unit,
+) {
+    when (item) {
+        is PageItem.Header -> PageHeader(item.section) { onCopy(page.root) }
+        is PageItem.Part ->
+            if (item.part.role == null) {
+                BlockColumn(item.part.blocks, onRefClick)
+            } else {
+                val isExpanded = expanded[item.index] ?: item.part.expandedByDefault
+                PartCard(item.part, isExpanded, onToggle = { expanded[item.index] = !isExpanded }, onRefClick = onRefClick)
+            }
+        is PageItem.RootBlocks -> BlockColumn(item.blocks, onRefClick)
+        is PageItem.Section -> SectionRow(item.section, page, highlighted = item.section.id == anchorId, onRefClick = onRefClick) {
+            onCopy(item.section)
+        }
+    }
+}
+
+@Composable
+private fun PageHeader(section: PageSection, onCopy: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = sectionLabel(section.number, section.title),
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        Row(verticalAlignment = Alignment.Top) {
+            Text(
+                text = sectionLabel(section.number, section.title),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f).padding(top = 6.dp),
+            )
+            // The whole page root: an IPG infraction with its penalty, an MTR section…
+            CopyRuleButton(sectionLabel(section.number, section.title), onCopy)
+        }
         section.infraction?.let { PenaltyBadge(it.penalty) }
     }
 }
@@ -156,7 +184,8 @@ private fun BlockColumn(blocks: List<Block>, onRefClick: (String) -> Unit) {
 
 /** A rule/subrule (CR) or a nested titled section, indented by depth; the linked one is highlighted. */
 @Composable
-private fun SectionRow(section: PageSection, highlighted: Boolean, onRefClick: (String) -> Unit) {
+private fun SectionRow(section: PageSection, page: RulesPage, highlighted: Boolean, onRefClick: (String) -> Unit, onCopy: () -> Unit) {
+    val reference = RuleText.reference(section, page.documentId)
     val indent = ((section.depth - 1).coerceAtLeast(0) * 16).dp
     Column(
         modifier = Modifier
@@ -168,11 +197,15 @@ private fun SectionRow(section: PageSection, highlighted: Boolean, onRefClick: (
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (section.title != null) {
-            Text(
-                text = sectionLabel(section.number, section.title),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Row(verticalAlignment = Alignment.Top) {
+                Text(
+                    text = sectionLabel(section.number, section.title),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f).padding(top = 8.dp),
+                )
+                CopyRuleButton(reference, onCopy)
+            }
             BlockColumn(section.blocks, onRefClick)
         } else {
             Row {
@@ -183,6 +216,8 @@ private fun SectionRow(section: PageSection, highlighted: Boolean, onRefClick: (
                     modifier = Modifier.padding(end = 8.dp),
                 )
                 Column(modifier = Modifier.weight(1f)) { BlockColumn(section.blocks, onRefClick) }
+                // Negative top offset: the 40dp touch target centred on the first text line.
+                CopyRuleButton(reference, onCopy, Modifier.offset(y = (-10).dp))
             }
         }
     }

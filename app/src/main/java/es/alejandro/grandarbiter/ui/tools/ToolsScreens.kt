@@ -10,16 +10,6 @@ fun DraftTimerScreen() {
     Text(text = "Draft Timer")
 }
 
-@Composable
-fun QuickReferencesScreen() {
-    Text(text = "Quick References")
-}
-
-@Composable
-fun QuickReferenceDetailScreen(referenceId: String) {
-    Text(text = "Quick Reference: $referenceId")
-}
-
 @Preview(showBackground = true)
 @Composable
 fun DraftTimerScreenPreview() {
@@ -28,18 +18,3 @@ fun DraftTimerScreenPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun QuickReferencesScreenPreview() {
-    GrandArbiterTheme {
-        QuickReferencesScreen()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun QuickReferenceDetailScreenPreview() {
-    GrandArbiterTheme {
-        QuickReferenceDetailScreen(referenceId = "456")
-    }
-}

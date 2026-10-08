@@ -1,6 +1,7 @@
 package es.alejandro.grandarbiter.data.rules
 
 import es.alejandro.grandarbiter.data.rules.bundle.DocumentId
+import es.alejandro.grandarbiter.data.rules.bundle.GlossaryEntry
 import es.alejandro.grandarbiter.data.rules.bundle.Infraction
 import es.alejandro.grandarbiter.data.rules.bundle.InfractionCategory
 import es.alejandro.grandarbiter.data.rules.bundle.Penalty
@@ -66,6 +67,9 @@ class RulesRepositoryImpl(
         }
         return PageRef(pageId = page.id, anchorId = target.id.takeIf { it != page.id })
     }
+
+    override suspend fun glossary(documentId: DocumentId): List<GlossaryEntry> =
+        dao.glossary(documentId.key, "").map { GlossaryEntry(it.term, it.definition) }
 
     override suspend fun search(query: String, documentId: DocumentId?): List<RulesSearchResult> {
         val q = query.trim()

@@ -1,5 +1,7 @@
 package es.alejandro.grandarbiter.ui.navigation
 
+import android.net.Uri
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -26,6 +28,17 @@ import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferencesScreen
 import es.alejandro.grandarbiter.ui.tools.quickrefs.ARG_REFERENCE
 import es.alejandro.grandarbiter.ui.tools.quickrefs.ARG_REFERENCE_DOCUMENT
 import es.alejandro.grandarbiter.ui.tools.ToolsScreen
+import es.alejandro.grandarbiter.ui.reader.ARG_TERM
+import es.alejandro.grandarbiter.ui.reader.GlossaryRoutes
+import es.alejandro.grandarbiter.ui.reader.GlossaryScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNotesScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteViewerScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteSetScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNoteCardScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ARG_SECTION
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ARG_CARD_INDEX
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ARG_SET_CODE
+import es.alejandro.grandarbiter.ui.home.RELEASE_NOTES_ID
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -41,6 +54,16 @@ sealed class Screen(val route: String) {
     object DraftTimer : Screen("draft_timer")
     object HeadJudgeAnnouncement : Screen("head_judge_announcement")
     object BannedLists : Screen("banned_lists")
+    object ReleaseNotes : Screen("release_notes")
+    object ReleaseNoteSet : Screen("release_notes/{$ARG_SET_CODE}") {
+        fun createRoute(code: String) = "release_notes/${Uri.encode(code)}"
+    }
+    object ReleaseNoteCard : Screen("release_notes/{$ARG_SET_CODE}/card/{$ARG_SECTION}/{$ARG_CARD_INDEX}") {
+        fun createRoute(code: String, section: Int, index: Int) = "release_notes/${Uri.encode(code)}/card/$section/$index"
+    }
+    object ReleaseNoteViewer : Screen("release_notes/{$ARG_SET_CODE}/original") {
+        fun createRoute(code: String) = "release_notes/${Uri.encode(code)}/original"
+    }
     object QuickReferences : Screen(QuickReferenceRoutes.LIST)
     object Settings : Screen("settings")
 }
@@ -60,13 +83,26 @@ fun AppNavGraph(
         composable(Screen.Home.route) { 
             HomeScreen(
                 onNavigateToDocument = { documentId ->
-                    navController.navigate(Screen.DocumentReader.createRoute(documentId))
+                    navController.navigate(
+                        if (documentId == RELEASE_NOTES_ID) Screen.ReleaseNotes.route
+                        else Screen.DocumentReader.createRoute(documentId)
+                    )
                 },
                 onOpenSettings = { navController.navigate(Screen.Settings.route) },
             ) 
         }
         composable(Screen.DocumentReader.route) {
             ReaderContentsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenPage = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
+                onOpenGlossary = { term -> navController.navigate(GlossaryRoutes.glossary(term)) },
+            )
+        }
+        composable(
+            GlossaryRoutes.GLOSSARY,
+            arguments = listOf(navArgument(ARG_TERM) { type = NavType.StringType; nullable = true; defaultValue = null }),
+        ) {
+            GlossaryScreen(
                 onBack = { navController.popBackStack() },
                 onOpenPage = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
             )
@@ -107,6 +143,21 @@ fun AppNavGraph(
                 onOpenRules = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
             )
         }
+        composable(Screen.ReleaseNotes.route) {
+            ReleaseNotesScreen(
+                onBack = { navController.popBackStack() },
+                onOpenSet = { set -> navController.navigate(Screen.ReleaseNoteSet.createRoute(set.code)) },
+            )
+        }
+        composable(Screen.ReleaseNoteSet.route) {
+            ReleaseNoteSetScreen(
+                onBack = { navController.popBackStack() },
+                onViewOriginal = { code -> navController.navigate(Screen.ReleaseNoteViewer.createRoute(code)) },
+                onOpenCard = { code, section, index -> navController.navigate(Screen.ReleaseNoteCard.createRoute(code, section, index)) },
+            )
+        }
+        composable(Screen.ReleaseNoteCard.route) { ReleaseNoteCardScreen(onBack = { navController.popBackStack() }) }
+        composable(Screen.ReleaseNoteViewer.route) { ReleaseNoteViewerScreen(onBack = { navController.popBackStack() }) }
         composable(Screen.BannedLists.route) {
             BannedListsScreen(
                 onBack = { navController.popBackStack() },

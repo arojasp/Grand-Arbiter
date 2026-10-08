@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "sets": [
+    {
+      "code": "FRA",
+      "name": "Reality Fracture",
+      "url": "https://magic.wizards.com/en/news/feature/reality-fracture-release-notes",
+      "sha": "10e03ff8bef77f85"
+    },
+    {
+      "code": "HOB",
+      "name": "The Hobbit",
+      "url": "https://magic.wizards.com/en/news/feature/the-hobbit-release-notes",
+      "sha": "05c51e2840d43b39"
+    },
+    {
+      "code": "MSH",
+      "name": "Marvel Super Heroes",
+      "url": "https://magic.wizards.com/en/news/feature/marvel-super-heroes-release-notes",
+      "sha": "73e34bbfd75ad28d"
+    },
+    {
+      "code": "SOS",
+      "name": "Secrets of Strixhaven",
+      "url": "https://magic.wizards.com/en/news/feature/secrets-of-strixhaven-release-notes",
+      "sha": "4226d0b4c51380d2"
+    },
+    {
+      "code": "TMT",
+      "name": "Teenage Mutant Ninja Turtles",
+      "url": "https://magic.wizards.com/en/news/feature/teenage-mutant-ninja-turtles-release-notes",
+      "sha": "23e2baa440f11a80"
+    },
+    {
+      "code": "ECL",
+      "name": "Lorwyn Eclipsed",
+      "url": "https://magic.wizards.com/en/news/feature/lorwyn-eclipsed-release-notes",
+      "sha": "1cc8cdd4a493d6ee"
+    },
+    {
+      "code": "TLA",
+      "name": "Avatar: The Last Airbender",
+      "url": "https://magic.wizards.com/en/news/feature/avatar-the-last-airbender-release-notes",
+      "sha": "c4957c9846b877e1"
+    },
+    {
+      "code": "SPM",
+      "name": "Marvel's Spider-Man",
+      "url": "https://magic.wizards.com/en/news/feature/spider-man-release-notes",
+      "sha": "d8691b7323d2f474"
+    },
+    {
+      "code": "EOE",
+      "name": "Edge of Eternities",
+      "url": "https://magic.wizards.com/en/news/feature/edge-of-eternities-release-notes",
+      "sha": "dcf1418e52581d37"
+    },
+    {
+      "code": "FIN",
+      "name": "Final Fantasy",
+      "url": "https://magic.wizards.com/en/news/feature/final-fantasy-release-notes",
+      "sha": "5c85b7264be0bbab"
+    },
+    {
+      "code": "TDM",
+      "name": "Tarkir: Dragonstorm",
+      "url": "https://magic.wizards.com/en/news/feature/tarkir-dragonstorm-release-notes",
+      "sha": "2e965dc930c0d93c"
+    },
+    {
+      "code": "DFT",
+      "name": "Aetherdrift",
+      "url": "https://magic.wizards.com/en/news/feature/aetherdrift-release-notes",
+      "sha": "8d2d0603102d1763"
+    },
+    {
+      "code": "FDN",
+      "name": "Foundations",
+      "url": "https://magic.wizards.com/en/news/feature/foundations-release-notes",
+      "sha": "d001a8f0d7fd2911"
+    },
+    {
+      "code": "DSK",
+      "name": "Duskmourn: House of Horror",
+      "url": "https://magic.wizards.com/en/news/feature/duskmourn-house-of-horror-release-notes",
+      "sha": "61e43008f8d46502"
+    },
+    {
+      "code": "BLB",
+      "name": "Bloomburrow",
+      "url": "https://magic.wizards.com/en/news/feature/bloomburrow-release-notes",
+      "sha": "d0b0cf9b58ec16e8"
+    }
+  ]
+}

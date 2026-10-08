@@ -6,6 +6,7 @@ import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.domain.model.DisplaySettings
 import es.alejandro.grandarbiter.domain.model.rules.RulesDocumentInfo
 import es.alejandro.grandarbiter.domain.model.rules.RulesUpdateState
+import es.alejandro.grandarbiter.data.releasenotes.ReleaseNotesRepository
 import es.alejandro.grandarbiter.domain.repository.RulesDataUpdater
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.channels.Channel
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     settingsDataStore: SettingsDataStore,
     rulesUpdater: RulesDataUpdater,
+    releaseNotes: ReleaseNotesRepository,
 ) : ViewModel() {
     /** Theme, text size, contrast and keep-screen-on, applied at the app root. */
     val displaySettings: StateFlow<DisplaySettings> = settingsDataStore.displaySettings
@@ -43,5 +45,7 @@ class MainViewModel(
             }
         }
         rulesUpdater.checkForUpdates()
+        // New sets' release notes, ready for offline use before the judge needs them.
+        viewModelScope.launch { releaseNotes.refresh() }
     }
 }

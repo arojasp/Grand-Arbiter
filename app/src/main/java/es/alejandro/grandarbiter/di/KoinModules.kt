@@ -49,7 +49,9 @@ import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferencesViewModel
 val networkModule = module {
     single {
         // HEADERS at most: BODY would buffer and log Scryfall's 25 MB bulk files.
-        HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
+        HttpLoggingInterceptor().apply {
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC else HttpLoggingInterceptor.Level.NONE
+        }
     }
 
     single {

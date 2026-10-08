@@ -1,44 +1,48 @@
 package es.alejandro.grandarbiter.data.timer
 
 import android.content.Context
-import android.content.Intent
+import android.content.SharedPreferences
+import androidx.core.content.edit
 import es.alejandro.grandarbiter.domain.timer.TimerManager
-import es.alejandro.grandarbiter.service.TimerService
+import es.alejandro.grandarbiter.domain.timer.TimerState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class TimerManagerImpl(private val context: Context) : TimerManager {
-    private val _elapsedTime = MutableStateFlow(0L)
-    override val elapsedTime: StateFlow<Long> = _elapsedTime.asStateFlow()
+/**
+ * Keeps the judge call timer in SharedPreferences: two numbers, written on start/pause/reset
+ * only. No service, no notification, no permissions: the time is derived from the clock.
+ */
+class TimerManagerImpl(
+    context: Context,
+    private val clock: () -> Long = System::currentTimeMillis,
+) : TimerManager {
 
-    private val _isRunning = MutableStateFlow(false)
-    override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+    private val prefs: SharedPreferences = context.getSharedPreferences("judge_call_timer", Context.MODE_PRIVATE)
+    private val _state = MutableStateFlow(load())
+    override val state: StateFlow<TimerState> = _state.asStateFlow()
 
-    override fun startTimer() {
-        sendCommand(TimerService.ACTION_START)
-    }
+    override fun start() = update { it.started(clock()) }
+    override fun pause() = update { it.paused(clock()) }
+    override fun reset() = update { TimerState() }
 
-    override fun pauseTimer() {
-        sendCommand(TimerService.ACTION_PAUSE)
-    }
-
-    override fun resetTimer() {
-        sendCommand(TimerService.ACTION_RESET)
-    }
-
-    override fun updateElapsedTime(time: Long) {
-        _elapsedTime.value = time
-    }
-
-    override fun setRunning(running: Boolean) {
-        _isRunning.value = running
-    }
-
-    private fun sendCommand(action: String) {
-        val intent = Intent(context, TimerService::class.java).apply {
-            this.action = action
+    @Synchronized
+    private fun update(change: (TimerState) -> TimerState) {
+        val next = change(_state.value)
+        _state.value = next
+        prefs.edit {
+            putLong(KEY_ACCUMULATED, next.accumulatedMs)
+            if (next.runningSince != null) putLong(KEY_SINCE, next.runningSince) else remove(KEY_SINCE)
         }
-        context.startService(intent)
+    }
+
+    private fun load() = TimerState(
+        accumulatedMs = prefs.getLong(KEY_ACCUMULATED, 0),
+        runningSince = if (prefs.contains(KEY_SINCE)) prefs.getLong(KEY_SINCE, 0) else null,
+    )
+
+    private companion object {
+        const val KEY_ACCUMULATED = "accumulated_ms"
+        const val KEY_SINCE = "running_since"
     }
 }

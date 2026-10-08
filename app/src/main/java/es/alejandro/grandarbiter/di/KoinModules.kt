@@ -37,6 +37,10 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
+import es.alejandro.grandarbiter.ui.reader.GlossaryProvider
+import es.alejandro.grandarbiter.ui.reader.GlossaryViewModel
+import es.alejandro.grandarbiter.data.releasenotes.ReleaseNotesRepository
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNotesViewModel
 import es.alejandro.grandarbiter.BuildConfig
 import es.alejandro.grandarbiter.data.cards.update.RoomInstalledCards
 import es.alejandro.grandarbiter.data.rules.update.RoomInstalledRules
@@ -92,6 +96,8 @@ val rulesModule = module {
     single { AssetRulesBundleSource(androidContext()) }
     single { RulesBundleImporter(get(), get()) }
     single<RulesRepository> { RulesRepositoryImpl(get()) }
+    single { GlossaryProvider(get()) }
+    single { ReleaseNotesRepository(androidContext(), get(), PublishedRulesUpdater.PUBLISHED_RULES_URL) }
     single { PublishedRulesClient(get(), PublishedRulesUpdater.PUBLISHED_RULES_URL) }
     single<RulesDataUpdater> { PublishedRulesUpdater(get(), RoomInstalledRules(get(), get(), get()), BuildConfig.VERSION_CODE) }
 }
@@ -131,6 +137,8 @@ val viewModelModule = module {
     viewModelOf(::AnnouncementViewModel)
     viewModelOf(::DeckCounterViewModel)
     viewModelOf(::QuickReferencesViewModel)
+    viewModelOf(::ReleaseNotesViewModel)
+    viewModelOf(::GlossaryViewModel)
     viewModelOf(::QuickReferenceDetailViewModel)
     viewModelOf(::QuickReferenceEditViewModel)
 }

@@ -35,6 +35,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.components.Label
+import es.alejandro.grandarbiter.data.rules.bundle.GlossaryEntry
+import es.alejandro.grandarbiter.data.rules.bundle.DocumentId
 import es.alejandro.grandarbiter.data.rules.bundle.Penalty
 import es.alejandro.grandarbiter.domain.model.rules.PageRef
 import es.alejandro.grandarbiter.domain.model.rules.RulesSearchResult
@@ -45,11 +48,13 @@ import org.koin.androidx.compose.koinViewModel
 fun ReaderContentsScreen(
     onBack: () -> Unit,
     onOpenPage: (PageRef) -> Unit,
+    onOpenGlossary: (term: String?) -> Unit,
     viewModel: ReaderContentsViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
     val query by viewModel.query.collectAsState()
     val results by viewModel.results.collectAsState()
+    val glossaryHits by viewModel.glossaryHits.collectAsState()
     var expanded by rememberSaveable { mutableStateOf(listOf<String>()) }
 
     Scaffold(
@@ -70,7 +75,7 @@ fun ReaderContentsScreen(
         ) {
             ReaderSearchField(query, viewModel::onQueryChange, Modifier.padding(vertical = 12.dp))
             when {
-                query.isNotBlank() -> SearchResults(results, onOpenPage)
+                query.isNotBlank() -> SearchResults(results, glossaryHits, onOpenPage, onOpenGlossary)
                 state.isLoading -> Centered { CircularProgressIndicator() }
                 state.contents.isEmpty() -> Centered {
                     Text(stringResource(R.string.reader_not_installed), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -86,9 +91,32 @@ fun ReaderContentsScreen(
                             onOpenPage = onOpenPage,
                         )
                     }
+                    // The CR ends with its glossary, as the document does.
+                    if (viewModel.documentId == DocumentId.CR) {
+                        item(key = "glossary") { GlossaryEntryCard { onOpenGlossary(null) } }
+                    }
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun GlossaryEntryCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
+        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.reader_glossary),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(painterResource(R.drawable.ic_chevron_right), null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -156,12 +184,38 @@ private fun TocRow(label: String, penalty: Penalty?, onClick: () -> Unit) {
 }
 
 @Composable
-private fun SearchResults(results: List<RulesSearchResult>, onOpenPage: (PageRef) -> Unit) {
-    if (results.isEmpty()) {
+private fun SearchResults(
+    results: List<RulesSearchResult>,
+    glossaryHits: List<GlossaryEntry>,
+    onOpenPage: (PageRef) -> Unit,
+    onOpenGlossary: (String) -> Unit,
+) {
+    if (results.isEmpty() && glossaryHits.isEmpty()) {
         Centered { Text(stringResource(R.string.reader_no_results), color = MaterialTheme.colorScheme.onSurfaceVariant) }
         return
     }
     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (glossaryHits.isNotEmpty()) {
+            item(key = "glossary-hits") {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                ) {
+                    Column(Modifier.padding(vertical = 8.dp)) {
+                        Label(stringResource(R.string.reader_glossary), Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                        glossaryHits.forEach { entry ->
+                            Text(
+                                text = entry.term,
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.fillMaxWidth().clickable { onOpenGlossary(entry.term) }.padding(horizontal = 12.dp, vertical = 10.dp),
+                            )
+                        }
+                    }
+                }
+            }
+        }
         items(results, key = { it.target.anchorId ?: it.target.pageId }) { result ->
             Card(
                 modifier = Modifier.fillMaxWidth().clickable { onOpenPage(result.target) },

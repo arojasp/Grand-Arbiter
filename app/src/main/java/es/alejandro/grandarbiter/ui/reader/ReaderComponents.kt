@@ -80,7 +80,9 @@ fun MarkupText(
 ) {
     val linkColor = MaterialTheme.colorScheme.primary
     val currentOnRefClick by rememberUpdatedState(onRefClick)
-    val text = remember(markup, linkColor) {
+    val glossary = LocalGlossary.current
+    val text = remember(markup, linkColor, glossary) {
+        val linked = HashSet<String>()   // each glossary term once per text
         buildAnnotatedString {
             for (span in InlineMarkup.parse(markup)) {
                 when (span) {
@@ -89,7 +91,10 @@ fun MarkupText(
                             fontWeight = if (span.bold) FontWeight.Bold else null,
                             fontStyle = if (span.italic) FontStyle.Italic else null,
                         )
-                    ) { append(span.text) }
+                    ) {
+                        if (glossary == null) append(span.text)
+                        else appendWithGlossary(span.text, glossary, linked, linkColor)
+                    }
 
                     is InlineSpan.Link -> {
                         val styles = TextLinkStyles(
@@ -112,6 +117,28 @@ fun MarkupText(
         }
     }
     Text(text = text, modifier = modifier, style = style.copy(lineHeight = 21.sp), color = color)
+}
+
+/**
+ * Glossary terms as quiet links: gold, not underlined (rule references are underlined), so
+ * the two kinds of link read differently. Tapping one shows its definition.
+ */
+private fun AnnotatedString.Builder.appendWithGlossary(
+    text: String,
+    glossary: GlossaryLinks,
+    linked: MutableSet<String>,
+    color: Color,
+) {
+    var at = 0
+    for (match in glossary.linker.find(text, linked)) {
+        append(text.substring(at, match.start))
+        val entry = match.entry
+        withLink(LinkAnnotation.Clickable(tag = "glossary:${entry.term}", styles = TextLinkStyles(SpanStyle(color = color))) {
+            glossary.onTermClick(entry)
+        }) { append(text.substring(match.start, match.end)) }
+        at = match.end
+    }
+    append(text.substring(at))
 }
 
 /** "100." for chapters/sections without a dot, "2.1" / "603.2a" as printed. */

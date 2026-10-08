@@ -1,6 +1,13 @@
 package es.alejandro.grandarbiter.ui.reader
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.runtime.CompositionLocalProvider
+import es.alejandro.grandarbiter.data.rules.bundle.GlossaryEntry
+import es.alejandro.grandarbiter.ui.components.Label
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,25 +63,52 @@ fun ReaderPageScreen(
         scope.launch { viewModel.resolve(sectionId)?.let(onOpenPage) }
     }
     val page = state.page
+    val glossaryLinker by viewModel.glossary.collectAsState()
+    var openTerm by remember { mutableStateOf<GlossaryEntry?>(null) }
+    val glossaryLinks = remember(glossaryLinker) { glossaryLinker?.let { GlossaryLinks(it) { entry -> openTerm = entry } } }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            ReaderTopBar(
-                title = page?.let { "${it.documentId.key.uppercase()} ${displayNumber(it.root.number).orEmpty()}".trim() }.orEmpty(),
-                subtitle = null,
-                onBack = onBack,
-            )
-        },
-    ) { innerPadding ->
-        when {
-            state.isLoading -> Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+    CompositionLocalProvider(LocalGlossary provides glossaryLinks) {
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            topBar = {
+                ReaderTopBar(
+                    title = page?.let { "${it.documentId.key.uppercase()} ${displayNumber(it.root.number).orEmpty()}".trim() }.orEmpty(),
+                    subtitle = null,
+                    onBack = onBack,
+                )
+            },
+        ) { innerPadding ->
+            when {
+                state.isLoading -> Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+                page == null -> Box(Modifier.fillMaxSize().padding(innerPadding).padding(24.dp), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.reader_page_not_found), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                else -> PageContent(page, state.anchorId, onRefClick, Modifier.padding(innerPadding))
             }
-            page == null -> Box(Modifier.fillMaxSize().padding(innerPadding).padding(24.dp), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.reader_page_not_found), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        openTerm?.let { entry ->
+            GlossarySheet(entry, onDismiss = { openTerm = null }, onRefClick = { sectionId -> openTerm = null; onRefClick(sectionId) })
+        }
+    }
+}
+
+/** A glossary definition over the page; its rule links navigate, its glossary terms switch the sheet. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GlossarySheet(entry: GlossaryEntry, onDismiss: () -> Unit, onRefClick: (String) -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.surfaceContainerHigh) {
+        SelectionContainer {
+            Column(
+                Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Label(stringResource(R.string.reader_glossary))
+                Text(entry.term, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface)
+                MarkupText(entry.definition, onRefClick)
             }
-            else -> PageContent(page, state.anchorId, onRefClick, Modifier.padding(innerPadding))
         }
     }
 }

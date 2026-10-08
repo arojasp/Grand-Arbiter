@@ -26,6 +26,10 @@ import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferencesScreen
 import es.alejandro.grandarbiter.ui.tools.quickrefs.ARG_REFERENCE
 import es.alejandro.grandarbiter.ui.tools.quickrefs.ARG_REFERENCE_DOCUMENT
 import es.alejandro.grandarbiter.ui.tools.ToolsScreen
+import es.alejandro.grandarbiter.ui.reader.ARG_TERM
+import es.alejandro.grandarbiter.ui.reader.GlossaryRoutes
+import es.alejandro.grandarbiter.ui.reader.GlossaryScreen
+import es.alejandro.grandarbiter.ui.tools.releasenotes.ReleaseNotesScreen
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -41,6 +45,7 @@ sealed class Screen(val route: String) {
     object DraftTimer : Screen("draft_timer")
     object HeadJudgeAnnouncement : Screen("head_judge_announcement")
     object BannedLists : Screen("banned_lists")
+    object ReleaseNotes : Screen("release_notes")
     object QuickReferences : Screen(QuickReferenceRoutes.LIST)
     object Settings : Screen("settings")
 }
@@ -67,6 +72,16 @@ fun AppNavGraph(
         }
         composable(Screen.DocumentReader.route) {
             ReaderContentsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenPage = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
+                onOpenGlossary = { term -> navController.navigate(GlossaryRoutes.glossary(term)) },
+            )
+        }
+        composable(
+            GlossaryRoutes.GLOSSARY,
+            arguments = listOf(navArgument(ARG_TERM) { type = NavType.StringType; nullable = true; defaultValue = null }),
+        ) {
+            GlossaryScreen(
                 onBack = { navController.popBackStack() },
                 onOpenPage = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
             )
@@ -107,6 +122,7 @@ fun AppNavGraph(
                 onOpenRules = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
             )
         }
+        composable(Screen.ReleaseNotes.route) { ReleaseNotesScreen(onBack = { navController.popBackStack() }) }
         composable(Screen.BannedLists.route) {
             BannedListsScreen(
                 onBack = { navController.popBackStack() },

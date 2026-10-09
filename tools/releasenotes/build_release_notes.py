@@ -283,7 +283,12 @@ def main() -> int:
         src = SOURCE / f"{slug(entry['url'])}.html"
         print(f"{entry['code']} {entry['name']}")
         if args.refresh or (args.download and not src.exists()):
-            download(entry["url"], src)
+            try:
+                download(entry["url"], src)
+            except Exception as e:  # noqa: BLE001 — one unreachable page must not stop the others
+                print(f"  ERROR: download failed ({e}); keeping the previous version")
+                failed += 1
+                continue
         if not src.exists():
             print(f"  missing {src.name}: run with --download")
             failed += 1

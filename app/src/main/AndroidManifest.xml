@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Draft timer: one vibration when a step runs out (normal permission, no prompt). -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".GrandArbiterApplication"

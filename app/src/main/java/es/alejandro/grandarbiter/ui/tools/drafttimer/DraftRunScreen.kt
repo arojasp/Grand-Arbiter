@@ -1,5 +1,8 @@
 package es.alejandro.grandarbiter.ui.tools.drafttimer
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -159,15 +162,19 @@ private fun PickContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftS
         left = { DraftChip(stringResource(R.string.draft_pack_of, step.pack, s.config.packs), MaterialTheme.colorScheme.primary, outlined = true) },
         right = { DraftChip(directionText(step.direction), MaterialTheme.colorScheme.onSurface) },
     )
-    Countdown(stringResource(R.string.draft_pick_label, step.pick, step.cardsLeft), p, s.isRunning, waiting,
+    // Picks in a pack, the untimed last one included: 14 (Booster), 7 for 14 cards two at a time (2HG).
+    val picksInPack = (s.config.cardsPerPack + step.cardsTaken - 1) / step.cardsTaken
+    val label = if (step.cardsTaken > 1) stringResource(R.string.draft_pick_take_label, step.pick, step.cardsTaken, step.cardsLeft)
+        else stringResource(R.string.draft_pick_label, step.pick, step.cardsLeft)
+    Countdown(label, p, s.isRunning, waiting,
         stringResource(R.string.draft_of, formatDuration(step.durationMs)))
     DraftCard {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             DraftLabel(stringResource(R.string.draft_pack_progress))
-            Text(stringResource(R.string.draft_pick_of, step.pick, s.config.cardsPerPack),
+            Text(stringResource(R.string.draft_pick_of, step.pick, picksInPack),
                 style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        PickSegments(done = step.pick - 1, total = s.config.cardsPerPack)
+        PickSegments(done = step.pick - 1, total = picksInPack)
     }
     NextCard(s.nextStep)
 }
@@ -244,7 +251,7 @@ private fun Countdown(label: String, p: DraftPosition.Running, running: Boolean,
     CountdownFrame(
         label = if (paused) stringResource(R.string.draft_paused_label, label) else label,
         time = formatClock(p.remainingMs),
-        fraction = p.remainingMs.toFloat() / p.step.durationMs,
+        fraction = smoothFraction(p.index, p.remainingMs, p.step.durationMs, running = running && !waiting),
         sub = if (waiting) stringResource(R.string.draft_time_is_up) else sub,
         color = when {
             waiting -> colors.primary
@@ -255,6 +262,27 @@ private fun Countdown(label: String, p: DraftPosition.Running, running: Boolean,
         size = size,
         borderColor = if (waiting) colors.primary.copy(alpha = 0.6f) else colors.outlineVariant,
     )
+}
+
+/**
+ * The progress bar's fill, moving continuously instead of jumping once per tick. Each tick gives
+ * the exact remaining time; from there the bar glides linearly to where the next tick will be
+ * (the next whole second), so tick and animation meet and nothing drifts. Paused, waiting or a new
+ * step: it snaps to the exact value. The countdown digits still change once per second.
+ */
+@Composable
+private fun smoothFraction(stepIndex: Int, remainingMs: Long, durationMs: Long, running: Boolean): Float {
+    val exact = (remainingMs.toFloat() / durationMs).coerceIn(0f, 1f)
+    val fraction = remember(stepIndex) { Animatable(exact) }
+    LaunchedEffect(stepIndex, remainingMs, running) {
+        fraction.snapTo(exact)
+        if (running && remainingMs > 0) {
+            val toNextTick = (remainingMs % 1_000).takeIf { it > 0 } ?: 1_000
+            val next = ((remainingMs - toNextTick).toFloat() / durationMs).coerceIn(0f, 1f)
+            fraction.animateTo(next, tween(durationMillis = toNextTick.toInt(), easing = LinearEasing))
+        }
+    }
+    return fraction.value
 }
 
 @Composable

@@ -4,13 +4,14 @@ package es.alejandro.grandarbiter.domain.draft
 sealed interface DraftStep {
     val durationMs: Long
 
-    /** [pick] is 1-based within the pack; [cardsLeft] counts the card being picked. */
+    /** [pick] is 1-based within the pack; [cardsLeft] counts the card(s) being picked; [cardsTaken]: 2 in Two-Headed Giant. */
     data class Pick(
         val pack: Int,
         val pick: Int,
         val cardsLeft: Int,
         val direction: PassDirection,
         override val durationMs: Long,
+        val cardsTaken: Int = 1,
     ) : DraftStep
 
     /** Between packs only (MTR 7.7): never after the last one. */

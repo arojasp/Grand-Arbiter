@@ -9,7 +9,7 @@ package es.alejandro.grandarbiter.domain.draft
  */
 enum class DraftFormat(val available: Boolean) {
     BOOSTER(available = true),
-    TWO_HEADED_GIANT(available = false),
+    TWO_HEADED_GIANT(available = true),
     ROCHESTER(available = false),
 }
 

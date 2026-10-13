@@ -16,16 +16,16 @@ interface DraftSessionStore {
 
 /** What happens when a step runs out. Implemented with the Vibrator; faked in tests. */
 interface DraftAlerts {
-    /** One vibration, plus a short beep if [beep]. */
-    fun stepEnded(beep: Boolean)
+    /** One vibration if [vibrate] (on by default), a short beep if [beep] (off by default). */
+    fun stepEnded(vibrate: Boolean, beep: Boolean)
 }
 
 /** Picks the plan factory for a format. Only available formats have one. */
 object DraftPlans {
-    fun create(config: DraftConfig, timings: BoosterDraftTimings): DraftPlan = when (config.format) {
-        DraftFormat.BOOSTER -> BoosterDraftPlanFactory.create(config, timings)
-        DraftFormat.TWO_HEADED_GIANT, DraftFormat.ROCHESTER ->
-            throw IllegalArgumentException("${config.format} is not available yet")
+    fun create(config: DraftConfig, timings: DraftTimings): DraftPlan = when (config.format) {
+        DraftFormat.BOOSTER -> BoosterDraftPlanFactory.create(config, timings.booster)
+        DraftFormat.TWO_HEADED_GIANT -> TwoHeadedGiantPlanFactory.create(config, timings.twoHeadedGiant)
+        DraftFormat.ROCHESTER -> throw IllegalArgumentException("${config.format} is not available yet")
     }
 }
 
@@ -33,6 +33,8 @@ object DraftPlans {
 data class DraftEstimate(
     val packs: Int,
     val timedPicksPerPack: Int,
+    /** 2 in Two-Headed Giant. */
+    val cardsPerPick: Int,
     val picksMs: Long,
     val reviewSeconds: List<Int>,
     val constructionMs: Long,
@@ -45,6 +47,7 @@ data class DraftEstimate(
             return DraftEstimate(
                 packs = packs,
                 timedPicksPerPack = picks.count { it.pack == 1 },
+                cardsPerPick = picks.firstOrNull()?.cardsTaken ?: 1,
                 picksMs = picks.sumOf { it.durationMs },
                 reviewSeconds = plan.steps.filterIsInstance<DraftStep.Review>().map { (it.durationMs / 1000).toInt() },
                 constructionMs = plan.steps.filterIsInstance<DraftStep.Construction>().sumOf { it.durationMs },

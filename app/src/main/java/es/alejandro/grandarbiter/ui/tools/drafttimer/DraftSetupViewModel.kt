@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.data.draft.DraftTimingsRepository
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
-import es.alejandro.grandarbiter.domain.draft.BoosterDraftTimings
+import es.alejandro.grandarbiter.domain.draft.DraftTimings
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftEstimate
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
@@ -31,7 +31,8 @@ class DraftSetupViewModel(
 
     val format: DraftFormat = DraftFormat.entries.firstOrNull { it.name == state.get<String>(ARG_FORMAT) } ?: DraftFormat.BOOSTER
 
-    private val last = store.lastConfig
+    /** The last draft's values if it was this format; otherwise the format's own defaults ("Manual start" carries over). */
+    private val last = store.lastConfig.let { if (it.format == format) it else DraftConfig.defaultsFor(format, it.manualStart) }
     private val packs = state.getStateFlow(KEY_PACKS, last.packs)
     private val cardsPerPack = state.getStateFlow(KEY_CARDS, last.cardsPerPack)
     private val constructionMinutes = state.getStateFlow(KEY_MINUTES, last.constructionMinutes)
@@ -40,10 +41,13 @@ class DraftSetupViewModel(
     /** Starting a draft stores this as the last config: that is how "Manual start" is remembered. */
     val config: StateFlow<DraftConfig> = combine(packs, cardsPerPack, constructionMinutes, manualStart) { p, c, m, manual ->
         DraftConfig(format, p, c, m, manual)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, last.copy(format = format))
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, last)
 
-    private val timings: StateFlow<BoosterDraftTimings> = timingsRepository.timings
-        .stateIn(viewModelScope, SharingStarted.Eagerly, BoosterDraftTimings.FALLBACK)
+    private val timings: StateFlow<DraftTimings> = timingsRepository.timings
+        .stateIn(viewModelScope, SharingStarted.Eagerly, DraftTimings.FALLBACK)
+
+    /** Allowed cards per pack: Two-Headed Giant only 14 or 15 (the sizes the MTR has times for). */
+    val cardsRange: IntRange = DraftConfig.cardsRange(format)
 
     /** Draft time with this config: picks + reviews + construction. Null for formats not available. */
     val estimate: StateFlow<DraftEstimate?> = combine(config, timings) { c, t ->
@@ -52,12 +56,15 @@ class DraftSetupViewModel(
 
     val beep: StateFlow<Boolean> = settings.draftBeep
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+    val vibrate: StateFlow<Boolean> = settings.draftVibrate
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     fun setPacks(value: Int) { state[KEY_PACKS] = value.coerceIn(DraftConfig.PACKS) }
-    fun setCardsPerPack(value: Int) { state[KEY_CARDS] = value.coerceIn(DraftConfig.CARDS_PER_PACK) }
+    fun setCardsPerPack(value: Int) { state[KEY_CARDS] = value.coerceIn(cardsRange) }
     fun setConstructionMinutes(value: Int) { state[KEY_MINUTES] = value.coerceIn(DraftConfig.CONSTRUCTION_MINUTES) }
     fun setManualStart(enabled: Boolean) { state[KEY_MANUAL] = enabled }
     fun setBeep(enabled: Boolean) = viewModelScope.launch { settings.setDraftBeep(enabled) }
+    fun setVibrate(enabled: Boolean) = viewModelScope.launch { settings.setDraftVibrate(enabled) }
 
     /** Starts the draft now (the first pick's time runs from this moment). */
     fun start() {

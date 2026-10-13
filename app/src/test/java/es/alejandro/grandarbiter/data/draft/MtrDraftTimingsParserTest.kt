@@ -4,6 +4,7 @@ import es.alejandro.grandarbiter.data.rules.bundle.Block
 import es.alejandro.grandarbiter.data.rules.bundle.DocumentId
 import es.alejandro.grandarbiter.data.rules.bundle.RulesBundle
 import es.alejandro.grandarbiter.domain.draft.BoosterDraftTimings
+import es.alejandro.grandarbiter.domain.draft.TwoHeadedGiantTimings
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -67,6 +68,52 @@ class MtrDraftTimingsParserTest {
 
     @Test fun noConstructionLine_null() = assertNull(MtrDraftTimingsParser.parse(appendixB(construction = "Something else")))
 
+    // ---- Two-Headed Giant ----
+
+    private val thgTable = Block.Table(
+        header = listOf("Cards remaining in pack — 15-Card Booster", "14-Card Booster", "Time allotted"),
+        rows = listOf(
+            listOf("15", "14", "50 seconds"), listOf("13", "12", "45 seconds"),
+            listOf("3", "-", "5 seconds"), listOf("1", "2", "N/A"),
+        ),
+    )
+
+    private fun appendixBWith2hg(
+        tableBlock: Block = thgTable,
+        review: String = "In addition, players receive 60 seconds to review their drafted cards in between booster packs.",
+        construction: String = "Two-Headed Giant Draft—40 minutes for deck construction and registration",
+    ) = appendixB() + listOf(
+        Block.BulletList(listOf(construction)),
+        Block.Heading("Two-Headed Giant Draft Timing"),
+        Block.Paragraph("Two-Headed Giant Booster Drafts have the following default time limits for each pick:"),
+        tableBlock,
+        Block.Paragraph(review),
+    )
+
+    @Test fun twoHeadedGiant_readsBothColumns_reviewAndConstruction() {
+        val t = MtrDraftTimingsParser.parseTwoHeadedGiant(appendixBWith2hg())!!
+        assertEquals(mapOf(15 to 50, 13 to 45, 3 to 5), t.pickSeconds[15])   // 1 card: N/A
+        assertEquals(mapOf(14 to 50, 12 to 45), t.pickSeconds[14])           // "-" and 2 cards: N/A
+        assertEquals(60, t.reviewSeconds)
+        assertEquals(40, t.constructionMinutes)
+    }
+
+    @Test fun twoHeadedGiant_constructionLine_notTakenFromDraft() =
+        assertEquals(25, MtrDraftTimingsParser.parse(appendixBWith2hg())!!.constructionMinutes)
+
+    @Test fun twoHeadedGiant_missing_null_andParseAllFallsBack() {
+        assertNull(MtrDraftTimingsParser.parseTwoHeadedGiant(appendixB()))
+        val all = MtrDraftTimingsParser.parseAll(appendixB())
+        assertEquals(TwoHeadedGiantTimings.FALLBACK, all.twoHeadedGiant)
+        assertEquals(25, all.booster.constructionMinutes)                  // Booster still read
+    }
+
+    @Test fun twoHeadedGiant_rewordedReview_null() =
+        assertNull(MtrDraftTimingsParser.parseTwoHeadedGiant(appendixBWith2hg(review = "One minute to review.")))
+
+    @Test fun twoHeadedGiant_tableShapeChanged_null() =
+        assertNull(MtrDraftTimingsParser.parseTwoHeadedGiant(appendixBWith2hg(tableBlock = table)))
+
     /** The REAL MTR shipped in the APK. If Wizards changes Appendix B, this fails at build time. */
     @Test fun bundledMtr_parsesToTheKnownValues() {
         val file = File("src/main/assets/rules/bundle.json")   // Gradle runs unit tests from app/
@@ -75,5 +122,6 @@ class MtrDraftTimingsParserTest {
         val mtr = bundle.documents.first { it.id == DocumentId.MTR }
         val blocks = mtr.sections.first { it.id == MtrDraftTimingsParser.PAGE_ID }.blocks
         assertEquals(BoosterDraftTimings.FALLBACK, MtrDraftTimingsParser.parse(blocks))
+        assertEquals(TwoHeadedGiantTimings.FALLBACK, MtrDraftTimingsParser.parseTwoHeadedGiant(blocks))
     }
 }

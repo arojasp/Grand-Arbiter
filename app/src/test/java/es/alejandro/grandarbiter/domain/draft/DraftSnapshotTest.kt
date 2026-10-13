@@ -11,7 +11,7 @@ import org.junit.Test
 class DraftSnapshotTest {
 
     private val config = DraftConfig(manualStart = false)
-    private val plan = DraftPlans.create(config, BoosterDraftTimings.FALLBACK)
+    private val plan = DraftPlans.create(config, DraftTimings.FALLBACK)
     private val session = DraftSession(config).started(now = 0)
 
     private fun at(ms: Long) = DraftSnapshot.of(session, plan, ms)
@@ -45,7 +45,7 @@ class DraftSnapshotTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun plans_onlyForAvailableFormats() {
-        DraftPlans.create(DraftConfig(format = DraftFormat.TWO_HEADED_GIANT), BoosterDraftTimings.FALLBACK)
+        DraftPlans.create(DraftConfig(format = DraftFormat.ROCHESTER), DraftTimings.FALLBACK)
     }
 
     @Test fun estimate_standardDraft() {
@@ -66,6 +66,6 @@ class DraftSnapshotTest {
         assertEquals(40_000L, s.elapsedMs)                             // the clock stopped at 0:00
     }
 
-    @Test fun onlyBoosterIsAvailable() =
-        assertEquals(listOf(DraftFormat.BOOSTER), DraftFormat.entries.filter { it.available })
+    @Test fun boosterAndTwoHeadedGiantAreAvailable() =
+        assertEquals(listOf(DraftFormat.BOOSTER, DraftFormat.TWO_HEADED_GIANT), DraftFormat.entries.filter { it.available })
 }

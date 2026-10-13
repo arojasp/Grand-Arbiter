@@ -309,11 +309,11 @@
     <string name="draft_section_alerts">Alerts</string>
     <string name="draft_vibrate">Vibrate at 0:00</string>
     <string name="draft_vibrate_hint">One vibration per step</string>
-    <string name="draft_always">Always</string>
     <string name="draft_beep">Beep at 0:00</string>
     <string name="draft_beep_hint">Short tone, off by default</string>
     <string name="draft_section_estimate">Estimated duration</string>
     <string name="draft_estimate_picks">Picks (%1$d packs × %2$d)</string>
+    <string name="draft_estimate_picks_multi">Picks (%1$d packs × %2$d, %3$d cards each)</string>
     <string name="draft_estimate_review">Review (%1$s)</string>
     <string name="draft_total">Total</string>
     <string name="draft_start">Start draft</string>
@@ -321,6 +321,7 @@
     <string name="draft_pass_left">← Pass left</string>
     <string name="draft_pass_right">Pass right →</string>
     <string name="draft_pick_label">Pick %1$d · %2$d cards in pack</string>
+    <string name="draft_pick_take_label">Pick %1$d · Take %2$d of %3$d cards</string>
     <string name="draft_paused_label">Paused · %1$s</string>
     <string name="draft_of">of %1$s</string>
     <string name="draft_pack_progress">Pack progress</string>

@@ -128,7 +128,7 @@ val cardsModule = module {
 }
 
 val repositoryModule = module {
-    single<CardRepository> { CardRepositoryImpl(get()) }
+    single<CardRepository> { CardRepositoryImpl(get(), get()) }
     single<QuickReferenceRepository> { QuickReferenceRepositoryImpl(get(), get(), get()) }
 }
 

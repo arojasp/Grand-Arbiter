@@ -74,6 +74,7 @@
     <string name="cards_search_text_placeholder">Words in name, type or rules text…</string>
     <string name="cards_search_in_text">Search rules text</string>
     <string name="cards_preparing">Preparing card data… This only takes a while the first time.</string>
+    <string name="cards_preparing_count">%1$s cards ready</string>
     <string name="cards_count">%1$s cards</string>
     <string name="cards_data_from">Scryfall data from %1$s</string>
     <string name="cards_no_results">No cards found</string>

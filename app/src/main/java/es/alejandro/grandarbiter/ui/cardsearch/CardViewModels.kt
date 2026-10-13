@@ -16,16 +16,11 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 
 const val ARG_CARD = "cardId"
-
-sealed interface CardDataState {
-    data object Checking : CardDataState
-    /** No data yet: the first import is running. */
-    data object Preparing : CardDataState
-    data class Ready(val info: CardDataInfo) : CardDataState
-}
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class CardSearchViewModel(
@@ -36,9 +31,16 @@ class CardSearchViewModel(
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
     val inText: StateFlow<Boolean> = savedStateHandle.getStateFlow(KEY_IN_TEXT, false)
 
-    /** Re-emits when an import finishes, so results appear by themselves after the first run. */
-    val dataState: StateFlow<CardDataState> = repository.observeDataInfo()
-        .map { info -> if (info == null) CardDataState.Preparing else CardDataState.Ready(info) }
+    /**
+     * Re-emits when an import finishes, so results appear by themselves after the first run.
+     * The import's progress comes from memory: "Preparing" shows even if the first database read
+     * has to wait behind the import.
+     */
+    val dataState: StateFlow<CardDataState> = combine(
+        repository.observeDataInfo().map { true to it }.onStart { emit(false to null) },
+        repository.observeImportProgress(),
+    ) { (read, info), importing -> CardDataState.of(read, info, importing) }
+        .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardDataState.Checking)
 
     val results: StateFlow<List<CardSummary>> = combine(query.debounce(200), inText, dataState) { q, t, d -> Triple(q, t, d) }

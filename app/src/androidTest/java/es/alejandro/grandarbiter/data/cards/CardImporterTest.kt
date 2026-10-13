@@ -33,7 +33,7 @@ class CardImporterTest {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), CardsDatabase::class.java).build()
         dao = db.cardsDao()
         importer = CardImporter(db, dao, minCards = 2)
-        repo = CardRepositoryImpl(dao)
+        repo = CardRepositoryImpl(dao, importer)
     }
 
     @After

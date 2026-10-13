@@ -8,7 +8,10 @@ import es.alejandro.grandarbiter.domain.model.quickrefs.DraftRule
 import es.alejandro.grandarbiter.domain.model.quickrefs.QuickReference
 import es.alejandro.grandarbiter.domain.model.quickrefs.QuickReferenceDetail
 import es.alejandro.grandarbiter.domain.model.quickrefs.QuickReferenceDraft
+import es.alejandro.grandarbiter.data.rules.bundle.Block
 import es.alejandro.grandarbiter.domain.model.rules.PageRef
+import es.alejandro.grandarbiter.domain.model.rules.TocEntry
+import es.alejandro.grandarbiter.ui.reader.InlineMarkup
 import es.alejandro.grandarbiter.domain.model.rules.RulesSearchResult
 import es.alejandro.grandarbiter.domain.repository.QuickReferenceRepository
 import es.alejandro.grandarbiter.domain.repository.RulesRepository
@@ -21,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -92,9 +96,14 @@ data class QuickReferenceEditorState(
     val results: List<RulesSearchResult> = emptyList(),
     val dirty: Boolean = false,
     val saving: Boolean = false,
+    /** The document's index, to add rules without searching: chapters > pages > rules. */
+    val index: List<IndexNode> = emptyList(),
+    val expanded: Set<String> = emptySet(),
+    val loadedRules: Map<String, List<IndexNode>> = emptyMap(),
 ) {
     val canSave: Boolean get() = !loading && !saving && title.isNotBlank()
     val addedIds: Set<String> get() = rules.mapTo(HashSet()) { it.rule.sectionId }
+    val indexRows: List<IndexRow> get() = QuickReferenceIndex.rows(index, expanded, loadedRules, addedIds)
 }
 
 sealed interface EditorEvent {
@@ -131,6 +140,12 @@ class QuickReferenceEditViewModel(
             }
         }
         viewModelScope.launch {
+            // The index of whichever document the reference is for, once known.
+            val document = _state.first { !it.loading }.documentId
+            val index = rules.contents(document).map { it.toIndexNode() }
+            _state.update { it.copy(index = index) }
+        }
+        viewModelScope.launch {
             _state.map { it.query.trim() to it.documentId }.distinctUntilChanged().debounce(250).collect { (query, document) ->
                 val results = if (query.isEmpty()) emptyList() else rules.search(query, document).take(MAX_RESULTS)
                 _state.update { if (it.query.trim() == query) it.copy(results = results) else it }
@@ -141,11 +156,49 @@ class QuickReferenceEditViewModel(
     fun setTitle(title: String) = _state.update { it.copy(title = title, dirty = true) }
     fun setQuery(query: String) = _state.update { it.copy(query = query) }
 
-    fun add(result: RulesSearchResult) = _state.update { s ->
-        val sectionId = result.target.anchorId ?: result.target.pageId
+    fun add(result: RulesSearchResult) =
+        addSection(result.target.anchorId ?: result.target.pageId, sectionLabel(result.number, result.title))
+
+    /** From the index: [label] as shown there ("702.19. Trample"). */
+    fun addSection(sectionId: String, label: String) = _state.update { s ->
         if (sectionId in s.addedIds) s
-        else s.copy(rules = s.rules + EditorRule(DraftRule(sectionId), sectionLabel(result.number, result.title)), dirty = true)
+        else s.copy(rules = s.rules + EditorRule(DraftRule(sectionId), label), dirty = true)
     }
+
+    /** Opens or closes an index entry; a page's rules are read the first time it's opened. */
+    fun toggle(sectionId: String) {
+        val s = _state.value
+        if (sectionId in s.expanded) {
+            _state.update { it.copy(expanded = it.expanded - sectionId) }
+            return
+        }
+        _state.update { it.copy(expanded = it.expanded + sectionId) }
+        if (QuickReferenceIndex.needsLoading(s.index, s.loadedRules, sectionId)) {
+            viewModelScope.launch {
+                val children = rulesOf(sectionId)
+                _state.update { it.copy(loadedRules = it.loadedRules + (sectionId to children)) }
+            }
+        }
+    }
+
+    /** The rules directly under a page: "702.19. Trample", or "100.1" + the start of its text. */
+    private suspend fun rulesOf(pageId: String): List<IndexNode> =
+        rules.page(pageId)?.sections.orEmpty().filter { it.depth == 1 }.map { section ->
+            IndexNode(
+                sectionId = section.id,
+                label = sectionLabel(section.number, section.title),
+                detail = if (section.title != null) null
+                    else section.blocks.firstNotNullOfOrNull { (it as? Block.Paragraph)?.text }?.let(InlineMarkup::plainText),
+            )
+        }
+
+    private fun TocEntry.toIndexNode(): IndexNode = IndexNode(
+        sectionId = sectionId,
+        label = sectionLabel(number, title),
+        addable = opensPage,
+        children = children.takeIf { it.isNotEmpty() }?.map { it.toIndexNode() },
+        lazyChildren = children.isEmpty() && opensPage,
+    )
 
     fun remove(sectionId: String) = _state.update { s ->
         s.copy(rules = s.rules.filterNot { it.rule.sectionId == sectionId }, dirty = true)

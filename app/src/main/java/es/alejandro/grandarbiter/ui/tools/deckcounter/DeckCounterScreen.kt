@@ -1,6 +1,10 @@
 package es.alejandro.grandarbiter.ui.tools.deckcounter
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -111,10 +115,8 @@ fun DeckCounterScreen(
             )
         },
     ) { innerPadding ->
-        Column(
-            Modifier.padding(innerPadding).fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+        val total = groups.sum()
+        val header: @Composable () -> Unit = {
             // Format + pile
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DeckFormat.entries.forEach { f ->
@@ -124,24 +126,22 @@ fun DeckCounterScreen(
             if (format.hasSideboard) {
                 PileTabs(pile, main.sum(), side.sum(), viewModel::selectPile)
             }
-
+        }
+        val count: @Composable (Int) -> Unit = { size ->
             // Total + status
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                val total = groups.sum()
                 Text(
                     total.toString(),
-                    style = TextStyle(fontSize = 96.sp, lineHeight = 104.sp, fontWeight = FontWeight.Black, letterSpacing = (-2).sp),
+                    style = TextStyle(fontSize = size.sp, lineHeight = (size + 8).sp, fontWeight = FontWeight.Black, letterSpacing = (-2).sp),
                     color = colors.primary,
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
                 StatusLine(DeckCount.status(format, pile, total), format, pile)
             }
-
-            // History: what was tapped, newest last (scrolls to the end)
-            History(groups.toList())
-
-            // 1–4 pads fill the remaining height: big targets, thumb reach
-            Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        }
+        val pads: @Composable (Modifier) -> Unit = { modifier ->
+            // 1–4 pads fill the space left: big targets, thumb reach
+            Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 for (row in listOf(1 to 2, 3 to 4)) {
                     Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         for (n in listOf(row.first, row.second)) {
@@ -153,7 +153,8 @@ fun DeckCounterScreen(
                     }
                 }
             }
-
+        }
+        val actions: @Composable () -> Unit = {
             // Undo last + reset (undoable from the snackbar)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 ActionButton(stringResource(R.string.deck_undo_last), enabled = groups.isNotEmpty(), modifier = Modifier.weight(1f),
@@ -169,6 +170,38 @@ fun DeckCounterScreen(
                         if (result == SnackbarResult.ActionPerformed) viewModel.restore(snapshot)
                     }
                 }
+            }
+        }
+
+        val configuration = LocalConfiguration.current
+        if (configuration.screenWidthDp > configuration.screenHeightDp) {
+            // Sideways: count and controls on the left, the pads on the right at full height.
+            Row(
+                Modifier.padding(innerPadding).fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Column(
+                    Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    header()
+                    count(64)
+                    History(groups.toList())
+                    actions()
+                }
+                pads(Modifier.weight(1f).fillMaxHeight())
+            }
+        } else {
+            Column(
+                Modifier.padding(innerPadding).fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                header()
+                count(96)
+                // History: what was tapped, newest last (scrolls to the end)
+                History(groups.toList())
+                pads(Modifier.weight(1f).fillMaxWidth())
+                actions()
             }
         }
     }

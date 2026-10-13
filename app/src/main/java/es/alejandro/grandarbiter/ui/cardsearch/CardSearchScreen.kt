@@ -107,6 +107,7 @@ fun CardSearchScreen(
             when {
                 dataState is CardDataState.Checking -> Unit
                 dataState is CardDataState.Preparing -> Centered {
+                    val soFar = (dataState as CardDataState.Preparing).cardsSoFar
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -115,6 +116,10 @@ fun CardSearchScreen(
                         CircularProgressIndicator()
                         Text(stringResource(R.string.cards_preparing), color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center)
+                        if (soFar != null) {
+                            Text(stringResource(R.string.cards_preparing_count, java.text.NumberFormat.getIntegerInstance().format(soFar)),
+                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
                 query.isBlank() -> (dataState as? CardDataState.Ready)?.let { IdleState(it) }

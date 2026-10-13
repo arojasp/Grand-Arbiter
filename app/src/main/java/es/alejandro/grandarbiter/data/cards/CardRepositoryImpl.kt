@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.data.cards
 
+import es.alejandro.grandarbiter.data.cards.local.CardImporter
 import es.alejandro.grandarbiter.data.cards.local.CardMapper
 import es.alejandro.grandarbiter.data.cards.local.CardsDao
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
@@ -10,7 +11,9 @@ import es.alejandro.grandarbiter.domain.repository.CardRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class CardRepositoryImpl(private val dao: CardsDao) : CardRepository {
+class CardRepositoryImpl(private val dao: CardsDao, private val importer: CardImporter) : CardRepository {
+
+    override fun observeImportProgress(): Flow<Int?> = importer.progress
 
     override suspend fun search(query: String, inText: Boolean, limit: Int): List<CardSummary> {
         val match = CardSearchQuery.toFts(query, inText) ?: return emptyList()

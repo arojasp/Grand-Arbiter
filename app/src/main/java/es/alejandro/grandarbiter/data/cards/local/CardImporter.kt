@@ -6,6 +6,9 @@ import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallCard
 import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallJson
 import es.alejandro.grandarbiter.data.cards.scryfall.ScryfallRuling
 import es.alejandro.grandarbiter.data.cards.scryfall.forEachJsonLine
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.SerializationException
@@ -40,6 +43,13 @@ class CardImporter(
 ) {
     private val mutex = Mutex()   // startup seed import and the weekly update must not interleave
 
+    private val _progress = MutableStateFlow<Int?>(null)
+    /**
+     * Cards written so far while an import runs; null when none is running. In memory, so the UI
+     * can show progress even while the database is busy with the import.
+     */
+    val progress: StateFlow<Int?> = _progress.asStateFlow()
+
     suspend fun import(source: CardDataSource, force: Boolean = false): CardImportResult = mutex.withLock {
         val version = source.version() ?: return CardImportResult.NoData
         val installed = dao.meta()?.let { CardDataVersion(it.oracleUpdatedAt, it.rulingsUpdatedAt) }
@@ -48,6 +58,7 @@ class CardImporter(
         }
 
         val started = clock()
+        _progress.value = 0
         val dropped = HashMap<String, Int>()
         var cards = 0
         var refs = 0
@@ -71,10 +82,11 @@ class CardImporter(
                         dropped[why] = (dropped[why] ?: 0) + 1
                     } else if (kept.add(card.oracleId!!)) {
                         batch += CardMapper.toEntity(card, json)
-                        if (batch.size == BATCH) { dao.insertCards(batch); batch.clear() }
+                        if (batch.size == BATCH) { dao.insertCards(batch); batch.clear(); _progress.value = kept.size }
                     }
                 }
                 if (batch.isNotEmpty()) dao.insertCards(batch)
+                _progress.value = kept.size
                 cards = kept.size
                 if (bad > MAX_BAD_LINES) throw ImportAbort("$bad card lines failed to decode (format change?)")
                 if (cards < minCards) throw ImportAbort("only $cards cards (expected ≥ $minCards): truncated file?")
@@ -119,6 +131,8 @@ class CardImporter(
             return CardImportResult.Rejected(e.message.orEmpty())
         } catch (e: java.io.IOException) {
             return CardImportResult.Rejected("read failed: $e")
+        } finally {
+            _progress.value = null
         }
         CardImportResult.Imported(source.name, version, cards, texts.size, refs, dropped, clock() - started)
     }

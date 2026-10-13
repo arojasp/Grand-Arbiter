@@ -1,6 +1,11 @@
 package es.alejandro.grandarbiter.ui.tools.quickrefs
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -164,6 +169,20 @@ fun QuickReferenceEditScreen(
                 }
             }
 
+            // No search: the document's index, to add rules by browsing (chapters > pages > rules).
+            if (state.query.isBlank() && state.index.isNotEmpty()) {
+                item {
+                    Label(stringResource(R.string.qr_browse, state.documentId.shortLabel()), Modifier.padding(start = 4.dp, top = 8.dp))
+                }
+                items(state.indexRows, key = { "index:" + it.sectionId }) { row ->
+                    IndexRowView(
+                        row = row,
+                        onToggle = { viewModel.toggle(row.sectionId) },
+                        onAdd = { viewModel.addSection(row.sectionId, row.label) },
+                    )
+                }
+            }
+
             if (state.id != null) {
                 item {
                     TextButton(onClick = { confirmDelete = true }, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
@@ -251,5 +270,48 @@ private fun SearchResultRow(result: RulesSearchResult, added: Boolean, onAdd: ()
             tint = if (added) colors.primary else colors.onSurfaceVariant,
             modifier = Modifier.size(22.dp),
         )
+    }
+}
+
+/** One index entry: tap opens/closes it (chapters, pages); the + adds it (pages, rules). */
+@Composable
+private fun IndexRowView(row: IndexRow, onToggle: () -> Unit, onAdd: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier.fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(enabled = row.expandable || (row.addable && !row.added), onClick = if (row.expandable) onToggle else onAdd)
+            .padding(start = 4.dp + 16.dp * row.depth, end = 4.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(24.dp), contentAlignment = Alignment.Center) {
+            when {
+                row.loading -> CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                row.expandable -> Icon(
+                    if (row.expanded) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    stringResource(if (row.expanded) R.string.qr_collapse else R.string.qr_expand),
+                    tint = colors.onSurfaceVariant,
+                )
+            }
+        }
+        Spacer(Modifier.width(8.dp))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(row.label,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = if (row.depth == 0) FontWeight.Bold else FontWeight.Medium),
+                color = colors.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            row.detail?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+        }
+        if (row.addable) {
+            IconButton(onClick = onAdd, enabled = !row.added) {
+                Icon(
+                    if (row.added) Icons.Default.CheckCircle else Icons.Default.AddCircleOutline,
+                    stringResource(if (row.added) R.string.qr_added else R.string.qr_add_rule),
+                    tint = if (row.added) colors.primary else colors.onSurfaceVariant,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+        }
     }
 }

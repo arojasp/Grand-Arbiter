@@ -21,6 +21,7 @@ class SettingsDataStore(private val context: Context) {
     private val HIGH_CONTRAST = booleanPreferencesKey("high_contrast")
     private val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
     private val VENUE_NOTE = stringPreferencesKey("hj_venue_note")
+    private val DRAFT_BEEP = booleanPreferencesKey("draft_beep")
 
     val displaySettings: Flow<DisplaySettings> = context.dataStore.data.map { p ->
         DisplaySettings(
@@ -36,6 +37,10 @@ class SettingsDataStore(private val context: Context) {
     /** Head Judge announcement: venue notes (restrooms, water…) kept between rounds and events. */
     val venueNote: Flow<String> = context.dataStore.data.map { it[VENUE_NOTE].orEmpty() }.distinctUntilChanged()
     suspend fun setVenueNote(note: String) = set(VENUE_NOTE, note)
+
+    /** Draft timer: short beep with the vibration when a step runs out. Off by default. */
+    val draftBeep: Flow<Boolean> = context.dataStore.data.map { it[DRAFT_BEEP] ?: false }.distinctUntilChanged()
+    suspend fun setDraftBeep(enabled: Boolean) = set(DRAFT_BEEP, enabled)
 
     suspend fun setThemeMode(mode: ThemeMode) = set(THEME_MODE, mode.name)
     suspend fun setTextScale(scale: TextScale) = set(TEXT_SCALE, scale.name)

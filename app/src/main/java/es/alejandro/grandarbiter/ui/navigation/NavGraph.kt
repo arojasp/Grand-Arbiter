@@ -19,7 +19,11 @@ import es.alejandro.grandarbiter.ui.reader.ReaderRoutes
 import es.alejandro.grandarbiter.ui.settings.SettingsScreen
 import es.alejandro.grandarbiter.ui.tools.banned.BannedListsScreen
 import es.alejandro.grandarbiter.ui.tools.deckcounter.DeckCounterScreen
-import es.alejandro.grandarbiter.ui.tools.DraftTimerScreen
+import es.alejandro.grandarbiter.domain.draft.DraftFormat
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftFormatScreen
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftRunScreen
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftSetupScreen
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftSetupViewModel
 import es.alejandro.grandarbiter.ui.tools.announcement.HeadJudgeAnnouncementScreen
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceDetailScreen
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceEditScreen
@@ -52,6 +56,10 @@ sealed class Screen(val route: String) {
     object Tools : Screen("tools")
     object DeckCounter : Screen("deck_counter")
     object DraftTimer : Screen("draft_timer")
+    object DraftSetup : Screen("draft_timer/{${DraftSetupViewModel.ARG_FORMAT}}/setup") {
+        fun createRoute(format: DraftFormat) = "draft_timer/${format.name}/setup"
+    }
+    object DraftRun : Screen("draft_timer/run")
     object HeadJudgeAnnouncement : Screen("head_judge_announcement")
     object BannedLists : Screen("banned_lists")
     object ReleaseNotes : Screen("release_notes")
@@ -136,7 +144,32 @@ fun AppNavGraph(
             )
         }
         composable(Screen.DeckCounter.route) { DeckCounterScreen(onBack = { navController.popBackStack() }) }
-        composable(Screen.DraftTimer.route) { DraftTimerScreen() }
+        composable(Screen.DraftTimer.route) {
+            // A draft in progress: the picker asks first (resume or discard).
+            DraftFormatScreen(
+                onBack = { navController.popBackStack() },
+                onOpenFormat = { format -> navController.navigate(Screen.DraftSetup.createRoute(format)) },
+                onResume = {
+                    navController.navigate(Screen.DraftRun.route) { popUpTo(Screen.DraftTimer.route) { inclusive = true } }
+                },
+            )
+        }
+        composable(Screen.DraftSetup.route) {
+            DraftSetupScreen(
+                onBack = { navController.popBackStack() },
+                onStarted = {
+                    navController.navigate(Screen.DraftRun.route) { popUpTo(Screen.DraftTimer.route) { inclusive = true } }
+                },
+            )
+        }
+        composable(Screen.DraftRun.route) {
+            DraftRunScreen(
+                onBack = { navController.popBackStack() },
+                onNoDraft = {
+                    navController.navigate(Screen.DraftTimer.route) { popUpTo(Screen.DraftRun.route) { inclusive = true } }
+                },
+            )
+        }
         composable(Screen.HeadJudgeAnnouncement.route) {
             HeadJudgeAnnouncementScreen(
                 onBack = { navController.popBackStack() },

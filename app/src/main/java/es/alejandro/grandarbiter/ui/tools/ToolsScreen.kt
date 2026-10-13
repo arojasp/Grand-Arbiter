@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Campaign
@@ -57,7 +56,7 @@ import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 
 /*
  * Figma: "Grand Arbiter - Tools with Disabled State" (node 19:723). The tools hub: in-tournament
- * tools as large cards, references as compact rows. Draft Timer is shown but disabled (coming soon).
+ * tools as large cards, references as compact rows.
  */
 
 private data class Tool(val title: Int, val description: Int, val icon: ImageVector, val route: String?)
@@ -65,13 +64,12 @@ private data class Tool(val title: Int, val description: Int, val icon: ImageVec
 private val ACTIVE_TOOLS = listOf(
     Tool(R.string.tools_deck_counter, R.string.tools_deck_counter_desc, Icons.Outlined.Style, Screen.DeckCounter.route),
     Tool(R.string.tools_announcement, R.string.tools_announcement_desc, Icons.Outlined.Campaign, Screen.HeadJudgeAnnouncement.route),
-    Tool(R.string.tools_draft_timer, R.string.tools_draft_timer_desc, Icons.Outlined.Timelapse, route = null),   // coming soon
+    Tool(R.string.tools_draft_timer, R.string.tools_draft_timer_desc, Icons.Outlined.Timelapse, Screen.DraftTimer.route),
 )
 
 private val REFERENCES = listOf(
     Tool(R.string.tools_banned_lists, R.string.tools_banned_lists_desc, Icons.Outlined.Block, Screen.BannedLists.route),
     Tool(R.string.tools_quick_references, R.string.tools_quick_references_desc, Icons.AutoMirrored.Outlined.MenuBook, Screen.QuickReferences.route),
-    Tool(R.string.tools_release_notes, R.string.tools_release_notes_desc, Icons.AutoMirrored.Outlined.Article, Screen.ReleaseNotes.route),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

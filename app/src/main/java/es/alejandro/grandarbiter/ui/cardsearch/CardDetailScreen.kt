@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -400,7 +401,8 @@ private fun ArtView(art: Art, showTitle: Boolean) {
             model = ImageRequest.Builder(LocalContext.current).data(art.url).crossfade(true).build(),
             contentDescription = art.title,
             contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxWidth().aspectRatio(ratio).clip(RoundedCornerShape(8.dp)),
+            // Capped width: sideways, a full-width image would be taller than the screen.
+            modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth().aspectRatio(ratio).clip(RoundedCornerShape(8.dp)),
             onSuccess = { state ->
                 val size = state.painter.intrinsicSize
                 if (size.width > 0f && size.height > 0f) ratio = size.width / size.height

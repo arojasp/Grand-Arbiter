@@ -11,6 +11,8 @@ interface CardRepository {
     suspend fun search(query: String, inText: Boolean = false, limit: Int = 100): List<CardSummary>
     suspend fun card(oracleId: String): CardDetail?
     fun observeDataInfo(): Flow<CardDataInfo?>
+    /** Cards written so far by an import in progress; null when none runs. */
+    fun observeImportProgress(): Flow<Int?>
     /** Banned/restricted lists per format; re-emits after a card data update. Empty until data is installed. */
     fun observeBanLists(): Flow<List<FormatBanList>>
 }

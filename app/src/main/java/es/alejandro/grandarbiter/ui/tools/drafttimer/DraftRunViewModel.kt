@@ -71,12 +71,13 @@ class DraftRunViewModel(
         var previousElapsed: Long? = null   // null: just (re)started or jumped, never alert
         while (true) {
             val now = System.currentTimeMillis()
-            val elapsed = session.elapsedAt(now)
+            val elapsed = session.elapsedAt(plan, now)
             if (DraftAlertPolicy.shouldAlert(plan, previousElapsed, elapsed)) alerts.stepEnded(beep.value)
             previousElapsed = elapsed
             val snapshot = DraftSnapshot.of(session, plan, now)
             emit(DraftRunState.Active(snapshot))
-            if (!session.isRunning || snapshot.position == DraftPosition.Finished) break
+            // Nothing changes while paused, waiting for "Start…" (manual start) or after the end.
+            if (!session.isRunning || snapshot.position !is DraftPosition.Running) break
             delay(1_000 - elapsed % 1_000)   // next whole second: steps last whole seconds
         }
     }
@@ -84,6 +85,9 @@ class DraftRunViewModel(
     fun togglePause() = update { s, _, now -> if (s.isRunning) s.paused(now) else s.started(now) }
     fun next() = update { s, plan, now -> s.next(plan, now) }
     fun previous() = update { s, plan, now -> s.previous(plan, now) }
+
+    /** Manual start: "Start pick 4", "Start review", "Start pack 2", "Start deck construction". */
+    fun startNext() = update { s, plan, now -> s.startNext(plan, now) }
 
     /** "End draft" (after confirming) and "Finish" on the time-up screen. */
     fun endDraft() = store.save(null)

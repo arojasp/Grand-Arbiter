@@ -90,11 +90,9 @@ fun DraftRunScreen(
             ) {
                 when (val p = s.position) {
                     DraftPosition.Finished -> TimeUpContent(s)
-                    is DraftPosition.Running -> when (val step = p.step) {
-                        is DraftStep.Pick -> PickContent(s, p, step)
-                        is DraftStep.Review -> ReviewContent(s, p, step)
-                        is DraftStep.Construction -> ConstructionContent(s, p)
-                    }
+                    is DraftPosition.Running -> StepContent(s, p, waiting = false)
+                    // Manual start: the step that ran out, at 0:00, until "Start…".
+                    is DraftPosition.Waiting -> StepContent(s, DraftPosition.Running(p.index, p.step, p.step.durationMs, 0), waiting = true)
                 }
             }
             Footer(s, viewModel, onEnd = { confirmEnd = true })
@@ -132,12 +130,19 @@ private fun KeepScreenOn() {
 // ---- Steps ----
 
 @Composable
-private fun PickContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftStep.Pick) {
+private fun StepContent(s: DraftSnapshot, p: DraftPosition.Running, waiting: Boolean) = when (val step = p.step) {
+    is DraftStep.Pick -> PickContent(s, p, step, waiting)
+    is DraftStep.Review -> ReviewContent(s, p, step, waiting)
+    is DraftStep.Construction -> ConstructionContent(s, p, waiting)
+}
+
+@Composable
+private fun PickContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftStep.Pick, waiting: Boolean) {
     StatusRow(
         left = { DraftChip(stringResource(R.string.draft_pack_of, step.pack, s.config.packs), MaterialTheme.colorScheme.primary, outlined = true) },
         right = { DraftChip(directionText(step.direction), MaterialTheme.colorScheme.onSurface) },
     )
-    Countdown(stringResource(R.string.draft_pick_label, step.pick, step.cardsLeft), p, s.isRunning,
+    Countdown(stringResource(R.string.draft_pick_label, step.pick, step.cardsLeft), p, s.isRunning, waiting,
         stringResource(R.string.draft_of, formatDuration(step.durationMs)))
     DraftCard {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -151,13 +156,13 @@ private fun PickContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftS
 }
 
 @Composable
-private fun ReviewContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftStep.Review) {
+private fun ReviewContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftStep.Review, waiting: Boolean) {
     val colors = MaterialTheme.colorScheme
     StatusRow(
         left = { DraftChip(stringResource(R.string.draft_pack_complete, step.afterPack), colors.primary, outlined = true) },
         right = { DraftChip(stringResource(R.string.draft_review)) },
     )
-    Countdown(stringResource(R.string.draft_review_label), p, s.isRunning, stringResource(R.string.draft_of, formatDuration(step.durationMs)))
+    Countdown(stringResource(R.string.draft_review_label), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatDuration(step.durationMs)))
     DraftCard {
         DraftLabel(stringResource(R.string.draft_up_next))
         Text(stringResource(R.string.draft_pack_n, step.nextPack), style = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
@@ -174,13 +179,13 @@ private fun ReviewContent(s: DraftSnapshot, p: DraftPosition.Running, step: Draf
 }
 
 @Composable
-private fun ConstructionContent(s: DraftSnapshot, p: DraftPosition.Running) {
+private fun ConstructionContent(s: DraftSnapshot, p: DraftPosition.Running, waiting: Boolean) {
     val colors = MaterialTheme.colorScheme
     StatusRow(
         left = { DraftChip(stringResource(R.string.draft_complete), colors.primary, outlined = true) },
         right = { DraftChip(stringResource(R.string.draft_build)) },
     )
-    Countdown(stringResource(R.string.draft_construction), p, s.isRunning, stringResource(R.string.draft_of, formatClock(p.step.durationMs)), size = 80)
+    Countdown(stringResource(R.string.draft_construction), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatClock(p.step.durationMs)), size = 80)
     DraftCard {
         DraftLabel(stringResource(R.string.draft_when_time_is_up))
         Text(stringResource(R.string.draft_when_time_is_up_text), style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp), color = colors.onSurfaceVariant)
@@ -216,16 +221,22 @@ private fun StatusRow(left: @Composable () -> Unit, right: @Composable () -> Uni
 }
 
 @Composable
-private fun Countdown(label: String, p: DraftPosition.Running, running: Boolean, sub: String, size: Int = 96) {
+private fun Countdown(label: String, p: DraftPosition.Running, running: Boolean, waiting: Boolean, sub: String, size: Int = 96) {
     val colors = MaterialTheme.colorScheme
+    val paused = !running && !waiting
     CountdownFrame(
-        label = if (running) label else stringResource(R.string.draft_paused_label, label),
+        label = if (paused) stringResource(R.string.draft_paused_label, label) else label,
         time = formatClock(p.remainingMs),
         fraction = p.remainingMs.toFloat() / p.step.durationMs,
-        sub = sub,
-        color = if (running) colors.onSurface else colors.onSurfaceVariant.copy(alpha = 0.6f),
-        labelColor = if (running) colors.onSurfaceVariant else colors.primary,
+        sub = if (waiting) stringResource(R.string.draft_time_is_up) else sub,
+        color = when {
+            waiting -> colors.primary
+            paused -> colors.onSurfaceVariant.copy(alpha = 0.6f)
+            else -> colors.onSurface
+        },
+        labelColor = if (paused) colors.primary else colors.onSurfaceVariant,
         size = size,
+        borderColor = if (waiting) colors.primary.copy(alpha = 0.6f) else colors.outlineVariant,
     )
 }
 
@@ -309,18 +320,19 @@ private fun Footer(s: DraftSnapshot, viewModel: DraftRunViewModel, onEnd: () -> 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        val running = s.position as? DraftPosition.Running
-        if (running == null) {
+        val position = s.position
+        if (position == DraftPosition.Finished) {
             // Time up: one action.
-            Box(
-                Modifier.fillMaxWidth().height(52.dp).clip(CircleShape).background(GoldDeep)
-                    .clickable(role = Role.Button) { viewModel.endDraft() },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(stringResource(R.string.draft_finish), style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold), color = OnGoldDeep)
-            }
+            PrimaryButton(stringResource(R.string.draft_finish), viewModel::endDraft)
             return@Column
         }
+        if (position is DraftPosition.Waiting) {
+            // Manual start: the judge starts what comes next. A plain tap: it's the expected action.
+            PrimaryButton(startLabel(position.step, s.nextStep), viewModel::startNext)
+            EndDraftLink(onEnd)
+            return@Column
+        }
+        val running = position as DraftPosition.Running
 
         PauseButton(s.isRunning, viewModel::togglePause)
 
@@ -347,13 +359,37 @@ private fun Footer(s: DraftSnapshot, viewModel: DraftRunViewModel, onEnd: () -> 
             )
         }
 
-        Text(
-            stringResource(R.string.draft_end),
-            Modifier.clip(CircleShape).clickable(role = Role.Button, onClick = onEnd).padding(horizontal = 16.dp, vertical = 8.dp),
-            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
-            color = colors.error,
-        )
+        EndDraftLink(onEnd)
     }
+}
+
+@Composable
+internal fun startLabel(ended: DraftStep, next: DraftStep?): String = when (next) {
+    is DraftStep.Pick -> if (ended is DraftStep.Review) stringResource(R.string.draft_start_pack, next.pack)
+        else stringResource(R.string.draft_start_pick, next.pick)
+    is DraftStep.Review -> stringResource(R.string.draft_start_review)
+    is DraftStep.Construction -> stringResource(R.string.draft_start_construction)
+    null -> stringResource(R.string.draft_finish)
+}
+
+@Composable
+private fun PrimaryButton(text: String, onClick: () -> Unit) {
+    Box(
+        Modifier.fillMaxWidth().height(56.dp).clip(CircleShape).background(GoldDeep).clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold), color = OnGoldDeep)
+    }
+}
+
+@Composable
+private fun EndDraftLink(onEnd: () -> Unit) {
+    Text(
+        stringResource(R.string.draft_end),
+        Modifier.clip(CircleShape).clickable(role = Role.Button, onClick = onEnd).padding(horizontal = 16.dp, vertical = 8.dp),
+        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
+        color = MaterialTheme.colorScheme.error,
+    )
 }
 
 @Composable

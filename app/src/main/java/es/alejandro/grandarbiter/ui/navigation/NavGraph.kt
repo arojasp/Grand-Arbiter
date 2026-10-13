@@ -19,16 +19,11 @@ import es.alejandro.grandarbiter.ui.reader.ReaderRoutes
 import es.alejandro.grandarbiter.ui.settings.SettingsScreen
 import es.alejandro.grandarbiter.ui.tools.banned.BannedListsScreen
 import es.alejandro.grandarbiter.ui.tools.deckcounter.DeckCounterScreen
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
-import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftFormatScreen
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftRunScreen
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftSetupScreen
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftSetupViewModel
-import org.koin.compose.koinInject
 import es.alejandro.grandarbiter.ui.tools.announcement.HeadJudgeAnnouncementScreen
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceDetailScreen
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceEditScreen
@@ -150,16 +145,13 @@ fun AppNavGraph(
         }
         composable(Screen.DeckCounter.route) { DeckCounterScreen(onBack = { navController.popBackStack() }) }
         composable(Screen.DraftTimer.route) {
-            // A draft in progress: straight to it (back from there returns to Tools).
-            val session by koinInject<DraftSessionStore>().session.collectAsState()
-            LaunchedEffect(session != null) {
-                if (session != null) navController.navigate(Screen.DraftRun.route) {
-                    popUpTo(Screen.DraftTimer.route) { inclusive = true }
-                }
-            }
+            // A draft in progress: the picker asks first (resume or discard).
             DraftFormatScreen(
                 onBack = { navController.popBackStack() },
                 onOpenFormat = { format -> navController.navigate(Screen.DraftSetup.createRoute(format)) },
+                onResume = {
+                    navController.navigate(Screen.DraftRun.route) { popUpTo(Screen.DraftTimer.route) { inclusive = true } }
+                },
             )
         }
         composable(Screen.DraftSetup.route) {

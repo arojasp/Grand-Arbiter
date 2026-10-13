@@ -35,10 +35,12 @@ class DraftSetupViewModel(
     private val packs = state.getStateFlow(KEY_PACKS, last.packs)
     private val cardsPerPack = state.getStateFlow(KEY_CARDS, last.cardsPerPack)
     private val constructionMinutes = state.getStateFlow(KEY_MINUTES, last.constructionMinutes)
+    private val manualStart = state.getStateFlow(KEY_MANUAL, last.manualStart)
 
-    val config: StateFlow<DraftConfig> = combine(packs, cardsPerPack, constructionMinutes) { p, c, m ->
-        DraftConfig(format, p, c, m)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, DraftConfig(format, last.packs, last.cardsPerPack, last.constructionMinutes))
+    /** Starting a draft stores this as the last config: that is how "Manual start" is remembered. */
+    val config: StateFlow<DraftConfig> = combine(packs, cardsPerPack, constructionMinutes, manualStart) { p, c, m, manual ->
+        DraftConfig(format, p, c, m, manual)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, last.copy(format = format))
 
     private val timings: StateFlow<BoosterDraftTimings> = timingsRepository.timings
         .stateIn(viewModelScope, SharingStarted.Eagerly, BoosterDraftTimings.FALLBACK)
@@ -54,6 +56,7 @@ class DraftSetupViewModel(
     fun setPacks(value: Int) { state[KEY_PACKS] = value.coerceIn(DraftConfig.PACKS) }
     fun setCardsPerPack(value: Int) { state[KEY_CARDS] = value.coerceIn(DraftConfig.CARDS_PER_PACK) }
     fun setConstructionMinutes(value: Int) { state[KEY_MINUTES] = value.coerceIn(DraftConfig.CONSTRUCTION_MINUTES) }
+    fun setManualStart(enabled: Boolean) { state[KEY_MANUAL] = enabled }
     fun setBeep(enabled: Boolean) = viewModelScope.launch { settings.setDraftBeep(enabled) }
 
     /** Starts the draft now (the first pick's time runs from this moment). */
@@ -67,5 +70,6 @@ class DraftSetupViewModel(
         private const val KEY_PACKS = "packs"
         private const val KEY_CARDS = "cards_per_pack"
         private const val KEY_MINUTES = "construction_minutes"
+        private const val KEY_MANUAL = "manual_start"
     }
 }

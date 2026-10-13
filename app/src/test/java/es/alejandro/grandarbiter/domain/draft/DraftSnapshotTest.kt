@@ -10,7 +10,7 @@ import org.junit.Test
 /** What the running screen shows: current step, what comes next, totals. */
 class DraftSnapshotTest {
 
-    private val config = DraftConfig()
+    private val config = DraftConfig(manualStart = false)
     private val plan = DraftPlans.create(config, BoosterDraftTimings.FALLBACK)
     private val session = DraftSession(config).started(now = 0)
 
@@ -56,6 +56,14 @@ class DraftSnapshotTest {
         assertEquals(listOf(60, 90), e.reviewSeconds)
         assertEquals(25 * 60_000L, e.constructionMs)
         assertEquals(e.picksMs + 150_000L + e.constructionMs, e.totalMs)
+    }
+
+    @Test fun manualStart_waiting_nextIsWhatTheButtonStarts() {
+        val manual = DraftSession(DraftConfig(manualStart = true)).started(now = 0)
+        val s = DraftSnapshot.of(manual, plan, now = 60_000)          // first pick (40 s) ran out
+        assertEquals(DraftPosition.Waiting(0, plan.steps[0]), s.position)
+        assertEquals(plan.steps[1], s.nextStep)
+        assertEquals(40_000L, s.elapsedMs)                             // the clock stopped at 0:00
     }
 
     @Test fun onlyBoosterIsAvailable() =

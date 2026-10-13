@@ -8,6 +8,8 @@ data class DraftConfig(
     val cardsPerPack: Int = DEFAULT_CARDS_PER_PACK,
     /** The Head Judge may change it (Appendix B): editable. */
     val constructionMinutes: Int = DEFAULT_CONSTRUCTION_MINUTES,
+    /** "Manual start": at 0:00 the timer stops until the judge starts the next step. */
+    val manualStart: Boolean = DEFAULT_MANUAL_START,
 ) {
     init {
         require(packs in PACKS) { "packs $packs not in $PACKS" }
@@ -19,6 +21,8 @@ data class DraftConfig(
         const val DEFAULT_PACKS = 3
         const val DEFAULT_CARDS_PER_PACK = 14
         const val DEFAULT_CONSTRUCTION_MINUTES = 25
+        /** On the first time; afterwards the setup remembers the judge's last choice. */
+        const val DEFAULT_MANUAL_START = true
         val PACKS = 1..6
         val CARDS_PER_PACK = 5..15
         val CONSTRUCTION_MINUTES = 1..90

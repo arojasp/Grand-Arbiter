@@ -34,5 +34,20 @@ class DraftSessionCodecTest {
 
     @Test fun negativeTime_null() = assertNull(DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, accumulatedMs = -1)))
 
+    @Test fun manualStartAndStep_roundTrip() {
+        val manual = DraftSession(DraftConfig(manualStart = true), TimerState(40_000, null), step = 3)
+        assertEquals(manual, DraftSessionCodec.decode(DraftSessionCodec.encode(manual)))
+        val auto = DraftConfig(manualStart = false)
+        assertEquals(auto, DraftSessionCodec.decodeConfig(DraftSessionCodec.encodeConfig(auto)))
+    }
+
+    @Test fun draftFromAnOlderVersion_keepsRunningOnItsOwn() =
+        assertEquals(false, DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25))!!.config.manualStart)
+
+    @Test fun lastConfigFromAnOlderVersion_getsTheFirstTimeDefault() =
+        assertEquals(true, DraftSessionCodec.decodeConfig(Stored("BOOSTER", 3, 14, 25))!!.manualStart)
+
+    @Test fun negativeStep_null() = assertNull(DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, step = -1)))
+
     @Test fun missingFormat_null() = assertNull(DraftSessionCodec.decode(Stored(null, 3, 14, 25)))
 }

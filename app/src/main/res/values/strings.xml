@@ -348,6 +348,12 @@
     <string name="draft_previous_pick">Previous pick</string>
     <string name="draft_next_pick_button">Next pick</string>
     <string name="draft_start_pack">Start pack %1$d</string>
+    <string name="draft_start_pick">Start pick %1$d</string>
+    <string name="draft_start_review">Start review</string>
+    <string name="draft_start_construction">Start deck construction</string>
+    <string name="draft_section_timer">Timer</string>
+    <string name="draft_manual_start">Manual start</string>
+    <string name="draft_manual_start_hint">At 0:00 the timer stops until you start the next step</string>
     <string name="draft_hold_hint">Press and hold to skip or go back</string>
     <string name="draft_keep_holding">Keep holding…</string>
     <string name="draft_hold_to_confirm">Hold to confirm</string>
@@ -357,5 +363,14 @@
     <string name="draft_end_title">End the draft?</string>
     <string name="draft_end_text">The timer stops and this draft can\'t be resumed.</string>
     <string name="draft_cancel">Cancel</string>
+    <string name="draft_active_title">Draft in progress</string>
+    <string name="draft_active_text">%1$s\n\nResume it, or discard it to set up a new one.</string>
+    <string name="draft_discard">Discard</string>
+    <string name="draft_active_pick">Pack %1$d · Pick %2$d · %3$s left</string>
+    <string name="draft_active_review">Review after pack %1$d · %2$s left</string>
+    <string name="draft_active_construction">Deck construction · %1$s left</string>
+    <string name="draft_active_waiting">Waiting: %1$s</string>
+    <string name="draft_active_finished">Deck construction time is up</string>
+    <string name="draft_active_paused">%1$s (paused)</string>
 
 </resources>

@@ -57,6 +57,7 @@ import es.alejandro.grandarbiter.data.draft.DraftTimingsRepository
 import es.alejandro.grandarbiter.data.draft.PrefsDraftSessionStore
 import es.alejandro.grandarbiter.domain.draft.DraftAlerts
 import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftFormatViewModel
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftRunViewModel
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftSetupViewModel
 
@@ -157,6 +158,7 @@ val viewModelModule = module {
     viewModelOf(::GlossaryViewModel)
     viewModelOf(::QuickReferenceDetailViewModel)
     viewModelOf(::QuickReferenceEditViewModel)
+    viewModelOf(::DraftFormatViewModel)
     viewModelOf(::DraftSetupViewModel)
     viewModelOf(::DraftRunViewModel)
 }

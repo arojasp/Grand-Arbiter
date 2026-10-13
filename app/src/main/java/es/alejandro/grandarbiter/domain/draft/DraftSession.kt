@@ -5,36 +5,61 @@ import es.alejandro.grandarbiter.domain.timer.TimerState
 /**
  * A draft in progress: its config and ONE timer for the whole timeline (the same TimerState as
  * the judge call timer). Persisted as is; on return the right step comes from the clock.
- * Pure: unit-tested.
+ *
+ * Manual start ([DraftConfig.manualStart]): time never runs past the end of [step]; there the
+ * draft waits at 0:00 ([DraftPosition.Waiting]) until [startNext]. Without it the steps follow
+ * each other on their own. Pure: unit-tested.
  */
 data class DraftSession(
     val config: DraftConfig,
     val timer: TimerState = TimerState(),
+    /** The step being timed (manual start: the one time stops at). Kept in sync by the jumps. */
+    val step: Int = 0,
 ) {
+    init { require(step >= 0) { "step $step < 0" } }
+
     val isRunning: Boolean get() = timer.isRunning
 
-    fun elapsedAt(now: Long): Long = timer.elapsedAt(now)
+    /** Elapsed draft time; with manual start, capped at the end of [step]. */
+    fun elapsedAt(plan: DraftPlan, now: Long): Long {
+        val elapsed = timer.elapsedAt(now)
+        return if (config.manualStart) elapsed.coerceAtMost(plan.startOf(step + 1)) else elapsed
+    }
 
-    fun positionAt(plan: DraftPlan, now: Long): DraftPosition = plan.positionAt(elapsedAt(now))
+    fun positionAt(plan: DraftPlan, now: Long): DraftPosition {
+        val elapsed = elapsedAt(plan, now)
+        if (config.manualStart && step < plan.steps.size && elapsed >= plan.startOf(step + 1)) {
+            return if (step >= plan.steps.lastIndex) DraftPosition.Finished
+            else DraftPosition.Waiting(step, plan.steps[step])
+        }
+        return plan.positionAt(elapsed)
+    }
 
     fun started(now: Long): DraftSession = copy(timer = timer.started(now))
     fun paused(now: Long): DraftSession = copy(timer = timer.paused(now))
 
     /** Jump to the start of the next step ("Next pick", "Start pack N"); from the last one, finish. */
     fun next(plan: DraftPlan, now: Long): DraftSession = when (val p = positionAt(plan, now)) {
-        is DraftPosition.Running -> seek(plan.startOf(p.index + 1), now)
+        is DraftPosition.Running -> seek(plan, p.index + 1, now)
+        is DraftPosition.Waiting -> seek(plan, p.index + 1, now)
         DraftPosition.Finished -> this
     }
 
     /** Jump to the start of the previous step; on the first step, back to its start. */
     fun previous(plan: DraftPlan, now: Long): DraftSession = when (val p = positionAt(plan, now)) {
-        is DraftPosition.Running -> seek(plan.startOf((p.index - 1).coerceAtLeast(0)), now)
-        DraftPosition.Finished -> seek(plan.startOf(plan.steps.lastIndex), now)
+        is DraftPosition.Running -> seek(plan, (p.index - 1).coerceAtLeast(0), now)
+        is DraftPosition.Waiting -> seek(plan, p.index, now)   // the step that just ran out, again
+        DraftPosition.Finished -> seek(plan, plan.steps.lastIndex, now)
     }
 
-    /** Elapsed time set to [elapsedMs]; keeps running if it was running, paused if it was paused. */
-    private fun seek(elapsedMs: Long, now: Long): DraftSession =
-        copy(timer = TimerState(accumulatedMs = elapsedMs, runningSince = if (timer.isRunning) now else null))
+    /** Manual start: the judge starts the next step (always running, even if it was paused). */
+    fun startNext(plan: DraftPlan, now: Long): DraftSession = next(plan, now).started(now)
+
+    /** Time set to the start of step [index] (or the end, past the last); keeps running or paused. */
+    private fun seek(plan: DraftPlan, index: Int, now: Long): DraftSession = copy(
+        timer = TimerState(accumulatedMs = plan.startOf(index), runningSince = if (timer.isRunning) now else null),
+        step = index.coerceAtMost(plan.steps.size),
+    )
 }
 
 /**

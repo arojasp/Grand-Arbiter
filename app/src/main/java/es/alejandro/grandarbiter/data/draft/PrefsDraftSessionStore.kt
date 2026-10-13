@@ -22,7 +22,7 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
     override val session: StateFlow<DraftSession?> = _session.asStateFlow()
 
     override val lastConfig: DraftConfig
-        get() = readStored(LAST)?.let(DraftSessionCodec::decodeConfig) ?: DraftConfig()
+        get() = readStored(LAST)?.let { DraftSessionCodec.decodeConfig(it) } ?: DraftConfig()
 
     @Synchronized
     override fun save(session: DraftSession?) {
@@ -46,8 +46,10 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
             packs = prefs.getInt(prefix + PACKS, 0),
             cardsPerPack = prefs.getInt(prefix + CARDS, 0),
             constructionMinutes = prefs.getInt(prefix + MINUTES, 0),
+            manualStart = if (prefs.contains(prefix + MANUAL)) prefs.getBoolean(prefix + MANUAL, true) else null,
             accumulatedMs = prefs.getLong(prefix + ACCUMULATED, 0),
             runningSince = if (prefs.contains(prefix + SINCE)) prefs.getLong(prefix + SINCE, 0) else null,
+            step = prefs.getInt(prefix + STEP, 0),
         )
     }
 
@@ -56,6 +58,8 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
         putInt(prefix + PACKS, s.packs)
         putInt(prefix + CARDS, s.cardsPerPack)
         putInt(prefix + MINUTES, s.constructionMinutes)
+        if (s.manualStart != null) putBoolean(prefix + MANUAL, s.manualStart) else remove(prefix + MANUAL)
+        putInt(prefix + STEP, s.step)
         putLong(prefix + ACCUMULATED, s.accumulatedMs)
         if (s.runningSince != null) putLong(prefix + SINCE, s.runningSince) else remove(prefix + SINCE)
     }
@@ -69,6 +73,8 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
         const val MINUTES = "construction_minutes"
         const val ACCUMULATED = "accumulated_ms"
         const val SINCE = "running_since"
-        val KEYS = listOf(FORMAT, PACKS, CARDS, MINUTES, ACCUMULATED, SINCE)
+        const val MANUAL = "manual_start"
+        const val STEP = "step"
+        val KEYS = listOf(FORMAT, PACKS, CARDS, MINUTES, MANUAL, ACCUMULATED, SINCE, STEP)
     }
 }

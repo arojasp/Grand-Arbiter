@@ -59,16 +59,21 @@ data class DraftSnapshot(
     val config: DraftConfig,
     val position: DraftPosition,
     val isRunning: Boolean,
-    /** What comes after the current step ("Next pick: 11 cards · 25 s", "Up next: pack 2"); null on the last one. */
+    /** What comes after the current (or just ended) step: "Next pick: 11 cards · 25 s", "Start pack 2"; null on the last one. */
     val nextStep: DraftStep?,
     val elapsedMs: Long,
     val totalMs: Long,
 ) {
     companion object {
         fun of(session: DraftSession, plan: DraftPlan, now: Long): DraftSnapshot {
-            val elapsed = session.elapsedAt(now)
-            val position = plan.positionAt(elapsed)
-            val next = (position as? DraftPosition.Running)?.let { plan.steps.getOrNull(it.index + 1) }
+            val elapsed = session.elapsedAt(plan, now)
+            val position = session.positionAt(plan, now)
+            val index = when (position) {
+                is DraftPosition.Running -> position.index
+                is DraftPosition.Waiting -> position.index
+                DraftPosition.Finished -> null
+            }
+            val next = index?.let { plan.steps.getOrNull(it + 1) }
             return DraftSnapshot(session.config, position, session.isRunning, next, elapsed.coerceAtMost(plan.totalMs), plan.totalMs)
         }
     }

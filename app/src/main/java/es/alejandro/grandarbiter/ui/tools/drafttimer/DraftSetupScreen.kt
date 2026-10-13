@@ -85,6 +85,15 @@ fun DraftSetupScreen(
                     config.constructionMinutes, DraftConfig.CONSTRUCTION_MINUTES, viewModel::setConstructionMinutes)
             }
             DraftCard {
+                DraftLabel(stringResource(R.string.draft_section_timer))
+                SettingRow(stringResource(R.string.draft_manual_start), stringResource(R.string.draft_manual_start_hint)) {
+                    Switch(
+                        checked = config.manualStart, onCheckedChange = { viewModel.setManualStart(it) },
+                        colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                    )
+                }
+            }
+            DraftCard {
                 DraftLabel(stringResource(R.string.draft_section_alerts))
                 SettingRow(stringResource(R.string.draft_vibrate), stringResource(R.string.draft_vibrate_hint)) {
                     DraftChip(stringResource(R.string.draft_always))

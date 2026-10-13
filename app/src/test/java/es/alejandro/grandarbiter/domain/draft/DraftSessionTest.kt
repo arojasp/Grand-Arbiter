@@ -8,7 +8,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Running a draft: pause/resume, the hold-to-confirm jumps, leaving the app and coming back. */
+/** Running a draft (steps on their own): pause/resume, the hold-to-confirm jumps, leaving the app and coming back. */
 class DraftSessionTest {
 
     // 10 s pick, 5 s review, 60 s construction.
@@ -17,7 +17,7 @@ class DraftSessionTest {
         DraftStep.Review(1, PassDirection.RIGHT, 5_000),
         DraftStep.Construction(60_000),
     ))
-    private val started = DraftSession(DraftConfig()).started(now = 1_000)
+    private val started = DraftSession(DraftConfig(manualStart = false)).started(now = 1_000)
 
     private fun DraftSession.index(now: Long) = (positionAt(plan, now) as Running).index
 

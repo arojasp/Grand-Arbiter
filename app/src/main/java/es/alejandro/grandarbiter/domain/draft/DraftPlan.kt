@@ -34,6 +34,9 @@ sealed interface DraftPosition {
         val remainingMs: Long,
     ) : DraftPosition
 
+    /** Manual start: [step] ran out and the timer waits at 0:00 until the next step is started. */
+    data class Waiting(val index: Int, val step: DraftStep) : DraftPosition
+
     /** Every step has run out (deck construction time is up). */
     data object Finished : DraftPosition
 }

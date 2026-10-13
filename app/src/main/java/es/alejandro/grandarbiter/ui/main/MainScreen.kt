@@ -1,7 +1,15 @@
 package es.alejandro.grandarbiter.ui.main
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
@@ -11,6 +19,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -20,7 +31,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -53,14 +66,23 @@ fun MainScreenContent(
         NavigationItem(R.string.nav_tools, Screen.Tools.route, Icons.Default.Build)
     )
 
+    val showNavigation = items.any { item -> currentDestination?.hierarchy?.any { it.route == item.route } == true }
+    // Phone turned sideways: the bar moves to the side (a rail), the content keeps its height.
+    val configuration = LocalConfiguration.current
+    val landscape = configuration.screenWidthDp > configuration.screenHeightDp
+    val isSelected = { item: NavigationItem -> currentDestination?.hierarchy?.any { it.route == item.route } == true }
+    val open = { item: NavigationItem ->
+        navController.navigate(item.route) {
+            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },   // app-wide: rules updated, app update ready
         bottomBar = {
-            val showBottomBar = items.any { item ->
-                currentDestination?.hierarchy?.any { it.route == item.route } == true
-            }
-
-            if (showBottomBar) {
+            if (showNavigation && !landscape) {
                 NavigationBar {
                     items.forEach { item ->
                         val title = stringResource(item.titleRes)
@@ -71,34 +93,54 @@ fun MainScreenContent(
                                     Text(title)
                                 }
                             },
-                            selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
+                            selected = isSelected(item),
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                 selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                 indicatorColor = MaterialTheme.colorScheme.primaryContainer,
                             ),
-                            onClick = {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
+                            onClick = { open(item) },
                         )
                     }
                 }
             }
         }
     ) { innerPadding ->
-        AppNavGraph(
-            navController = navController,
-            modifier = Modifier.padding(innerPadding),
-            startDestination = startDestination,
-        )
+        Row(Modifier.padding(innerPadding).fillMaxSize()) {
+            if (showNavigation && landscape) {
+                NavigationRail(windowInsets = WindowInsets(0, 0, 0, 0)) {   // the Scaffold already applied the insets
+                    Spacer(Modifier.weight(1f))
+                    items.forEach { item ->
+                        val title = stringResource(item.titleRes)
+                        NavigationRailItem(
+                            icon = { Icon(item.icon, contentDescription = title) },
+                            label = { Text(title) },
+                            selected = isSelected(item),
+                            colors = NavigationRailItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            ),
+                            onClick = { open(item) },
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
+                }
+            }
+            // Wide screens: content centered at a readable width (no 900 dp lines of rules text).
+            Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.TopCenter) {
+                AppNavGraph(
+                    navController = navController,
+                    modifier = Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxSize(),
+                    startDestination = startDestination,
+                )
+            }
+        }
     }
 }
+
+/** Widest the screens get; phones in portrait are narrower, so it only applies sideways. */
+private val MAX_CONTENT_WIDTH = 640.dp
 
 
 @Preview(showBackground = true)

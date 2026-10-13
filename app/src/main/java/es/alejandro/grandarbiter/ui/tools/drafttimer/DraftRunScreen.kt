@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -83,19 +85,34 @@ fun DraftRunScreen(
     ) { innerPadding ->
         val active = state as? DraftRunState.Active ?: return@Scaffold
         val s = active.snapshot
-        Column(Modifier.padding(innerPadding).fillMaxSize()) {
-            Column(
-                Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                when (val p = s.position) {
-                    DraftPosition.Finished -> TimeUpContent(s)
-                    is DraftPosition.Running -> StepContent(s, p, waiting = false)
-                    // Manual start: the step that ran out, at 0:00, until "Start…".
-                    is DraftPosition.Waiting -> StepContent(s, DraftPosition.Running(p.index, p.step, p.step.durationMs, 0), waiting = true)
+        val content: @Composable () -> Unit = {
+            when (val p = s.position) {
+                DraftPosition.Finished -> TimeUpContent(s)
+                is DraftPosition.Running -> StepContent(s, p, waiting = false)
+                // Manual start: the step that ran out, at 0:00, until "Start…".
+                is DraftPosition.Waiting -> StepContent(s, DraftPosition.Running(p.index, p.step, p.step.durationMs, 0), waiting = true)
+            }
+        }
+        val configuration = LocalConfiguration.current
+        if (configuration.screenWidthDp > configuration.screenHeightDp) {
+            // Sideways: the step on the left (scrolls if needed), the controls always visible on the right.
+            Row(Modifier.padding(innerPadding).fillMaxSize()) {
+                Column(
+                    Modifier.weight(1.4f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) { content() }
+                Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                    Footer(s, viewModel, onEnd = { confirmEnd = true })
                 }
             }
-            Footer(s, viewModel, onEnd = { confirmEnd = true })
+        } else {
+            Column(Modifier.padding(innerPadding).fillMaxSize()) {
+                Column(
+                    Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) { content() }
+                Footer(s, viewModel, onEnd = { confirmEnd = true })
+            }
         }
     }
 

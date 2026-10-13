@@ -373,4 +373,8 @@
     <string name="draft_active_finished">Deck construction time is up</string>
     <string name="draft_active_paused">%1$s (paused)</string>
 
+    <!-- Quick reference editor: browse the document's index -->
+    <string name="qr_browse">Or browse the %1$s</string>
+    <string name="qr_expand">Show contents</string>
+    <string name="qr_collapse">Hide contents</string>
 </resources>

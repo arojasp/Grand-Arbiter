@@ -48,6 +48,16 @@ class DraftSnapshotTest {
         DraftPlans.create(DraftConfig(format = DraftFormat.TWO_HEADED_GIANT), BoosterDraftTimings.FALLBACK)
     }
 
+    @Test fun estimate_standardDraft() {
+        val e = DraftEstimate.of(plan)
+        assertEquals(3, e.packs)
+        assertEquals(13, e.timedPicksPerPack)
+        assertEquals(735_000L, e.picksMs)            // 12:15
+        assertEquals(listOf(60, 90), e.reviewSeconds)
+        assertEquals(25 * 60_000L, e.constructionMs)
+        assertEquals(e.picksMs + 150_000L + e.constructionMs, e.totalMs)
+    }
+
     @Test fun onlyBoosterIsAvailable() =
         assertEquals(listOf(DraftFormat.BOOSTER), DraftFormat.entries.filter { it.available })
 }

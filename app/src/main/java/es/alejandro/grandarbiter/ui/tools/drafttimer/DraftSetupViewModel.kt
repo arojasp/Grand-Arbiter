@@ -7,6 +7,7 @@ import es.alejandro.grandarbiter.data.draft.DraftTimingsRepository
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.domain.draft.BoosterDraftTimings
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
+import es.alejandro.grandarbiter.domain.draft.DraftEstimate
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftPlans
 import es.alejandro.grandarbiter.domain.draft.DraftSession
@@ -42,10 +43,10 @@ class DraftSetupViewModel(
     private val timings: StateFlow<BoosterDraftTimings> = timingsRepository.timings
         .stateIn(viewModelScope, SharingStarted.Eagerly, BoosterDraftTimings.FALLBACK)
 
-    /** Total draft time with this config: picks + reviews + construction. */
-    val estimatedMs: StateFlow<Long> = combine(config, timings) { c, t ->
-        if (c.format.available) DraftPlans.create(c, t).totalMs else 0L
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
+    /** Draft time with this config: picks + reviews + construction. Null for formats not available. */
+    val estimate: StateFlow<DraftEstimate?> = combine(config, timings) { c, t ->
+        if (c.format.available) DraftEstimate.of(DraftPlans.create(c, t)) else null
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val beep: StateFlow<Boolean> = settings.draftBeep
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)

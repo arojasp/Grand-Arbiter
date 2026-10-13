@@ -57,7 +57,7 @@ import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 
 /*
  * Figma: "Grand Arbiter - Tools with Disabled State" (node 19:723). The tools hub: in-tournament
- * tools as large cards, references as compact rows. Draft Timer is shown but disabled (coming soon).
+ * tools as large cards, references as compact rows.
  */
 
 private data class Tool(val title: Int, val description: Int, val icon: ImageVector, val route: String?)
@@ -65,7 +65,7 @@ private data class Tool(val title: Int, val description: Int, val icon: ImageVec
 private val ACTIVE_TOOLS = listOf(
     Tool(R.string.tools_deck_counter, R.string.tools_deck_counter_desc, Icons.Outlined.Style, Screen.DeckCounter.route),
     Tool(R.string.tools_announcement, R.string.tools_announcement_desc, Icons.Outlined.Campaign, Screen.HeadJudgeAnnouncement.route),
-    Tool(R.string.tools_draft_timer, R.string.tools_draft_timer_desc, Icons.Outlined.Timelapse, route = null),   // coming soon
+    Tool(R.string.tools_draft_timer, R.string.tools_draft_timer_desc, Icons.Outlined.Timelapse, Screen.DraftTimer.route),
 )
 
 private val REFERENCES = listOf(

@@ -29,6 +29,31 @@ object DraftPlans {
     }
 }
 
+/** The setup screen's "Estimated duration": picks, reviews, construction and total. Pure. */
+data class DraftEstimate(
+    val packs: Int,
+    val timedPicksPerPack: Int,
+    val picksMs: Long,
+    val reviewSeconds: List<Int>,
+    val constructionMs: Long,
+    val totalMs: Long,
+) {
+    companion object {
+        fun of(plan: DraftPlan): DraftEstimate {
+            val picks = plan.steps.filterIsInstance<DraftStep.Pick>()
+            val packs = picks.maxOfOrNull { it.pack } ?: 0
+            return DraftEstimate(
+                packs = packs,
+                timedPicksPerPack = picks.count { it.pack == 1 },
+                picksMs = picks.sumOf { it.durationMs },
+                reviewSeconds = plan.steps.filterIsInstance<DraftStep.Review>().map { (it.durationMs / 1000).toInt() },
+                constructionMs = plan.steps.filterIsInstance<DraftStep.Construction>().sumOf { it.durationMs },
+                totalMs = plan.totalMs,
+            )
+        }
+    }
+}
+
 /** Everything the running screen shows at one moment. Pure: built from session + plan + clock. */
 data class DraftSnapshot(
     val config: DraftConfig,

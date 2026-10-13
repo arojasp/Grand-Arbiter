@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Campaign
@@ -71,7 +70,6 @@ private val ACTIVE_TOOLS = listOf(
 private val REFERENCES = listOf(
     Tool(R.string.tools_banned_lists, R.string.tools_banned_lists_desc, Icons.Outlined.Block, Screen.BannedLists.route),
     Tool(R.string.tools_quick_references, R.string.tools_quick_references_desc, Icons.AutoMirrored.Outlined.MenuBook, Screen.QuickReferences.route),
-    Tool(R.string.tools_release_notes, R.string.tools_release_notes_desc, Icons.AutoMirrored.Outlined.Article, Screen.ReleaseNotes.route),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

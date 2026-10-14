@@ -16,16 +16,16 @@ interface DraftSessionStore {
 
 /** What happens when a step runs out. Implemented with the Vibrator; faked in tests. */
 interface DraftAlerts {
-    /** One vibration, plus a short beep if [beep]. */
-    fun stepEnded(beep: Boolean)
+    /** One vibration if [vibrate] (on by default), a short beep if [beep] (off by default). */
+    fun stepEnded(vibrate: Boolean, beep: Boolean)
 }
 
 /** Picks the plan factory for a format. Only available formats have one. */
 object DraftPlans {
-    fun create(config: DraftConfig, timings: BoosterDraftTimings): DraftPlan = when (config.format) {
-        DraftFormat.BOOSTER -> BoosterDraftPlanFactory.create(config, timings)
-        DraftFormat.TWO_HEADED_GIANT, DraftFormat.ROCHESTER ->
-            throw IllegalArgumentException("${config.format} is not available yet")
+    fun create(config: DraftConfig, timings: DraftTimings): DraftPlan = when (config.format) {
+        DraftFormat.BOOSTER -> BoosterDraftPlanFactory.create(config, timings.booster)
+        DraftFormat.TWO_HEADED_GIANT -> TwoHeadedGiantPlanFactory.create(config, timings.twoHeadedGiant)
+        DraftFormat.ROCHESTER -> RochesterPlanFactory.create(config, timings.rochester)
     }
 }
 
@@ -33,8 +33,15 @@ object DraftPlans {
 data class DraftEstimate(
     val packs: Int,
     val timedPicksPerPack: Int,
+    /** 2 in Two-Headed Giant. */
+    val cardsPerPick: Int,
     val picksMs: Long,
     val reviewSeconds: List<Int>,
+    /** Rochester: each pack's review once laid out (20 s). */
+    val layOutSeconds: List<Int>,
+    /** Rochester: pick times are maxima (picks end on "Picked"), so the total is "at most". */
+    val atMost: Boolean,
+    val pickSeconds: Int,
     val constructionMs: Long,
     val totalMs: Long,
 ) {
@@ -45,8 +52,12 @@ data class DraftEstimate(
             return DraftEstimate(
                 packs = packs,
                 timedPicksPerPack = picks.count { it.pack == 1 },
+                cardsPerPick = picks.firstOrNull()?.cardsTaken ?: 1,
                 picksMs = picks.sumOf { it.durationMs },
                 reviewSeconds = plan.steps.filterIsInstance<DraftStep.Review>().map { (it.durationMs / 1000).toInt() },
+                layOutSeconds = plan.steps.filterIsInstance<DraftStep.LayOut>().map { (it.durationMs / 1000).toInt() },
+                atMost = picks.any { it.waitsForPicked },
+                pickSeconds = picks.firstOrNull()?.let { (it.durationMs / 1000).toInt() } ?: 0,
                 constructionMs = plan.steps.filterIsInstance<DraftStep.Construction>().sumOf { it.durationMs },
                 totalMs = plan.totalMs,
             )
@@ -61,10 +72,14 @@ data class DraftSnapshot(
     val isRunning: Boolean,
     /** What comes after the current (or just ended) step: "Next pick: 11 cards · 25 s", "Start pack 2"; null on the last one. */
     val nextStep: DraftStep?,
+    /** The next few steps (Rochester: "Next: 2A · then 2B, 2C"). */
+    val upcoming: List<DraftStep>,
     val elapsedMs: Long,
     val totalMs: Long,
 ) {
     companion object {
+        private const val UPCOMING = 6
+
         fun of(session: DraftSession, plan: DraftPlan, now: Long): DraftSnapshot {
             val elapsed = session.elapsedAt(plan, now)
             val position = session.positionAt(plan, now)
@@ -73,8 +88,9 @@ data class DraftSnapshot(
                 is DraftPosition.Waiting -> position.index
                 DraftPosition.Finished -> null
             }
-            val next = index?.let { plan.steps.getOrNull(it + 1) }
-            return DraftSnapshot(session.config, position, session.isRunning, next, elapsed.coerceAtMost(plan.totalMs), plan.totalMs)
+            val upcoming = index?.let { plan.steps.drop(it + 1).take(UPCOMING) }.orEmpty()
+            return DraftSnapshot(session.config, position, session.isRunning, upcoming.firstOrNull(), upcoming,
+                elapsed.coerceAtMost(plan.totalMs), plan.totalMs)
         }
     }
 }

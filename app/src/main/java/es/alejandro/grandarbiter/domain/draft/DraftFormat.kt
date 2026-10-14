@@ -9,8 +9,8 @@ package es.alejandro.grandarbiter.domain.draft
  */
 enum class DraftFormat(val available: Boolean) {
     BOOSTER(available = true),
-    TWO_HEADED_GIANT(available = false),
-    ROCHESTER(available = false),
+    TWO_HEADED_GIANT(available = true),
+    ROCHESTER(available = true),
 }
 
 /** Where the pack goes after a pick. MTR 7.7: first pack left, reversed for each pack. */

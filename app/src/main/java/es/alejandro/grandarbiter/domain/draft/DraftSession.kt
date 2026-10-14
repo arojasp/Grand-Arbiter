@@ -6,9 +6,10 @@ import es.alejandro.grandarbiter.domain.timer.TimerState
  * A draft in progress: its config and ONE timer for the whole timeline (the same TimerState as
  * the judge call timer). Persisted as is; on return the right step comes from the clock.
  *
- * Manual start ([DraftConfig.manualStart]): time never runs past the end of [step]; there the
- * draft waits at 0:00 ([DraftPosition.Waiting]) until [startNext]. Without it the steps follow
- * each other on their own. Pure: unit-tested.
+ * Some step ends wait: time never runs past them, the draft waits at 0:00
+ * ([DraftPosition.Waiting]) until [startNext]. With manual start ([DraftConfig.manualStart]) every
+ * step does; in Rochester every pick does ("Picked"). Other steps follow each other on their own.
+ * Pure: unit-tested.
  */
 data class DraftSession(
     val config: DraftConfig,
@@ -20,19 +21,32 @@ data class DraftSession(
 
     val isRunning: Boolean get() = timer.isRunning
 
-    /** Elapsed draft time; with manual start, capped at the end of [step]. */
-    fun elapsedAt(plan: DraftPlan, now: Long): Long {
-        val elapsed = timer.elapsedAt(now)
-        return if (config.manualStart) elapsed.coerceAtMost(plan.startOf(step + 1)) else elapsed
-    }
+    /** Elapsed draft time, stopped at the first waiting step end it reached. */
+    fun elapsedAt(plan: DraftPlan, now: Long): Long = walk(plan, now).second
 
-    fun positionAt(plan: DraftPlan, now: Long): DraftPosition {
-        val elapsed = elapsedAt(plan, now)
-        if (config.manualStart && step < plan.steps.size && elapsed >= plan.startOf(step + 1)) {
-            return if (step >= plan.steps.lastIndex) DraftPosition.Finished
-            else DraftPosition.Waiting(step, plan.steps[step])
+    fun positionAt(plan: DraftPlan, now: Long): DraftPosition = walk(plan, now).first
+
+    /** Whether the end of step [index] waits for the judge instead of moving on. */
+    fun waitsAfter(plan: DraftPlan, index: Int): Boolean =
+        config.manualStart || (plan.steps[index] as? DraftStep.Pick)?.waitsForPicked == true
+
+    /**
+     * From [step] (the last step started by hand), follow the clock through the steps that move on
+     * by themselves; stop at the first one that ran out and waits, or where the time is now.
+     */
+    private fun walk(plan: DraftPlan, now: Long): Pair<DraftPosition, Long> {
+        val elapsed = timer.elapsedAt(now)
+        var i = step.coerceAtMost(plan.steps.size)
+        while (i < plan.steps.size) {
+            val end = plan.startOf(i + 1)
+            if (elapsed < end) return plan.positionAt(elapsed) to elapsed
+            if (waitsAfter(plan, i)) {
+                val position = if (i == plan.steps.lastIndex) DraftPosition.Finished else DraftPosition.Waiting(i, plan.steps[i])
+                return position to end
+            }
+            i++
         }
-        return plan.positionAt(elapsed)
+        return DraftPosition.Finished to elapsed
     }
 
     fun started(now: Long): DraftSession = copy(timer = timer.started(now))

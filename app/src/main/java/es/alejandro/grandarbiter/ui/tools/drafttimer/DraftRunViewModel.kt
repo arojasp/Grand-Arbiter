@@ -51,6 +51,8 @@ class DraftRunViewModel(
 
     private val beep: StateFlow<Boolean> = settings.draftBeep
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    private val vibrate: StateFlow<Boolean> = settings.draftVibrate
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     /** Null until the MTR timings are read (a moment at start-up). */
     private val source: StateFlow<Source?> = combine(store.session, timingsRepository.timings) { session, timings ->
@@ -72,7 +74,7 @@ class DraftRunViewModel(
         while (true) {
             val now = System.currentTimeMillis()
             val elapsed = session.elapsedAt(plan, now)
-            if (DraftAlertPolicy.shouldAlert(plan, previousElapsed, elapsed)) alerts.stepEnded(beep.value)
+            if (DraftAlertPolicy.shouldAlert(plan, previousElapsed, elapsed)) alerts.stepEnded(vibrate = vibrate.value, beep = beep.value)
             previousElapsed = elapsed
             val snapshot = DraftSnapshot.of(session, plan, now)
             emit(DraftRunState.Active(snapshot))

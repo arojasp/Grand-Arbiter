@@ -122,11 +122,15 @@ private fun DraftFormat.description(): Int = when (this) {
 private fun describe(s: DraftSnapshot): String {
     val text = when (val p = s.position) {
         DraftPosition.Finished -> stringResource(R.string.draft_active_finished)
-        is DraftPosition.Waiting -> stringResource(R.string.draft_active_waiting, startLabel(p.step, s.nextStep))
+        is DraftPosition.Waiting -> (p.step as? DraftStep.Pick)?.actor
+            ?.let { actor -> stringResource(R.string.draft_active_rochester_pick, (p.step as DraftStep.Pick).pack, actor, formatClock(0)) }
+            ?: stringResource(R.string.draft_active_waiting, startLabel(p.step, s.nextStep))
         is DraftPosition.Running -> {
             val left = formatClock(p.remainingMs)
             when (val step = p.step) {
-                is DraftStep.Pick -> stringResource(R.string.draft_active_pick, step.pack, step.pick, left)
+                is DraftStep.Pick -> step.actor?.let { stringResource(R.string.draft_active_rochester_pick, step.pack, it, left) }
+                    ?: stringResource(R.string.draft_active_pick, step.pack, step.pick, left)
+                is DraftStep.LayOut -> stringResource(R.string.draft_active_layout, step.pack, left)
                 is DraftStep.Review -> stringResource(R.string.draft_active_review, step.afterPack, left)
                 is DraftStep.Construction -> stringResource(R.string.draft_active_construction, left)
             }

@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftEstimate
+import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.ui.theme.GoldDeep
 import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import org.koin.androidx.compose.koinViewModel
@@ -54,6 +55,7 @@ fun DraftSetupScreen(
     val config by viewModel.config.collectAsState()
     val estimate by viewModel.estimate.collectAsState()
     val beep by viewModel.beep.collectAsState()
+    val vibrate by viewModel.vibrate.collectAsState()
 
     Scaffold(
         containerColor = colors.background,
@@ -76,10 +78,28 @@ fun DraftSetupScreen(
         ) {
             DraftCard {
                 DraftLabel(stringResource(R.string.draft_section_format))
-                Stepper(stringResource(R.string.draft_packs), null, config.packs, DraftConfig.PACKS, viewModel::setPacks)
+                val rochester = viewModel.format == DraftFormat.ROCHESTER
+                if (rochester) {
+                    // MTR 8.5: Player B of the team that picks first lays out the first pack.
+                    SettingRow(stringResource(R.string.draft_first_team), stringResource(R.string.draft_first_team_hint, "${config.firstTeam}B")) {
+                        Choice(listOf(1, 2), config.firstTeam, viewModel::setFirstTeam, width = 76) { stringResource(R.string.draft_team_n, it) }
+                    }
+                    HorizontalDivider(color = colors.outlineVariant)
+                    Stepper(stringResource(R.string.draft_packs_per_player), stringResource(R.string.draft_packs_at_table, config.totalPacks),
+                        config.packs, DraftConfig.PACKS, viewModel::setPacks)
+                } else {
+                    Stepper(stringResource(R.string.draft_packs), null, config.packs, DraftConfig.PACKS, viewModel::setPacks)
+                }
                 HorizontalDivider(color = colors.outlineVariant)
-                Stepper(stringResource(R.string.draft_cards_per_pack), stringResource(R.string.draft_cards_per_pack_hint),
-                    config.cardsPerPack, DraftConfig.CARDS_PER_PACK, viewModel::setCardsPerPack)
+                if (viewModel.cardsRange.count() <= 2) {
+                    // Two-Headed Giant: only the booster sizes the MTR has times for (14 or 15).
+                    SettingRow(stringResource(R.string.draft_cards_per_pack), null) {
+                        Choice(viewModel.cardsRange.toList(), config.cardsPerPack, viewModel::setCardsPerPack)
+                    }
+                } else {
+                    Stepper(stringResource(R.string.draft_cards_per_pack), if (rochester) null else stringResource(R.string.draft_cards_per_pack_hint),
+                        config.cardsPerPack, viewModel.cardsRange, viewModel::setCardsPerPack)
+                }
                 HorizontalDivider(color = colors.outlineVariant)
                 Stepper(stringResource(R.string.draft_construction), stringResource(R.string.draft_minutes),
                     config.constructionMinutes, DraftConfig.CONSTRUCTION_MINUTES, viewModel::setConstructionMinutes)
@@ -96,7 +116,10 @@ fun DraftSetupScreen(
             DraftCard {
                 DraftLabel(stringResource(R.string.draft_section_alerts))
                 SettingRow(stringResource(R.string.draft_vibrate), stringResource(R.string.draft_vibrate_hint)) {
-                    DraftChip(stringResource(R.string.draft_always))
+                    Switch(
+                        checked = vibrate, onCheckedChange = { viewModel.setVibrate(it) },
+                        colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                    )
                 }
                 HorizontalDivider(color = colors.outlineVariant)
                 SettingRow(stringResource(R.string.draft_beep), stringResource(R.string.draft_beep_hint)) {
@@ -123,6 +146,35 @@ private fun Stepper(label: String, hint: String?, value: Int, range: IntRange, o
             Text(value.toString(), Modifier.width(56.dp), textAlign = TextAlign.Center,
                 style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold), color = colors.onSurface)
             StepButton("+", stringResource(R.string.draft_increase, label), enabled = value < range.last) { onChange(value + 1) }
+        }
+    }
+}
+
+/** Pick one of a few values (Two-Headed Giant booster size: 14 | 15; Rochester: Team 1 | Team 2). */
+@Composable
+private fun Choice(
+    values: List<Int>,
+    selected: Int,
+    onSelect: (Int) -> Unit,
+    width: Int = 56,
+    label: @Composable (Int) -> String = { it.toString() },
+) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier.clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        values.forEach { value ->
+            val on = value == selected
+            Box(
+                Modifier.width(width.dp).height(36.dp).clip(CircleShape)
+                    .background(if (on) GoldDeep else colors.surfaceContainerHighest)
+                    .clickable(role = Role.RadioButton) { onSelect(value) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(label(value), style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold),
+                    color = if (on) OnGoldDeep else colors.onSurfaceVariant)
+            }
         }
     }
 }
@@ -156,15 +208,29 @@ private fun SettingRow(label: String, hint: String?, trailing: @Composable () ->
 private fun EstimateCard(e: DraftEstimate) {
     val colors = MaterialTheme.colorScheme
     DraftCard {
-        DraftLabel(stringResource(R.string.draft_section_estimate))
-        EstimateRow(stringResource(R.string.draft_estimate_picks, e.packs, e.timedPicksPerPack), formatClock(e.picksMs))
+        DraftLabel(stringResource(if (e.atMost) R.string.draft_section_estimate_at_most else R.string.draft_section_estimate))
+        if (e.layOutSeconds.isNotEmpty()) {
+            // Rochester: every pack reviewed once laid out, then picks of 5 s AT MOST (they end on "Picked").
+            EstimateRow(stringResource(R.string.draft_estimate_layout, e.layOutSeconds.size, e.layOutSeconds.first()),
+                formatClock(e.layOutSeconds.sum() * 1000L))
+        }
+        val picksLabel = if (e.atMost) stringResource(R.string.draft_estimate_picks_rochester, e.packs, e.timedPicksPerPack, e.pickSeconds)
+            else if (e.cardsPerPick > 1) stringResource(R.string.draft_estimate_picks_multi, e.packs, e.timedPicksPerPack, e.cardsPerPick)
+            else stringResource(R.string.draft_estimate_picks, e.packs, e.timedPicksPerPack)
+        EstimateRow(picksLabel, formatClock(e.picksMs))
         if (e.reviewSeconds.isNotEmpty()) {
-            EstimateRow(stringResource(R.string.draft_estimate_review, e.reviewSeconds.joinToString(" + ") { "$it s" }),
-                formatClock(e.reviewSeconds.sum() * 1000L))
+            // "60 s + 90 s"; the same every time (2HG): "5 × 60 s".
+            val reviews = if (e.reviewSeconds.size > 2 && e.reviewSeconds.distinct().size == 1) "${e.reviewSeconds.size} × ${e.reviewSeconds[0]} s"
+                else e.reviewSeconds.joinToString(" + ") { "$it s" }
+            EstimateRow(stringResource(R.string.draft_estimate_review, reviews), formatClock(e.reviewSeconds.sum() * 1000L))
         }
         EstimateRow(stringResource(R.string.draft_construction), formatClock(e.constructionMs))
         HorizontalDivider(color = colors.outlineVariant)
-        EstimateRow(stringResource(R.string.draft_total), "≈ " + formatClock(e.totalMs), emphasis = true)
+        EstimateRow(stringResource(R.string.draft_total), (if (e.atMost) "≤ " else "≈ ") + formatClock(e.totalMs), emphasis = true)
+        if (e.atMost) {
+            Text(stringResource(R.string.draft_estimate_at_most_note, e.pickSeconds),
+                style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp), color = colors.onSurfaceVariant)
+        }
     }
 }
 

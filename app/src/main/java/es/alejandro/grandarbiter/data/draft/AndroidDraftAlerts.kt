@@ -13,8 +13,8 @@ import android.util.Log
 import es.alejandro.grandarbiter.domain.draft.DraftAlerts
 
 /**
- * One clear vibration when a draft step runs out (VIBRATE permission: normal, no prompt), plus an
- * optional short beep. Alarm usage so it isn't dropped when touch haptics are off; the beep uses
+ * One clear vibration when a draft step runs out (VIBRATE permission: normal, no prompt; on by
+ * default) and an optional short beep (off by default). Alarm usage so it isn't dropped when touch haptics are off; the beep uses
  * the notification stream, so it respects silent mode.
  */
 class AndroidDraftAlerts(context: Context) : DraftAlerts {
@@ -30,8 +30,8 @@ class AndroidDraftAlerts(context: Context) : DraftAlerts {
     private var tone: ToneGenerator? = null
 
     @Synchronized
-    override fun stepEnded(beep: Boolean) {
-        vibrate()
+    override fun stepEnded(vibrate: Boolean, beep: Boolean) {
+        if (vibrate) vibrate()
         if (beep) beep()
     }
 

@@ -43,11 +43,6 @@ class DraftSnapshotTest {
         assertEquals(plan.totalMs, s.elapsedMs)
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun plans_onlyForAvailableFormats() {
-        DraftPlans.create(DraftConfig(format = DraftFormat.ROCHESTER), DraftTimings.FALLBACK)
-    }
-
     @Test fun estimate_standardDraft() {
         val e = DraftEstimate.of(plan)
         assertEquals(3, e.packs)
@@ -66,6 +61,6 @@ class DraftSnapshotTest {
         assertEquals(40_000L, s.elapsedMs)                             // the clock stopped at 0:00
     }
 
-    @Test fun boosterAndTwoHeadedGiantAreAvailable() =
-        assertEquals(listOf(DraftFormat.BOOSTER, DraftFormat.TWO_HEADED_GIANT), DraftFormat.entries.filter { it.available })
+    @Test fun everyFormatIsAvailable() =
+        assertEquals(DraftFormat.entries, DraftFormat.entries.filter { it.available })
 }

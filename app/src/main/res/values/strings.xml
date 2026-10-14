@@ -374,6 +374,36 @@
     <string name="draft_active_waiting">Waiting: %1$s</string>
     <string name="draft_active_finished">Deck construction time is up</string>
     <string name="draft_active_paused">%1$s (paused)</string>
+    <!-- Rochester Draft -->
+    <string name="draft_first_team">First pick</string>
+    <string name="draft_first_team_hint">%1$s lays out the first pack (Player B of that team)</string>
+    <string name="draft_team_n">Team %1$d</string>
+    <string name="draft_packs_per_player">Packs per player</string>
+    <string name="draft_packs_at_table">%1$d packs at the table (6 players)</string>
+    <string name="draft_section_estimate_at_most">Estimated duration (at most)</string>
+    <string name="draft_estimate_layout">Pack review (%1$d × %2$d s)</string>
+    <string name="draft_estimate_picks_rochester">Picks (%1$d × %2$d × %3$d s)</string>
+    <string name="draft_estimate_at_most_note">Picks usually take less than %1$d s: the real draft is shorter.</string>
+    <string name="draft_laid_out_by">Laid out by %1$s</string>
+    <string name="draft_layout_label">Review the pack</string>
+    <string name="draft_layout_sub">of %1$s · cards face up</string>
+    <string name="draft_picks_first">%1$s picks first</string>
+    <string name="draft_picks_then">Then %1$s, who takes two and turns back</string>
+    <string name="draft_clockwise">Clockwise</string>
+    <string name="draft_counterclockwise">Counterclockwise</string>
+    <string name="draft_rotation_packs">%1$s (packs %2$d–%3$d)</string>
+    <string name="draft_now_picking">Now picking</string>
+    <string name="draft_card_of">Card %1$d of %2$d</string>
+    <string name="draft_pick_short">Pick</string>
+    <string name="draft_official_picks">An official gives %1$s the oldest card</string>
+    <string name="draft_next_seat">%1$s · then %2$s</string>
+    <string name="draft_next_layout_value">Pack %1$d · laid out by %2$s</string>
+    <string name="draft_picked">Picked</string>
+    <string name="draft_picked_hint">Tap Picked as soon as the player takes the card</string>
+    <string name="draft_start_picks">Start picks</string>
+    <string name="draft_previous">Previous</string>
+    <string name="draft_active_layout">Pack %1$d laid out · %2$s left</string>
+    <string name="draft_active_rochester_pick">Pack %1$d · %2$s picking · %3$s left</string>
 
     <!-- Quick reference editor: browse the document's index -->
     <string name="qr_browse">Or browse the %1$s</string>

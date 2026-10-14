@@ -3,6 +3,7 @@ package es.alejandro.grandarbiter.data.draft
 import es.alejandro.grandarbiter.data.rules.bundle.Block
 import es.alejandro.grandarbiter.domain.draft.BoosterDraftTimings
 import es.alejandro.grandarbiter.domain.draft.DraftTimings
+import es.alejandro.grandarbiter.domain.draft.RochesterTimings
 import es.alejandro.grandarbiter.domain.draft.TwoHeadedGiantTimings
 
 /**
@@ -17,6 +18,11 @@ import es.alejandro.grandarbiter.domain.draft.TwoHeadedGiantTimings
  * - the table under "Two-Headed Giant Draft Timing" (15-card column, 14-card column, time),
  * - "…receive 60 seconds to review their drafted cards in between booster packs",
  * - the list item "Two-Headed Giant Draft—40 minutes for deck construction and registration".
+ *
+ * Rochester (Team Rochester, MTR 8.5):
+ * - under "Rochester Draft Timing": "…before the first card is drafted is 20 seconds. Players
+ *   have 5 seconds for each pick.",
+ * - the list item "Team Draft—40 minutes for deck construction and registration".
  *
  * Each format is all or nothing: if any part is missing or changed shape, null, and the caller
  * uses that format's FALLBACK. A unit test runs this on the bundled MTR, so a format change is
@@ -34,12 +40,25 @@ object MtrDraftTimingsParser {
     private val CONSTRUCTION = Regex("""^Draft\s*[—–-]\s*(\d+)\s*minutes""", RegexOption.IGNORE_CASE)
     private val THG_REVIEW = Regex("""(\d+) seconds to review""", RegexOption.IGNORE_CASE)
     private val THG_CONSTRUCTION = Regex("""^Two-Headed Giant Draft\s*[—–-]\s*(\d+)\s*minutes""", RegexOption.IGNORE_CASE)
+    private val ROCHESTER_REVIEW = Regex("""before the first card is drafted is (\d+) seconds""", RegexOption.IGNORE_CASE)
+    private val ROCHESTER_PICK = Regex("""(\d+) seconds for each pick""", RegexOption.IGNORE_CASE)
+    private val TEAM_CONSTRUCTION = Regex("""^Team Draft\s*[—–-]\s*(\d+)\s*minutes""", RegexOption.IGNORE_CASE)
 
     /** Every format, each falling back on its own if unreadable. */
     fun parseAll(blocks: List<Block>): DraftTimings = DraftTimings(
         booster = parse(blocks) ?: BoosterDraftTimings.FALLBACK,
         twoHeadedGiant = parseTwoHeadedGiant(blocks) ?: TwoHeadedGiantTimings.FALLBACK,
+        rochester = parseRochester(blocks) ?: RochesterTimings.FALLBACK,
     )
+
+    /** Team Rochester; null if Appendix B doesn't read as expected. */
+    fun parseRochester(blocks: List<Block>): RochesterTimings? {
+        val text = paragraphs(section(blocks, "Rochester Draft Timing") ?: return null)
+        val review = ROCHESTER_REVIEW.find(text)?.groupValues?.get(1)?.toInt() ?: return null
+        val pick = ROCHESTER_PICK.find(text)?.groupValues?.get(1)?.toInt() ?: return null
+        val construction = listItem(blocks, TEAM_CONSTRUCTION) ?: return null
+        return RochesterTimings(review, pick, construction)
+    }
 
     /** Booster Draft; null if Appendix B doesn't read as expected. */
     fun parse(blocks: List<Block>): BoosterDraftTimings? {

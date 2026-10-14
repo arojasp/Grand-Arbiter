@@ -33,6 +33,7 @@ data class TwoHeadedGiantTimings(
 data class DraftTimings(
     val booster: BoosterDraftTimings = BoosterDraftTimings.FALLBACK,
     val twoHeadedGiant: TwoHeadedGiantTimings = TwoHeadedGiantTimings.FALLBACK,
+    val rochester: RochesterTimings = RochesterTimings.FALLBACK,
 ) {
     companion object {
         val FALLBACK = DraftTimings()

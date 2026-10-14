@@ -25,7 +25,7 @@ object DraftPlans {
     fun create(config: DraftConfig, timings: DraftTimings): DraftPlan = when (config.format) {
         DraftFormat.BOOSTER -> BoosterDraftPlanFactory.create(config, timings.booster)
         DraftFormat.TWO_HEADED_GIANT -> TwoHeadedGiantPlanFactory.create(config, timings.twoHeadedGiant)
-        DraftFormat.ROCHESTER -> throw IllegalArgumentException("${config.format} is not available yet")
+        DraftFormat.ROCHESTER -> RochesterPlanFactory.create(config, timings.rochester)
     }
 }
 
@@ -37,6 +37,11 @@ data class DraftEstimate(
     val cardsPerPick: Int,
     val picksMs: Long,
     val reviewSeconds: List<Int>,
+    /** Rochester: each pack's review once laid out (20 s). */
+    val layOutSeconds: List<Int>,
+    /** Rochester: pick times are maxima (picks end on "Picked"), so the total is "at most". */
+    val atMost: Boolean,
+    val pickSeconds: Int,
     val constructionMs: Long,
     val totalMs: Long,
 ) {
@@ -50,6 +55,9 @@ data class DraftEstimate(
                 cardsPerPick = picks.firstOrNull()?.cardsTaken ?: 1,
                 picksMs = picks.sumOf { it.durationMs },
                 reviewSeconds = plan.steps.filterIsInstance<DraftStep.Review>().map { (it.durationMs / 1000).toInt() },
+                layOutSeconds = plan.steps.filterIsInstance<DraftStep.LayOut>().map { (it.durationMs / 1000).toInt() },
+                atMost = picks.any { it.waitsForPicked },
+                pickSeconds = picks.firstOrNull()?.let { (it.durationMs / 1000).toInt() } ?: 0,
                 constructionMs = plan.steps.filterIsInstance<DraftStep.Construction>().sumOf { it.durationMs },
                 totalMs = plan.totalMs,
             )
@@ -64,10 +72,14 @@ data class DraftSnapshot(
     val isRunning: Boolean,
     /** What comes after the current (or just ended) step: "Next pick: 11 cards · 25 s", "Start pack 2"; null on the last one. */
     val nextStep: DraftStep?,
+    /** The next few steps (Rochester: "Next: 2A · then 2B, 2C"). */
+    val upcoming: List<DraftStep>,
     val elapsedMs: Long,
     val totalMs: Long,
 ) {
     companion object {
+        private const val UPCOMING = 6
+
         fun of(session: DraftSession, plan: DraftPlan, now: Long): DraftSnapshot {
             val elapsed = session.elapsedAt(plan, now)
             val position = session.positionAt(plan, now)
@@ -76,8 +88,9 @@ data class DraftSnapshot(
                 is DraftPosition.Waiting -> position.index
                 DraftPosition.Finished -> null
             }
-            val next = index?.let { plan.steps.getOrNull(it + 1) }
-            return DraftSnapshot(session.config, position, session.isRunning, next, elapsed.coerceAtMost(plan.totalMs), plan.totalMs)
+            val upcoming = index?.let { plan.steps.drop(it + 1).take(UPCOMING) }.orEmpty()
+            return DraftSnapshot(session.config, position, session.isRunning, upcoming.firstOrNull(), upcoming,
+                elapsed.coerceAtMost(plan.totalMs), plan.totalMs)
         }
     }
 }

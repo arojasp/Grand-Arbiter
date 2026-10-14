@@ -4,6 +4,7 @@ import es.alejandro.grandarbiter.data.rules.bundle.Block
 import es.alejandro.grandarbiter.data.rules.bundle.DocumentId
 import es.alejandro.grandarbiter.data.rules.bundle.RulesBundle
 import es.alejandro.grandarbiter.domain.draft.BoosterDraftTimings
+import es.alejandro.grandarbiter.domain.draft.RochesterTimings
 import es.alejandro.grandarbiter.domain.draft.TwoHeadedGiantTimings
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -68,6 +69,24 @@ class MtrDraftTimingsParserTest {
 
     @Test fun noConstructionLine_null() = assertNull(MtrDraftTimingsParser.parse(appendixB(construction = "Something else")))
 
+    // ---- Rochester ----
+
+    private fun appendixBWithRochester(text: String = "The review period for a booster after it has been laid out on the table and before the first card is drafted is 20 seconds. Players have 5 seconds for each pick.") =
+        appendixB().filterNot { it is Block.Heading && it.text == "Rochester Draft Timing" || it is Block.Paragraph && it.text.startsWith("Players have") } +
+            listOf(Block.Heading("Rochester Draft Timing"), Block.Paragraph(text))
+
+    @Test fun rochester_reviewPickAndTeamDraftConstruction() =
+        assertEquals(RochesterTimings(20, 5, 40), MtrDraftTimingsParser.parseRochester(appendixBWithRochester()))
+
+    @Test fun rochester_reworded_null() =
+        assertNull(MtrDraftTimingsParser.parseRochester(appendixBWithRochester("Picks are quick.")))
+
+    @Test fun rochester_missing_fallsBackAlone() {
+        val all = MtrDraftTimingsParser.parseAll(appendixB().filterNot { it is Block.Heading && it.text == "Rochester Draft Timing" })
+        assertEquals(RochesterTimings.FALLBACK, all.rochester)
+        assertEquals(25, all.booster.constructionMinutes)
+    }
+
     // ---- Two-Headed Giant ----
 
     private val thgTable = Block.Table(
@@ -123,5 +142,6 @@ class MtrDraftTimingsParserTest {
         val blocks = mtr.sections.first { it.id == MtrDraftTimingsParser.PAGE_ID }.blocks
         assertEquals(BoosterDraftTimings.FALLBACK, MtrDraftTimingsParser.parse(blocks))
         assertEquals(TwoHeadedGiantTimings.FALLBACK, MtrDraftTimingsParser.parseTwoHeadedGiant(blocks))
+        assertEquals(RochesterTimings.FALLBACK, MtrDraftTimingsParser.parseRochester(blocks))
     }
 }

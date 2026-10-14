@@ -15,6 +15,7 @@ class DraftTimingsRepository(private val rules: RulesRepository) {
             val blocks = rules.page(MtrDraftTimingsParser.PAGE_ID)?.sections?.flatMap { it.blocks }.orEmpty()
             if (MtrDraftTimingsParser.parse(blocks) == null) Log.w(TAG, "Booster Draft timing not readable: built-in values")
             if (MtrDraftTimingsParser.parseTwoHeadedGiant(blocks) == null) Log.w(TAG, "Two-Headed Giant timing not readable: built-in values")
+            if (MtrDraftTimingsParser.parseRochester(blocks) == null) Log.w(TAG, "Rochester timing not readable: built-in values")
             MtrDraftTimingsParser.parseAll(blocks)
         }
         .distinctUntilChanged()

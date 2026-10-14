@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Setup of one format: packs, cards per pack, construction minutes, beep. Prefilled with the
+ * Setup of one format: packs, cards per pack, construction minutes, beep; Rochester: who picks first. Prefilled with the
  * last draft's config; the edits survive rotation and process death (SavedStateHandle).
  */
 class DraftSetupViewModel(
@@ -37,10 +37,12 @@ class DraftSetupViewModel(
     private val cardsPerPack = state.getStateFlow(KEY_CARDS, last.cardsPerPack)
     private val constructionMinutes = state.getStateFlow(KEY_MINUTES, last.constructionMinutes)
     private val manualStart = state.getStateFlow(KEY_MANUAL, last.manualStart)
+    /** Rochester: the team picking first (its Player B lays out the first pack). */
+    private val firstTeam = state.getStateFlow(KEY_FIRST_TEAM, last.firstTeam)
 
     /** Starting a draft stores this as the last config: that is how "Manual start" is remembered. */
-    val config: StateFlow<DraftConfig> = combine(packs, cardsPerPack, constructionMinutes, manualStart) { p, c, m, manual ->
-        DraftConfig(format, p, c, m, manual)
+    val config: StateFlow<DraftConfig> = combine(packs, cardsPerPack, constructionMinutes, manualStart, firstTeam) { p, c, m, manual, team ->
+        DraftConfig(format, p, c, m, manual, team)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, last)
 
     private val timings: StateFlow<DraftTimings> = timingsRepository.timings
@@ -63,6 +65,7 @@ class DraftSetupViewModel(
     fun setCardsPerPack(value: Int) { state[KEY_CARDS] = value.coerceIn(cardsRange) }
     fun setConstructionMinutes(value: Int) { state[KEY_MINUTES] = value.coerceIn(DraftConfig.CONSTRUCTION_MINUTES) }
     fun setManualStart(enabled: Boolean) { state[KEY_MANUAL] = enabled }
+    fun setFirstTeam(team: Int) { state[KEY_FIRST_TEAM] = team.coerceIn(1, 2) }
     fun setBeep(enabled: Boolean) = viewModelScope.launch { settings.setDraftBeep(enabled) }
     fun setVibrate(enabled: Boolean) = viewModelScope.launch { settings.setDraftVibrate(enabled) }
 
@@ -78,5 +81,6 @@ class DraftSetupViewModel(
         private const val KEY_CARDS = "cards_per_pack"
         private const val KEY_MINUTES = "construction_minutes"
         private const val KEY_MANUAL = "manual_start"
+        private const val KEY_FIRST_TEAM = "first_team"
     }
 }

@@ -4,7 +4,11 @@ package es.alejandro.grandarbiter.domain.draft
 sealed interface DraftStep {
     val durationMs: Long
 
-    /** [pick] is 1-based within the pack; [cardsLeft] counts the card(s) being picked; [cardsTaken]: 2 in Two-Headed Giant. */
+    /**
+     * [pick] is 1-based within the pack; [cardsLeft] counts the card(s) being picked; [cardsTaken]: 2 in
+     * Two-Headed Giant. Rochester: [actor] is the seat picking ("2B") and the step [waitsForPicked]: its
+     * time is a maximum, it ends when the judge taps "Picked" (or, at 0:00, an official picks for them).
+     */
     data class Pick(
         val pack: Int,
         val pick: Int,
@@ -12,6 +16,16 @@ sealed interface DraftStep {
         val direction: PassDirection,
         override val durationMs: Long,
         val cardsTaken: Int = 1,
+        val actor: String? = null,
+        val waitsForPicked: Boolean = false,
+    ) : DraftStep
+
+    /** Rochester: a pack laid out face up by [opener], reviewed before the first pick (MTR 8.5). */
+    data class LayOut(
+        val pack: Int,
+        val opener: String,
+        val direction: PassDirection,
+        override val durationMs: Long,
     ) : DraftStep
 
     /** Between packs only (MTR 7.7): never after the last one. */

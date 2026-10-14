@@ -2,6 +2,7 @@ package es.alejandro.grandarbiter.data.draft
 
 import es.alejandro.grandarbiter.data.draft.DraftSessionCodec.Stored
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
+import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftSession
 import es.alejandro.grandarbiter.domain.timer.TimerState
 import org.junit.Assert.assertEquals
@@ -24,7 +25,12 @@ class DraftSessionCodecTest {
 
     @Test fun unknownFormat_null() = assertNull(DraftSessionCodec.decode(Stored("WINSTON", 3, 14, 25)))
 
-    @Test fun formatNotAvailableYet_null() = assertNull(DraftSessionCodec.decode(Stored("ROCHESTER", 3, 14, 25)))
+    @Test fun rochesterFirstTeam_roundTrip() {
+        val rochester = DraftSession(DraftConfig.defaultsFor(DraftFormat.ROCHESTER).copy(firstTeam = 2), TimerState(5_000, 1_000), step = 7)
+        assertEquals(rochester, DraftSessionCodec.decode(DraftSessionCodec.encode(rochester)))
+    }
+
+    @Test fun badFirstTeam_null() = assertNull(DraftSessionCodec.decode(Stored("ROCHESTER", 3, 15, 40, firstTeam = 3)))
 
     @Test fun outOfRange_null() {
         assertNull(DraftSessionCodec.decode(Stored("BOOSTER", 0, 14, 25)))

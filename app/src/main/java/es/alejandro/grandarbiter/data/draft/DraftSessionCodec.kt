@@ -22,6 +22,8 @@ object DraftSessionCodec {
         val accumulatedMs: Long = 0,
         val runningSince: Long? = null,
         val step: Int = 0,
+        /** Rochester: the team picking first; 1 when stored by a version without it. */
+        val firstTeam: Int = 1,
     )
 
     fun encode(session: DraftSession): Stored = encodeConfig(session.config).copy(
@@ -31,7 +33,7 @@ object DraftSessionCodec {
     )
 
     fun encodeConfig(config: DraftConfig): Stored =
-        Stored(config.format.name, config.packs, config.cardsPerPack, config.constructionMinutes, config.manualStart)
+        Stored(config.format.name, config.packs, config.cardsPerPack, config.constructionMinutes, config.manualStart, firstTeam = config.firstTeam)
 
     /** A draft started before "Manual start" existed ran on its own: it keeps doing so. */
     fun decode(stored: Stored): DraftSession? {
@@ -45,7 +47,7 @@ object DraftSessionCodec {
         val format = DraftFormat.entries.firstOrNull { it.name == stored.format } ?: return null
         if (!format.available) return null
         return runCatching {
-            DraftConfig(format, stored.packs, stored.cardsPerPack, stored.constructionMinutes, stored.manualStart ?: manualStartIfMissing)
+            DraftConfig(format, stored.packs, stored.cardsPerPack, stored.constructionMinutes, stored.manualStart ?: manualStartIfMissing, stored.firstTeam)
         }.getOrNull()
     }
 }

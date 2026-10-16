@@ -39,10 +39,24 @@ class DraftSetupViewModel(
     private val manualStart = state.getStateFlow(KEY_MANUAL, last.manualStart)
     /** Rochester: the team picking first (its Player B lays out the first pack). */
     private val firstTeam = state.getStateFlow(KEY_FIRST_TEAM, last.firstTeam)
+    /** "Different size per pack": one size per pack round (drafts mixing sets). */
+    private val mixedSizes = state.getStateFlow(KEY_MIXED, last.packSizes != null)
+    /** Room for the most packs; only the first [packs] are used. */
+    private val packSizes = state.getStateFlow(KEY_PACK_SIZES,
+        IntArray(DraftConfig.PACKS.last) { last.packSizes?.getOrNull(it) ?: last.cardsPerPack })
+
+    /** Booster and Two-Headed Giant only. */
+    val canMixSizes: Boolean = format in DraftConfig.MIXED_SIZE_FORMATS
 
     /** Starting a draft stores this as the last config: that is how "Manual start" is remembered. */
-    val config: StateFlow<DraftConfig> = combine(packs, cardsPerPack, constructionMinutes, manualStart, firstTeam) { p, c, m, manual, team ->
-        DraftConfig(format, p, c, m, manual, team)
+    val config: StateFlow<DraftConfig> = combine(
+        combine(packs, cardsPerPack, constructionMinutes, manualStart, firstTeam) { p, c, m, manual, team ->
+            DraftConfig(format, p, c, m, manual, team)
+        },
+        mixedSizes,
+        packSizes,
+    ) { c, mixed, sizes ->
+        if (mixed && canMixSizes) c.copy(packSizes = sizes.take(c.packs)) else c
     }.stateIn(viewModelScope, SharingStarted.Eagerly, last)
 
     private val timings: StateFlow<DraftTimings> = timingsRepository.timings
@@ -66,6 +80,17 @@ class DraftSetupViewModel(
     fun setConstructionMinutes(value: Int) { state[KEY_MINUTES] = value.coerceIn(DraftConfig.CONSTRUCTION_MINUTES) }
     fun setManualStart(enabled: Boolean) { state[KEY_MANUAL] = enabled }
     fun setFirstTeam(team: Int) { state[KEY_FIRST_TEAM] = team.coerceIn(1, 2) }
+
+    /** Turning it on starts every pack at the current "Cards per pack". */
+    fun setMixedSizes(enabled: Boolean) {
+        if (enabled) state[KEY_PACK_SIZES] = IntArray(DraftConfig.PACKS.last) { cardsPerPack.value }
+        state[KEY_MIXED] = enabled
+    }
+
+    /** [pack] is 1-based. */
+    fun setPackSize(pack: Int, value: Int) {
+        state[KEY_PACK_SIZES] = packSizes.value.copyOf().also { it[pack - 1] = value.coerceIn(cardsRange) }
+    }
     fun setBeep(enabled: Boolean) = viewModelScope.launch { settings.setDraftBeep(enabled) }
     fun setVibrate(enabled: Boolean) = viewModelScope.launch { settings.setDraftVibrate(enabled) }
 
@@ -82,5 +107,7 @@ class DraftSetupViewModel(
         private const val KEY_MINUTES = "construction_minutes"
         private const val KEY_MANUAL = "manual_start"
         private const val KEY_FIRST_TEAM = "first_team"
+        private const val KEY_MIXED = "mixed_pack_sizes"
+        private const val KEY_PACK_SIZES = "pack_sizes"
     }
 }

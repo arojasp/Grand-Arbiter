@@ -55,5 +55,19 @@ class DraftSessionCodecTest {
 
     @Test fun negativeStep_null() = assertNull(DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, step = -1)))
 
+    @Test fun packSizes_roundTrip() {
+        val mixed = DraftSession(DraftConfig(packSizes = listOf(15, 14, 14)), TimerState(5_000, null), step = 2)
+        assertEquals("15,14,14", DraftSessionCodec.encode(mixed).packSizes)
+        assertEquals(mixed, DraftSessionCodec.decode(DraftSessionCodec.encode(mixed)))
+    }
+
+    @Test fun noPackSizes_storedAsNull() = assertNull(DraftSessionCodec.encodeConfig(DraftConfig()).packSizes)
+
+    @Test fun badPackSizes_null() {
+        assertNull(DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, packSizes = "15,x,14")))
+        assertNull(DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, packSizes = "15,14")))      // 3 packs, 2 sizes
+        assertNull(DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, packSizes = "15,14,99")))
+    }
+
     @Test fun missingFormat_null() = assertNull(DraftSessionCodec.decode(Stored(null, 3, 14, 25)))
 }

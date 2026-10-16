@@ -49,14 +49,13 @@ object TwoHeadedGiantPlanFactory {
 
     fun create(config: DraftConfig, timings: TwoHeadedGiantTimings): DraftPlan {
         require(config.format == DraftFormat.TWO_HEADED_GIANT) { "not a Two-Headed Giant draft: ${config.format}" }
-        val table = requireNotNull(timings.pickSeconds[config.cardsPerPack]) {
-            "no Two-Headed Giant times for ${config.cardsPerPack}-card boosters"
-        }
         val steps = buildList {
             for (pack in 1..config.packs) {
+                val cards = config.cardsInPack(pack)
+                val table = requireNotNull(timings.pickSeconds[cards]) { "no Two-Headed Giant times for $cards-card boosters" }
                 val direction = PassDirection.forPack(pack)
                 var pick = 1
-                for (cardsLeft in config.cardsPerPack downTo 1 step CARDS_PER_PICK) {
+                for (cardsLeft in cards downTo 1 step CARDS_PER_PICK) {
                     // No time in the table ("N/A": the last card or two) -> no timer, no step.
                     table[cardsLeft]?.let { seconds ->
                         add(DraftStep.Pick(pack, pick, cardsLeft, direction, seconds * 1_000L, cardsTaken = CARDS_PER_PICK))

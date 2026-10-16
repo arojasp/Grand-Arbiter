@@ -32,7 +32,10 @@ object DraftPlans {
 /** The setup screen's "Estimated duration": picks, reviews, construction and total. Pure. */
 data class DraftEstimate(
     val packs: Int,
+    /** Timed picks in pack 1; see [timedPicksByPack] when pack sizes differ. */
     val timedPicksPerPack: Int,
+    /** Timed picks of each pack: [13, 13, 13], or [14, 13, 13] for a 15-card pack then two of 14. */
+    val timedPicksByPack: List<Int>,
     /** 2 in Two-Headed Giant. */
     val cardsPerPick: Int,
     val picksMs: Long,
@@ -52,6 +55,7 @@ data class DraftEstimate(
             return DraftEstimate(
                 packs = packs,
                 timedPicksPerPack = picks.count { it.pack == 1 },
+                timedPicksByPack = (1..packs).map { pack -> picks.count { it.pack == pack } },
                 cardsPerPick = picks.firstOrNull()?.cardsTaken ?: 1,
                 picksMs = picks.sumOf { it.durationMs },
                 reviewSeconds = plan.steps.filterIsInstance<DraftStep.Review>().map { (it.durationMs / 1000).toInt() },

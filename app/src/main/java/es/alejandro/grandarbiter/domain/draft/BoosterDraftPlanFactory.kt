@@ -11,12 +11,13 @@ object BoosterDraftPlanFactory {
         val steps = buildList {
             for (pack in 1..config.packs) {
                 val direction = PassDirection.forPack(pack)
-                for (cardsLeft in config.cardsPerPack downTo 1) {
+                val cards = config.cardsInPack(pack)
+                for (cardsLeft in cards downTo 1) {
                     // No time in the table ("N/A": the last card) -> no timer, no step.
                     val seconds = timings.pickSeconds[cardsLeft] ?: continue
                     add(DraftStep.Pick(
                         pack = pack,
-                        pick = config.cardsPerPack - cardsLeft + 1,
+                        pick = cards - cardsLeft + 1,
                         cardsLeft = cardsLeft,
                         direction = direction,
                         durationMs = seconds * 1_000L,

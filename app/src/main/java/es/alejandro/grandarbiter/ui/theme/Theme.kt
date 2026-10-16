@@ -141,7 +141,9 @@ fun GrandArbiterTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
+            // Edge-to-edge (MainActivity.enableEdgeToEdge): the bars are transparent and the top bars draw
+            // behind them. Only the icon color is ours to set; Window.statusBarColor is deprecated and
+            // ignored from Android 15.
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }

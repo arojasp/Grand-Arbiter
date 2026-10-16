@@ -91,13 +91,24 @@ fun DraftSetupScreen(
                     Stepper(stringResource(R.string.draft_packs), null, config.packs, DraftConfig.PACKS, viewModel::setPacks)
                 }
                 HorizontalDivider(color = colors.outlineVariant)
-                if (viewModel.cardsRange.count() <= 2) {
-                    // Two-Headed Giant: only the booster sizes the MTR has times for (14 or 15).
-                    SettingRow(stringResource(R.string.draft_cards_per_pack), null) {
-                        Choice(viewModel.cardsRange.toList(), config.cardsPerPack, viewModel::setCardsPerPack)
+                val sizes = config.packSizes
+                if (viewModel.canMixSizes) {
+                    // Drafts mixing sets: every player opens the same pack at once, but each round can differ (15, 14, 14).
+                    // The switch stays in place; below it, one size for all or one per pack.
+                    SettingRow(stringResource(R.string.draft_mixed_sizes), stringResource(R.string.draft_mixed_sizes_hint)) {
+                        Switch(
+                            checked = sizes != null, onCheckedChange = { viewModel.setMixedSizes(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                        )
+                    }
+                    HorizontalDivider(color = colors.outlineVariant)
+                }
+                if (sizes != null) {
+                    sizes.forEachIndexed { i, size ->
+                        PackSize(stringResource(R.string.draft_pack_n, i + 1), null, size, viewModel.cardsRange) { viewModel.setPackSize(i + 1, it) }
                     }
                 } else {
-                    Stepper(stringResource(R.string.draft_cards_per_pack), if (rochester) null else stringResource(R.string.draft_cards_per_pack_hint),
+                    PackSize(stringResource(R.string.draft_cards_per_pack), if (rochester) null else stringResource(R.string.draft_cards_per_pack_hint),
                         config.cardsPerPack, viewModel.cardsRange, viewModel::setCardsPerPack)
                 }
                 HorizontalDivider(color = colors.outlineVariant)
@@ -148,6 +159,13 @@ private fun Stepper(label: String, hint: String?, value: Int, range: IntRange, o
             StepButton("+", stringResource(R.string.draft_increase, label), enabled = value < range.last) { onChange(value + 1) }
         }
     }
+}
+
+/** A pack size: a stepper, or 14 | 15 in Two-Headed Giant (the only sizes the MTR has times for). */
+@Composable
+private fun PackSize(label: String, hint: String?, value: Int, range: IntRange, onChange: (Int) -> Unit) {
+    if (range.count() <= 2) SettingRow(label, hint) { Choice(range.toList(), value, onChange) }
+    else Stepper(label, hint, value, range, onChange)
 }
 
 /** Pick one of a few values (Two-Headed Giant booster size: 14 | 15; Rochester: Team 1 | Team 2). */
@@ -214,7 +232,11 @@ private fun EstimateCard(e: DraftEstimate) {
             EstimateRow(stringResource(R.string.draft_estimate_layout, e.layOutSeconds.size, e.layOutSeconds.first()),
                 formatClock(e.layOutSeconds.sum() * 1000L))
         }
+        // Packs of different sizes: "Picks (14 + 13 + 13)".
+        val byPack = e.timedPicksByPack.takeIf { it.distinct().size > 1 }?.joinToString(" + ")
         val picksLabel = if (e.atMost) stringResource(R.string.draft_estimate_picks_rochester, e.packs, e.timedPicksPerPack, e.pickSeconds)
+            else if (byPack != null && e.cardsPerPick > 1) stringResource(R.string.draft_estimate_picks_by_pack_multi, byPack, e.cardsPerPick)
+            else if (byPack != null) stringResource(R.string.draft_estimate_picks_by_pack, byPack)
             else if (e.cardsPerPick > 1) stringResource(R.string.draft_estimate_picks_multi, e.packs, e.timedPicksPerPack, e.cardsPerPick)
             else stringResource(R.string.draft_estimate_picks, e.packs, e.timedPicksPerPack)
         EstimateRow(picksLabel, formatClock(e.picksMs))

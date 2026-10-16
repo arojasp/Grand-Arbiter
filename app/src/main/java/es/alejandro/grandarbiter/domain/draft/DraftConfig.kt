@@ -12,15 +12,28 @@ data class DraftConfig(
     val manualStart: Boolean = DEFAULT_MANUAL_START,
     /** Rochester: the team that picks first (1 or 2); its Player B lays out the first pack (MTR 8.5). */
     val firstTeam: Int = 1,
+    /**
+     * Booster / Two-Headed Giant drafts mixing sets (e.g. one 15-card pack, then two 14-card packs):
+     * the size of each pack round, in order. Null: every pack has [cardsPerPack].
+     */
+    val packSizes: List<Int>? = null,
 ) {
     /** Packs at the table: Rochester counts [packs] per player, six players. */
     val totalPacks: Int get() = if (format == DraftFormat.ROCHESTER) packs * RochesterOrder.PLAYERS else packs
+
+    /** Cards in pack round [pack] (1-based). */
+    fun cardsInPack(pack: Int): Int = packSizes?.getOrNull(pack - 1) ?: cardsPerPack
 
     init {
         require(packs in PACKS) { "packs $packs not in $PACKS" }
         require(cardsPerPack in cardsRange(format)) { "cardsPerPack $cardsPerPack not in ${cardsRange(format)} for $format" }
         require(constructionMinutes in CONSTRUCTION_MINUTES) { "constructionMinutes $constructionMinutes not in $CONSTRUCTION_MINUTES" }
         require(firstTeam in 1..2) { "firstTeam $firstTeam" }
+        if (packSizes != null) {
+            require(format in MIXED_SIZE_FORMATS) { "different pack sizes not supported for $format" }
+            require(packSizes.size == packs) { "packSizes $packSizes: need $packs" }
+            require(packSizes.all { it in cardsRange(format) }) { "packSizes $packSizes not in ${cardsRange(format)} for $format" }
+        }
     }
 
     companion object {
@@ -32,6 +45,8 @@ data class DraftConfig(
         val PACKS = 1..6
         val CARDS_PER_PACK = 5..15
         val CONSTRUCTION_MINUTES = 1..90
+        /** Formats where each pack round can have its own size. Not Rochester (packs per player, 18 at the table). */
+        val MIXED_SIZE_FORMATS = setOf(DraftFormat.BOOSTER, DraftFormat.TWO_HEADED_GIANT)
 
         /** Two-Headed Giant: only the booster sizes Appendix B has times for. */
         fun cardsRange(format: DraftFormat): IntRange = when (format) {

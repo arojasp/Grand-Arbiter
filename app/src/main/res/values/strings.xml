@@ -302,6 +302,8 @@
     <string name="draft_packs">Packs</string>
     <string name="draft_cards_per_pack">Cards per pack</string>
     <string name="draft_cards_per_pack_hint">Play Boosters: 14</string>
+    <string name="draft_mixed_sizes">Different size per pack</string>
+    <string name="draft_mixed_sizes_hint">For drafts mixing sets, e.g. one 15-card pack and two of 14</string>
     <string name="draft_construction">Deck construction</string>
     <string name="draft_minutes">Minutes</string>
     <string name="draft_decrease">Decrease %1$s</string>
@@ -314,6 +316,8 @@
     <string name="draft_section_estimate">Estimated duration</string>
     <string name="draft_estimate_picks">Picks (%1$d packs × %2$d)</string>
     <string name="draft_estimate_picks_multi">Picks (%1$d packs × %2$d, %3$d cards each)</string>
+    <string name="draft_estimate_picks_by_pack">Picks (%1$s)</string>
+    <string name="draft_estimate_picks_by_pack_multi">Picks (%1$s, %2$d cards each)</string>
     <string name="draft_estimate_review">Review (%1$s)</string>
     <string name="draft_total">Total</string>
     <string name="draft_start">Start draft</string>

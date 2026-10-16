@@ -246,7 +246,7 @@ private fun PickContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftS
         right = { DraftChip(directionText(step.direction), MaterialTheme.colorScheme.onSurface) },
     )
     // Picks in a pack, the untimed last one included: 14 (Booster), 7 for 14 cards two at a time (2HG).
-    val picksInPack = (s.config.cardsPerPack + step.cardsTaken - 1) / step.cardsTaken
+    val picksInPack = (s.config.cardsInPack(step.pack) + step.cardsTaken - 1) / step.cardsTaken
     val label = if (step.cardsTaken > 1) stringResource(R.string.draft_pick_take_label, step.pick, step.cardsTaken, step.cardsLeft)
         else stringResource(R.string.draft_pick_label, step.pick, step.cardsLeft)
     Countdown(label, p, s.isRunning, waiting,

@@ -55,7 +55,6 @@ jobs:
         id: update
         run: |
           set +e
-          chmod +x gradlew   # committed from Windows: no executable bit
           python tools/update_all.py 2>&1 | tee update.log
           code=${PIPESTATUS[0]}
           # The script's own summary (from "=== Summary" on) goes in the PR description.

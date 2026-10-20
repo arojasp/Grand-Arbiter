@@ -42,7 +42,11 @@ fun Section(title: String, content: @Composable () -> Unit) {
     }
 }
 
-/** Bordered surface: the Figma blocks (1dp outlineVariant border). */
+/**
+ * Bordered surface: the Figma blocks (1dp outlineVariant border). [contentModifier] styles the
+ * inside (padding, click), not the panel itself: it isn't the usual `modifier`, on purpose.
+ */
+@Suppress("ModifierParameter")
 @Composable
 fun Panel(
     color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,

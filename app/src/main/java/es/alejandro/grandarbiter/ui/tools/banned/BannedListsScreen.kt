@@ -51,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -321,7 +322,7 @@ private fun CategoryBlock(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.banned_categories, entries.size), style = Body.copy(fontWeight = FontWeight.Medium),
+                Text(pluralStringResource(R.plurals.banned_categories, entries.size, entries.size), style = Body.copy(fontWeight = FontWeight.Medium),
                     color = colors.onSurfaceVariant)
                 Text(BanCategory.entries.filter { it in groups }.map { categoryLabel(it) }.joinToString(" · "),
                     style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant.copy(alpha = 0.7f))

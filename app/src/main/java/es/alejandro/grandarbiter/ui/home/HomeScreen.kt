@@ -84,13 +84,13 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     effectiveDates: Map<String, LocalDate>,
-    latestReleaseNotes: String? = null,
     elapsedTime: Long,
     isRunning: Boolean,
     onToggleTimer: () -> Unit,
     onResetTimer: () -> Unit,
     onNavigateToDocument: (String) -> Unit,
     modifier: Modifier = Modifier,
+    latestReleaseNotes: String? = null,
     onOpenSettings: () -> Unit = {},
 ) {
     Scaffold(

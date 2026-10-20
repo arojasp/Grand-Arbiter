@@ -43,8 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -99,8 +100,8 @@ fun DraftRunScreen(
                 is DraftPosition.Waiting -> StepContent(s, DraftPosition.Running(p.index, p.step, p.step.durationMs, 0), waiting = true)
             }
         }
-        val configuration = LocalConfiguration.current
-        if (configuration.screenWidthDp > configuration.screenHeightDp) {
+        val window = LocalWindowInfo.current.containerSize
+        if (window.width > window.height) {
             // Sideways: the step on the left (scrolls if needed), the controls always visible on the right.
             Row(Modifier.padding(innerPadding).fillMaxSize()) {
                 Column(
@@ -313,7 +314,7 @@ private fun TimeUpContent(s: DraftSnapshot) {
     val bound = if (s.config.format == DraftFormat.ROCHESTER) "≤ " else ""
     DraftCard {
         DraftLabel(stringResource(R.string.draft_summary))
-        SummaryRow(stringResource(R.string.draft_summary_draft, s.config.totalPacks), bound + formatClock(s.totalMs - constructionMs))
+        SummaryRow(pluralStringResource(R.plurals.draft_summary_draft, s.config.totalPacks, s.config.totalPacks), bound + formatClock(s.totalMs - constructionMs))
         SummaryRow(stringResource(R.string.draft_construction), formatClock(constructionMs))
         HorizontalDivider(color = colors.outlineVariant)
         SummaryRow(stringResource(R.string.draft_total), bound + formatClock(s.totalMs), emphasis = true)

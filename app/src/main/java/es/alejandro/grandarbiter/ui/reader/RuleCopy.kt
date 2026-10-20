@@ -66,12 +66,13 @@ object RuleText {
 fun rememberCopyText(): (label: String, text: String) -> Unit {
     val clipboard = LocalClipboard.current
     val context = LocalContext.current
+    val copiedFormat = stringResource(R.string.reader_copied)   // read in composition: follows config changes
     val scope = rememberCoroutineScope()
     return { label, text ->
         scope.launch {
             clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(label, text)))
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                Toast.makeText(context, context.getString(R.string.reader_copied, label), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, copiedFormat.format(label), Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Android lint for this app. CI fails on any error; warnings are kept at zero by hand. -->
+<lint>
+    <!-- Mana symbols are Scryfall's official SVGs converted by tools/cards/build_symbols.py: their
+         long paths are the real artwork, and they're drawn small. Simplifying them by hand would
+         drift from the source. -->
+    <issue id="VectorPath">
+        <ignore path="src/main/res/drawable/mana_*.xml" />
+    </issue>
+    <!-- "A newer version is available": true or false depending on the day, not on the code, so
+         they'd break CI on their own. Dependabot (.github/dependabot.yml) proposes the updates as
+         PRs instead, each one checked by CI. -->
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="NewerVersionAvailable" severity="ignore" />
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+</lint>

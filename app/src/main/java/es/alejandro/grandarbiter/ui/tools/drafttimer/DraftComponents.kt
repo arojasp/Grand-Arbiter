@@ -89,7 +89,7 @@ internal fun DraftChip(text: String, color: Color = MaterialTheme.colorScheme.on
 
 /** Thin progress track, filled to [fraction] (0..1). */
 @Composable
-internal fun DraftProgress(fraction: Float, color: Color = MaterialTheme.colorScheme.primary, modifier: Modifier = Modifier) {
+internal fun DraftProgress(fraction: Float, modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.primary) {
     Box(modifier.fillMaxWidth().height(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
         Box(Modifier.fillMaxWidth(fraction.coerceIn(0f, 1f)).height(6.dp).clip(CircleShape).background(color))
     }

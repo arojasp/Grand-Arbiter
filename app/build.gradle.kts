@@ -29,14 +29,17 @@ android {
     //       storePassword=…   keyAlias=upload   keyPassword=…
     // Neither: release builds are simply unsigned (the CI workflow, other machines). Never a debug key.
     val ciKeystore = System.getenv("UPLOAD_KEYSTORE_FILE")?.takeIf { it.isNotBlank() }
+    // GitHub passes a secret that doesn't exist as an EMPTY variable, not a missing one: treat blank as missing.
+    fun requiredEnv(name: String): String =
+        System.getenv(name)?.takeIf { it.isNotBlank() } ?: error("$name is not set (secret missing in the GitHub environment \"play\"?)")
     val keystoreFile = rootProject.file("keystore.properties")
     if (ciKeystore != null || keystoreFile.exists()) {
         val keystore = Properties().apply {
             if (ciKeystore != null) {
                 setProperty("storeFile", ciKeystore)
-                setProperty("storePassword", System.getenv("UPLOAD_KEYSTORE_PASSWORD") ?: error("UPLOAD_KEYSTORE_PASSWORD is not set"))
-                setProperty("keyAlias", System.getenv("UPLOAD_KEY_ALIAS") ?: error("UPLOAD_KEY_ALIAS is not set"))
-                setProperty("keyPassword", System.getenv("UPLOAD_KEY_PASSWORD") ?: error("UPLOAD_KEY_PASSWORD is not set"))
+                setProperty("storePassword", requiredEnv("UPLOAD_KEYSTORE_PASSWORD"))
+                setProperty("keyAlias", requiredEnv("UPLOAD_KEY_ALIAS"))
+                setProperty("keyPassword", requiredEnv("UPLOAD_KEY_PASSWORD"))
             } else {
                 keystoreFile.inputStream().use { load(it) }
             }

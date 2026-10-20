@@ -39,6 +39,7 @@ jobs:
           set -eu
           [ "$GITHUB_REF_TYPE" = "tag" ] || { echo "::error::Run this from a tag (vX.Y.Z), not a branch."; exit 1; }
           tag="$GITHUB_REF_NAME"
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Tags must look like v1.2.3 (got $tag)."; exit 1; }
           git merge-base --is-ancestor "$GITHUB_SHA" origin/main \
             || { echo "::error::$tag is not on main. Merge develop into main first, then tag main."; exit 1; }
           name=$(sed -n 's/^ *versionName = "\(.*\)"/\1/p' app/build.gradle.kts)
@@ -77,6 +78,22 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
         with:
           cache-read-only: true
+
+      - name: Secrets present
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+          UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
+          UPLOAD_KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+        run: |
+          # A secret that doesn't exist arrives empty, and the failure would show up much later as
+          # "keystore password was incorrect". Name the missing ones instead.
+          missing=0
+          for name in PLAY_SERVICE_ACCOUNT_JSON UPLOAD_KEYSTORE_BASE64 UPLOAD_KEYSTORE_PASSWORD UPLOAD_KEY_ALIAS UPLOAD_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then echo "::error::Secret $name is missing in the environment \"play\"."; missing=1; fi
+          done
+          exit $missing
 
       - name: Upload key
         env:

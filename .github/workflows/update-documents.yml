@@ -24,31 +24,32 @@ concurrency:
 
 env:
   BRANCH: auto/update-documents
+  PYTHONUNBUFFERED: "1"   # the scripts' output in order with update_all.py's headings
 
 jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: develop
 
-      - uses: gradle/actions/wrapper-validation@v4   # the gradle-wrapper.jar is the official one
+      - uses: gradle/actions/wrapper-validation@v5   # the gradle-wrapper.jar is the official one
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
       - name: Python dependencies
         run: pip install pdfplumber
 
-      - uses: actions/setup-java@v4   # update_all.py runs the unit tests when something changed
+      - uses: actions/setup-java@v6   # update_all.py runs the unit tests when something changed
         with:
           distribution: temurin
           java-version: "21"
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5   # v5, not v6: v6 moved caching to a closed-source component with its own terms
 
       - name: Run tools/update_all.py
         id: update
@@ -91,7 +92,7 @@ jobs:
 
       - name: Keep the log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: update-log
           path: update.log

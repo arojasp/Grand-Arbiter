@@ -21,13 +21,26 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // Upload key for Google Play. keystore.properties and the .jks are gitignored and never committed:
-    //   storeFile=C:/path/to/grand-arbiter-upload.jks
-    //   storePassword=…   keyAlias=upload   keyPassword=…
-    // Without the file, release builds are simply unsigned (CI, other machines).
+    // Upload key for Google Play, never committed. Two sources, the first one found wins:
+    //  1. CI (.github/workflows/release.yml): environment variables UPLOAD_KEYSTORE_FILE (path to the
+    //     .jks decoded from a GitHub secret), UPLOAD_KEYSTORE_PASSWORD, UPLOAD_KEY_ALIAS, UPLOAD_KEY_PASSWORD.
+    //  2. Your PC: keystore.properties (gitignored) at the repo root:
+    //       storeFile=C:/path/to/grand-arbiter-upload.jks
+    //       storePassword=…   keyAlias=upload   keyPassword=…
+    // Neither: release builds are simply unsigned (the CI workflow, other machines). Never a debug key.
+    val ciKeystore = System.getenv("UPLOAD_KEYSTORE_FILE")?.takeIf { it.isNotBlank() }
     val keystoreFile = rootProject.file("keystore.properties")
-    if (keystoreFile.exists()) {
-        val keystore = Properties().apply { keystoreFile.inputStream().use { load(it) } }
+    if (ciKeystore != null || keystoreFile.exists()) {
+        val keystore = Properties().apply {
+            if (ciKeystore != null) {
+                setProperty("storeFile", ciKeystore)
+                setProperty("storePassword", System.getenv("UPLOAD_KEYSTORE_PASSWORD") ?: error("UPLOAD_KEYSTORE_PASSWORD is not set"))
+                setProperty("keyAlias", System.getenv("UPLOAD_KEY_ALIAS") ?: error("UPLOAD_KEY_ALIAS is not set"))
+                setProperty("keyPassword", System.getenv("UPLOAD_KEY_PASSWORD") ?: error("UPLOAD_KEY_PASSWORD is not set"))
+            } else {
+                keystoreFile.inputStream().use { load(it) }
+            }
+        }
         signingConfigs {
             create("release") {
                 storeFile = file(keystore.getProperty("storeFile"))

@@ -27,6 +27,9 @@ jobs:
 
       - uses: gradle/actions/wrapper-validation@v5
 
+      - name: Release notes for Play (≤ 500 characters)
+        run: python3 .github/scripts/check_whatsnew.py
+
       - uses: actions/setup-java@v6
         with:
           distribution: temurin

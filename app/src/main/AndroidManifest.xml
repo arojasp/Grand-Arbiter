@@ -4,6 +4,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Draft timer: one vibration when a step runs out (normal permission, no prompt). -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Release notes viewer: online or offline (ConnectivityManager). Normal permission, no prompt. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".GrandArbiterApplication"

@@ -1,0 +1,105 @@
+# Daily: runs tools/update_all.py (rules + release notes) on develop. If anything changed, it opens
+# (or refreshes) a pull request against develop with the script's summary. Nothing is published:
+# publishing is still merging develop -> main, by hand, after reviewing.
+#
+# GitHub runs scheduled workflows from the DEFAULT branch (main): this file starts running once it
+# is merged to main. "Run workflow" on the Actions tab runs it on demand.
+#
+# Needs, once, in the repo: Settings > Actions > General > Workflow permissions >
+# "Allow GitHub Actions to create and approve pull requests".
+name: Update documents
+
+on:
+  schedule:
+    - cron: "17 5 * * *"   # every day 05:17 UTC (07:17 in Spain in summer, 06:17 in winter)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-documents
+  cancel-in-progress: false
+
+env:
+  BRANCH: auto/update-documents
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - uses: gradle/actions/wrapper-validation@v4   # the gradle-wrapper.jar is the official one
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Python dependencies
+        run: pip install pdfplumber
+
+      - uses: actions/setup-java@v4   # update_all.py runs the unit tests when something changed
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Run tools/update_all.py
+        id: update
+        run: |
+          set +e
+          chmod +x gradlew   # committed from Windows: no executable bit
+          python tools/update_all.py 2>&1 | tee update.log
+          code=${PIPESTATUS[0]}
+          # The script's own summary (from "=== Summary" on) goes in the PR description.
+          sed -n '/=== Summary/,$p' update.log > summary.txt
+          echo "exit=$code" >> "$GITHUB_OUTPUT"
+          if [ -n "$(git status --porcelain -- rules app/src/main/assets)" ]; then echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Open or refresh the pull request
+        # Only a clean run: if the tests or a build step failed, nothing is proposed (the job fails below).
+        if: steps.update.outputs.changed == 'true' && steps.update.outputs.exit == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add rules app/src/main/assets
+          git commit -m "Update documents ($(date -u +%Y-%m-%d))" -m "$(cat summary.txt)"
+          git push --force origin "$BRANCH"
+          {
+            echo "Automatic run of \`tools/update_all.py\`. Review the diff (for rules: \`rules/source/*.txt\`)."
+            echo
+            echo "**Merging this into develop does not publish anything.** Publishing is merging develop into main."
+            echo
+            echo '```'
+            cat summary.txt
+            echo '```'
+          } > body.md
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base develop --head "$BRANCH" --title "Update documents ($(date -u +%Y-%m-%d))" --body-file body.md
+          else
+            gh pr edit "$BRANCH" --body-file body.md
+          fi
+
+      - name: Keep the log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-log
+          path: update.log
+          retention-days: 14
+
+      - name: Fail if the script failed
+        # A failed run makes GitHub email you: something couldn't be downloaded, built or tested.
+        if: steps.update.outputs.exit != '0'
+        run: |
+          cat summary.txt
+          exit 1

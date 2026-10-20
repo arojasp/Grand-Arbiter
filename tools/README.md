@@ -33,6 +33,14 @@ what to do next. It never commits or publishes anything.
 Exit code `0` = all good, `1` = something failed: the summary says what, and whatever failed keeps its
 previous version (a failed download or build never overwrites good data).
 
+## Every day, automatically
+
+`.github/workflows/update-documents.yml` runs `update_all.py` (rules + release notes) on GitHub every
+morning. If something changed and the tests pass, it opens a pull request against `develop` (branch
+`auto/update-documents`) with the summary; if a step fails, the run fails and GitHub emails you.
+It never publishes: you still review, merge into `develop`, then `develop` → `main`.
+Also runnable by hand from the repo's Actions tab ("Run workflow").
+
 ## After it runs
 
 1. Review: `git diff --stat` (for rules, also `git diff rules/source`: the `.txt` files are readable

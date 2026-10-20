@@ -1,0 +1,52 @@
+# Every PR and every push to develop / main: unit tests, Android lint and a release build
+# (unsigned: there is no keystore here). The release build catches R8 / resource-shrinking
+# errors that only show in release. Free: the repo is public.
+#
+# Make it required: Settings > Branches > main (and develop) > "Require status checks" > "CI / build".
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: gradle/actions/wrapper-validation@v5
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v5
+        with:
+          # Only develop writes the cache; PRs and main read it.
+          cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
+
+      - name: Tests, lint and release build
+        run: ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleRelease --continue
+
+      - name: Reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports
+          path: |
+            app/build/reports/tests/
+            app/build/reports/lint-results-debug.*
+            app/build/test-results/
+          retention-days: 14

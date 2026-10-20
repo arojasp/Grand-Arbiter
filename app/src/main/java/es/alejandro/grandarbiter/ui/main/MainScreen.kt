@@ -31,7 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,8 +68,8 @@ fun MainScreenContent(
 
     val showNavigation = items.any { item -> currentDestination?.hierarchy?.any { it.route == item.route } == true }
     // Phone turned sideways: the bar moves to the side (a rail), the content keeps its height.
-    val configuration = LocalConfiguration.current
-    val landscape = configuration.screenWidthDp > configuration.screenHeightDp
+    val window = LocalWindowInfo.current.containerSize
+    val landscape = window.width > window.height
     val isSelected = { item: NavigationItem -> currentDestination?.hierarchy?.any { it.route == item.route } == true }
     val open = { item: NavigationItem ->
         navController.navigate(item.route) {

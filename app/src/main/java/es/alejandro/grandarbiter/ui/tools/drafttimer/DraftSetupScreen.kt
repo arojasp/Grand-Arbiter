@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -237,8 +238,8 @@ private fun EstimateCard(e: DraftEstimate) {
         val picksLabel = if (e.atMost) stringResource(R.string.draft_estimate_picks_rochester, e.packs, e.timedPicksPerPack, e.pickSeconds)
             else if (byPack != null && e.cardsPerPick > 1) stringResource(R.string.draft_estimate_picks_by_pack_multi, byPack, e.cardsPerPick)
             else if (byPack != null) stringResource(R.string.draft_estimate_picks_by_pack, byPack)
-            else if (e.cardsPerPick > 1) stringResource(R.string.draft_estimate_picks_multi, e.packs, e.timedPicksPerPack, e.cardsPerPick)
-            else stringResource(R.string.draft_estimate_picks, e.packs, e.timedPicksPerPack)
+            else if (e.cardsPerPick > 1) pluralStringResource(R.plurals.draft_estimate_picks_multi, e.packs, e.packs, e.timedPicksPerPack, e.cardsPerPick)
+            else pluralStringResource(R.plurals.draft_estimate_picks, e.packs, e.packs, e.timedPicksPerPack)
         EstimateRow(picksLabel, formatClock(e.picksMs))
         if (e.reviewSeconds.isNotEmpty()) {
             // "60 s + 90 s"; the same every time (2HG): "5 × 60 s".

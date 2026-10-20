@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -173,8 +173,8 @@ fun DeckCounterScreen(
             }
         }
 
-        val configuration = LocalConfiguration.current
-        if (configuration.screenWidthDp > configuration.screenHeightDp) {
+        val window = LocalWindowInfo.current.containerSize
+        if (window.width > window.height) {
             // Sideways: count and controls on the left, the pads on the right at full height.
             Row(
                 Modifier.padding(innerPadding).fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),

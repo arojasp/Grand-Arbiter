@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Grand Arbiter</string>
     <string name="nav_home">Home</string>
     <string name="nav_card_search">Card Search</string>
@@ -64,7 +64,7 @@
     <string name="cards_oracle_text">Oracle text</string>
     <string name="cards_no_text">This card has no rules text.</string>
     <string name="cards_official_rulings">Official rulings</string>
-    <string name="cards_rulings_total">%1$d Total</string>
+    <string name="cards_rulings_total" tools:ignore="PluralsCandidate">%1$d Total</string>
     <string name="cards_card_image">Card art</string>
     <string name="cards_show_image">Show card art</string>
     <string name="cards_hide_image">Hide card art</string>
@@ -157,7 +157,10 @@
     <string name="banned_search_placeholder">Search cards or formats</string>
     <string name="banned_data_from">From Scryfall card data, %1$s</string>
     <string name="banned_community">Community formats</string>
-    <string name="banned_categories">+ %1$d cards banned by category</string>
+    <plurals name="banned_categories">
+        <item quantity="one">+ %1$d card banned by category</item>
+        <item quantity="other">+ %1$d cards banned by category</item>
+    </plurals>
     <string name="banned_category_un">Un-cards (acorn, stickers, attractions)</string>
     <string name="banned_category_conspiracy">Conspiracy cards</string>
     <string name="banned_category_ante">Cards that play for ante</string>
@@ -200,12 +203,12 @@
     <string name="deck_format_commander">Commander</string>
     <string name="deck_pile_main">Main deck</string>
     <string name="deck_pile_side">Sideboard</string>
-    <string name="deck_status_short">%1$d short of %2$d</string>
+    <string name="deck_status_short" tools:ignore="PluralsCandidate">%1$d short of %2$d</string>
     <string name="deck_status_ok">Legal size (%1$d or more)</string>
     <string name="deck_status_exact_ok">Exactly %1$d</string>
-    <string name="deck_status_over">%1$d over (must be exactly %2$d)</string>
+    <string name="deck_status_over" tools:ignore="PluralsCandidate">%1$d over (must be exactly %2$d)</string>
     <string name="deck_status_side_ok">Within the %1$d-card limit</string>
-    <string name="deck_status_side_over">%1$d over the %2$d-card limit</string>
+    <string name="deck_status_side_over" tools:ignore="PluralsCandidate">%1$d over the %2$d-card limit</string>
     <string name="deck_status_no_limit">No size limit</string>
     <string name="deck_history_empty">Tap the number of copies of each card</string>
     <string name="deck_add">Add %1$d</string>
@@ -265,7 +268,6 @@
     <string name="reader_copied">%1$s copied</string>
     <string name="reader_glossary">Glossary</string>
     <string name="tools_release_notes">Release Notes</string>
-    <string name="tools_release_notes_desc">Official notes for each set</string>
     <string name="release_notes_caption">Wizards of the Coast\'s official release notes for each set, newest first, readable offline.</string>
     <string name="release_notes_latest">Latest</string>
     <string name="release_notes_open">Open %1$s release notes</string>
@@ -314,33 +316,39 @@
     <string name="draft_beep">Beep at 0:00</string>
     <string name="draft_beep_hint">Short tone, off by default</string>
     <string name="draft_section_estimate">Estimated duration</string>
-    <string name="draft_estimate_picks">Picks (%1$d packs × %2$d)</string>
-    <string name="draft_estimate_picks_multi">Picks (%1$d packs × %2$d, %3$d cards each)</string>
+    <plurals name="draft_estimate_picks">
+        <item quantity="one">Picks (%1$d pack × %2$d)</item>
+        <item quantity="other">Picks (%1$d packs × %2$d)</item>
+    </plurals>
+    <plurals name="draft_estimate_picks_multi">
+        <item quantity="one">Picks (%1$d pack × %2$d, %3$d cards each)</item>
+        <item quantity="other">Picks (%1$d packs × %2$d, %3$d cards each)</item>
+    </plurals>
     <string name="draft_estimate_picks_by_pack">Picks (%1$s)</string>
-    <string name="draft_estimate_picks_by_pack_multi">Picks (%1$s, %2$d cards each)</string>
+    <string name="draft_estimate_picks_by_pack_multi" tools:ignore="PluralsCandidate">Picks (%1$s, %2$d cards each)</string>
     <string name="draft_estimate_review">Review (%1$s)</string>
     <string name="draft_total">Total</string>
     <string name="draft_start">Start draft</string>
     <string name="draft_pack_of">Pack %1$d of %2$d</string>
     <string name="draft_pass_left">← Pass left</string>
     <string name="draft_pass_right">Pass right →</string>
-    <string name="draft_pick_label">Pick %1$d · %2$d cards in pack</string>
-    <string name="draft_pick_take_label">Pick %1$d · Take %2$d of %3$d cards</string>
+    <string name="draft_pick_label" tools:ignore="PluralsCandidate">Pick %1$d · %2$d cards in pack</string>
+    <string name="draft_pick_take_label" tools:ignore="PluralsCandidate">Pick %1$d · Take %2$d of %3$d cards</string>
     <string name="draft_paused_label">Paused · %1$s</string>
     <string name="draft_of">of %1$s</string>
     <string name="draft_pack_progress">Pack progress</string>
     <string name="draft_pick_of">Pick %1$d of %2$d</string>
     <string name="draft_next_pick">Next pick</string>
     <string name="draft_next">Next</string>
-    <string name="draft_next_pick_value">%1$d cards · %2$d s</string>
+    <string name="draft_next_pick_value" tools:ignore="PluralsCandidate">%1$d cards · %2$d s</string>
     <string name="draft_next_review_value">Review · %1$s</string>
     <string name="draft_next_construction_value">Deck construction · %1$s</string>
-    <string name="draft_pack_complete">Pack %1$d complete</string>
+    <string name="draft_pack_complete" tools:ignore="PluralsCandidate">Pack %1$d complete</string>
     <string name="draft_review">Review</string>
     <string name="draft_review_label">Review your picks</string>
     <string name="draft_up_next">Up next</string>
     <string name="draft_pack_n">Pack %1$d</string>
-    <string name="draft_first_pick">First pick: %1$d cards · %2$d s</string>
+    <string name="draft_first_pick" tools:ignore="PluralsCandidate">First pick: %1$d cards · %2$d s</string>
     <string name="draft_review_note">Picks stay face down. No picking or trading during review.</string>
     <string name="draft_complete">Draft complete</string>
     <string name="draft_build">Build</string>
@@ -349,7 +357,10 @@
     <string name="draft_time">Time</string>
     <string name="draft_time_is_up">Time is up</string>
     <string name="draft_summary">Summary</string>
-    <string name="draft_summary_draft">Draft (%1$d packs)</string>
+    <plurals name="draft_summary_draft">
+        <item quantity="one">Draft (%1$d pack)</item>
+        <item quantity="other">Draft (%1$d packs)</item>
+    </plurals>
     <string name="draft_finish">Finish</string>
     <string name="draft_previous_pick">Previous pick</string>
     <string name="draft_next_pick_button">Next pick</string>
@@ -383,7 +394,7 @@
     <string name="draft_first_team_hint">%1$s lays out the first pack (Player B of that team)</string>
     <string name="draft_team_n">Team %1$d</string>
     <string name="draft_packs_per_player">Packs per player</string>
-    <string name="draft_packs_at_table">%1$d packs at the table (6 players)</string>
+    <string name="draft_packs_at_table" tools:ignore="PluralsCandidate">%1$d packs at the table (6 players)</string>
     <string name="draft_section_estimate_at_most">Estimated duration (at most)</string>
     <string name="draft_estimate_layout">Pack review (%1$d × %2$d s)</string>
     <string name="draft_estimate_picks_rochester">Picks (%1$d × %2$d × %3$d s)</string>
@@ -406,7 +417,7 @@
     <string name="draft_picked_hint">Tap Picked as soon as the player takes the card</string>
     <string name="draft_start_picks">Start picks</string>
     <string name="draft_previous">Previous</string>
-    <string name="draft_active_layout">Pack %1$d laid out · %2$s left</string>
+    <string name="draft_active_layout" tools:ignore="PluralsCandidate">Pack %1$d laid out · %2$s left</string>
     <string name="draft_active_rochester_pick">Pack %1$d · %2$s picking · %3$s left</string>
 
     <!-- Quick reference editor: browse the document's index -->

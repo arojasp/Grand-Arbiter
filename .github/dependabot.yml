@@ -1,0 +1,30 @@
+# Weekly PRs against develop for outdated Gradle dependencies (version catalog, AGP, Kotlin, the
+# Gradle wrapper) and GitHub Actions. CI runs on each one: merge if green, close if not wanted.
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: "/"
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      # One PR for the tightly coupled ones (Kotlin + its plugins + KSP), one for AndroidX, one for the rest.
+      kotlin:
+        patterns: ["org.jetbrains.kotlin*", "com.google.devtools.ksp*"]
+      androidx:
+        patterns: ["androidx.*"]
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: gradle-wrapper
+    directory: "/"
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    target-branch: develop
+    schedule:
+      interval: monthly

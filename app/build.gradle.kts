@@ -15,8 +15,8 @@ android {
         applicationId = "es.alejandro.grandarbiter"
         minSdk = 26
         targetSdk = 37
-        versionCode = 6
-        versionName = "1.1.1"
+        versionCode = 7
+        versionName = "1.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -29,14 +29,17 @@ android {
     //       storePassword=…   keyAlias=upload   keyPassword=…
     // Neither: release builds are simply unsigned (the CI workflow, other machines). Never a debug key.
     val ciKeystore = System.getenv("UPLOAD_KEYSTORE_FILE")?.takeIf { it.isNotBlank() }
+    // GitHub passes a secret that doesn't exist as an EMPTY variable, not a missing one: treat blank as missing.
+    fun requiredEnv(name: String): String =
+        System.getenv(name)?.takeIf { it.isNotBlank() } ?: error("$name is not set (secret missing in the GitHub environment \"play\"?)")
     val keystoreFile = rootProject.file("keystore.properties")
     if (ciKeystore != null || keystoreFile.exists()) {
         val keystore = Properties().apply {
             if (ciKeystore != null) {
                 setProperty("storeFile", ciKeystore)
-                setProperty("storePassword", System.getenv("UPLOAD_KEYSTORE_PASSWORD") ?: error("UPLOAD_KEYSTORE_PASSWORD is not set"))
-                setProperty("keyAlias", System.getenv("UPLOAD_KEY_ALIAS") ?: error("UPLOAD_KEY_ALIAS is not set"))
-                setProperty("keyPassword", System.getenv("UPLOAD_KEY_PASSWORD") ?: error("UPLOAD_KEY_PASSWORD is not set"))
+                setProperty("storePassword", requiredEnv("UPLOAD_KEYSTORE_PASSWORD"))
+                setProperty("keyAlias", requiredEnv("UPLOAD_KEY_ALIAS"))
+                setProperty("keyPassword", requiredEnv("UPLOAD_KEY_PASSWORD"))
             } else {
                 keystoreFile.inputStream().use { load(it) }
             }
@@ -57,6 +60,10 @@ android {
             // Play deobfuscates crash traces with the mapping file bundled in the AAB.
             isMinifyEnabled = true
             isShrinkResources = true
+            // The app has no C/C++ of its own, but two AndroidX libraries ship native code
+            // (graphics path, DataStore). Their symbol tables go into the AAB so Play Console can
+            // name the functions in a native crash / ANR trace (Play warns without them).
+            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
             signingConfigs.findByName("release")?.let { signingConfig = it }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

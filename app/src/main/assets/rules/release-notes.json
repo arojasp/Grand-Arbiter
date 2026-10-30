@@ -2,6 +2,12 @@
   "schemaVersion": 1,
   "sets": [
     {
+      "code": "TRK",
+      "name": "Star Trek",
+      "url": "https://magic.wizards.com/en/news/feature/star-trek-release-notes",
+      "sha": "6db8bca5e35b7cf2"
+    },
+    {
       "code": "FRA",
       "name": "Reality Fracture",
       "url": "https://magic.wizards.com/en/news/feature/reality-fracture-release-notes",

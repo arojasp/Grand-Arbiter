@@ -60,6 +60,10 @@ android {
             // Play deobfuscates crash traces with the mapping file bundled in the AAB.
             isMinifyEnabled = true
             isShrinkResources = true
+            // The app has no C/C++ of its own, but two AndroidX libraries ship native code
+            // (graphics path, DataStore). Their symbol tables go into the AAB so Play Console can
+            // name the functions in a native crash / ANR trace (Play warns without them).
+            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
             signingConfigs.findByName("release")?.let { signingConfig = it }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

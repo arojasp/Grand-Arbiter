@@ -4,8 +4,9 @@ Update every document the app ships, doing only what is needed, then run the tes
 
   1. Rules (CR, MTR, IPG, JAR): download the official sources; rebuild the bundle ONLY if the
      extracted text changed (a rebuild bumps bundleVersion, and every installed app would download it).
-  2. Release notes: re-download every set in the index; a set's JSON (and its SHA in the index)
-     only changes when Wizards changed the article.
+  2. Release notes: add new sets found on Wizards' site (discover_release_notes.py), then
+     re-download every set in the index; a set's JSON (and its SHA in the index) only changes when
+     Wizards changed the article.
   3. Cards seed in the APK (--cards) and mana symbols (--symbols): opt-in. Scryfall's data changes
      every 12 hours and users already update cards from Settings, so refresh the seed before a
      release, not on every run.
@@ -153,6 +154,14 @@ def update_rules(rep: Report) -> None:
 def update_release_notes(rep: Report) -> None:
     step("Release notes")
     before = snapshot([RN_INDEX, RN_DIR])
+    codes_before = {e["code"] for e in json.loads(RN_INDEX.read_text(encoding="utf-8"))["sets"]}
+    # New sets on Wizards' site: added at the top of the index, then built below with the others.
+    if not run("releasenotes/discover_release_notes.py"):
+        rep.failures.append("release notes: a new page couldn't be added to the index (see ERROR lines above): "
+                            "add it by hand or to tools/releasenotes/ignored.json")
+    new_sets = [e["code"] for e in json.loads(RN_INDEX.read_text(encoding="utf-8"))["sets"] if e["code"] not in codes_before]
+    if new_sets:
+        rep.changed.append(f"NEW release notes: {', '.join(new_sets)} (check code and name)")
     ok = run("releasenotes/build_release_notes.py", "--refresh")
     changes = diff(before, snapshot([RN_INDEX, RN_DIR]))
     if not ok:
@@ -167,8 +176,6 @@ def update_release_notes(rep: Report) -> None:
         rep.publish = True
     else:
         print("Release notes: no set changed.")
-    print("Reminder: a NEW set is not discovered automatically. Add it at the top of "
-          f"{RN_INDEX.relative_to(ROOT)} (code, name, official URL) and run this again.")
 
 
 # ---------------------------------------------------------------- 3. cards seed / symbols (opt-in)

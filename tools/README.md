@@ -53,9 +53,12 @@ Cards seed and symbols are different: they reach users with the **next app versi
 
 ## Things the script can't do for you
 
-- **A new set's release notes**: add a line at the **top** of
-  `app/src/main/assets/rules/release-notes.json` (`code`, `name`, official URL on
-  magic.wizards.com), then run `update_all.py`. Sets aren't discovered automatically.
+- **A new set's release notes the discovery couldn't place**: `update_all.py` finds new release notes
+  pages in Wizards' sitemap (`tools/releasenotes/discover_release_notes.py`) and adds them with the
+  code from Scryfall. When the name doesn't match exactly one Scryfall set, it fails and names the
+  page. Then either add a line at the **top** of `app/src/main/assets/rules/release-notes.json`
+  (`code`, `name`, URL) by hand, or, if it isn't a set we want, put its URL in
+  `tools/releasenotes/ignored.json`. Always check the code and name of a new set in the PR.
 - **A new IPG**: re-check every entry of `rules/source/ipg-infractions.json` against the PDF and set
   `"verified": true` again. The build fails while the PDF and that file disagree (on purpose).
 - **Forcing an app update** (rare). The order matters:

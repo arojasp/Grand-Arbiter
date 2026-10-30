@@ -1,0 +1,28 @@
+{
+  "comment": "Release notes pages on magic.wizards.com that discover_release_notes.py must not propose: older sets than the app carries, or pages that aren't a set's release notes. Add a URL here to stop it being proposed again.",
+  "urls": [
+    "https://magic.wizards.com/en/news/feature/assassins-creed-release-notes",
+    "https://magic.wizards.com/en/news/feature/commander-masters-release-notes",
+    "https://magic.wizards.com/en/news/feature/dominaria-release-notes",
+    "https://magic.wizards.com/en/news/feature/dominaria-remastered-release-notes",
+    "https://magic.wizards.com/en/news/feature/innistrad-midnight-hunt-release-notes",
+    "https://magic.wizards.com/en/news/feature/innistrad-remastered-release-notes",
+    "https://magic.wizards.com/en/news/feature/ixalan-release-notes",
+    "https://magic.wizards.com/en/news/feature/jumpstart-2022-release-notes",
+    "https://magic.wizards.com/en/news/feature/magic-the-gathering-doctor-who-release-notes",
+    "https://magic.wizards.com/en/news/feature/magic-the-gathering-fallout-release-notes",
+    "https://magic.wizards.com/en/news/feature/march-of-the-machine-release-notes",
+    "https://magic.wizards.com/en/news/feature/march-of-the-machine-the-aftermath-release-notes",
+    "https://magic.wizards.com/en/news/feature/modern-horizons-3-release-notes",
+    "https://magic.wizards.com/en/news/feature/murders-at-karlov-manor-release-notes",
+    "https://magic.wizards.com/en/news/feature/mystery-booster-2-release-notes",
+    "https://magic.wizards.com/en/news/feature/mystery-booster-commander-edition-release-notes",
+    "https://magic.wizards.com/en/news/feature/outlaws-of-thunder-junction-release-notes",
+    "https://magic.wizards.com/en/news/feature/phyrexia-all-will-be-one-release-notes",
+    "https://magic.wizards.com/en/news/feature/ravnica-remastered-release-notes",
+    "https://magic.wizards.com/en/news/feature/the-brothers-war-release-notes",
+    "https://magic.wizards.com/en/news/feature/the-lord-of-the-rings-tales-of-middle-earth-release-notes",
+    "https://magic.wizards.com/en/news/feature/the-lost-caverns-of-ixalan-release-notes",
+    "https://magic.wizards.com/en/news/feature/wilds-of-eldraine-release-notes"
+  ]
+}

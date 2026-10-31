@@ -15,12 +15,12 @@ android {
         applicationId = "es.alejandro.grandarbiter"
         minSdk = 26
         targetSdk = 37
-        // versionName = A.B.C for app changes (code). A release that only brings new documents
-        // (rules, cards, release notes) keeps A.B.C and appends a 3-digit counter to the patch:
-        // 1.2.3 -> 1.2.3001 -> 1.2.3002; the next code release (1.2.4) drops it again.
-        // versionCode always goes up by one.
-        versionCode = 7
-        versionName = "1.1.2"
+        // versionName = A.B.C + XXX. A.B.C tracks app changes (code, texts); XXX, a 3-digit counter
+        // appended to the patch, tracks document changes (rules, cards, release notes) since that
+        // A.B.C. 1.2.3001: app 1.2.3 with its first document update; 1.2.3002: one more, app
+        // unchanged; 1.2.4: new app version with no document changes. versionCode always +1.
+        versionCode = 8
+        versionName = "1.1.3001"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

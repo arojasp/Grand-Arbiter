@@ -3,8 +3,9 @@
 # internal testers at once.
 # Production stays manual: promote the release in the Play Console after testing it.
 #
-# Versions: A.B.C for app changes; a documents-only release appends a 3-digit counter to the patch
-# (1.2.3 -> 1.2.3001 -> 1.2.3002, then 1.2.4). Tags follow: v1.2.3, v1.2.3001.
+# Versions: A.B.C tracks app changes; a 3-digit counter appended to the patch tracks document
+# changes since that A.B.C (1.2.3001, 1.2.3002; 1.2.4 = new app, no document changes).
+# Tags follow: v1.2.3, v1.2.3001.
 #
 # Procedure:
 #   1. On develop: bump versionCode/versionName (app/build.gradle.kts) and edit distribution/whatsnew/*.
@@ -52,7 +53,7 @@ jobs:
           python3 .github/scripts/check_whatsnew.py
           patch="${name##*.}"
           if [ ${#patch} -gt 3 ]; then
-            kind="documents update #${patch: -3} on ${name%.*}.${patch:0:${#patch}-3}"
+            kind="app ${name%.*}.${patch:0:${#patch}-3}, documents update #${patch: -3}"
           else
             kind="app release"
           fi

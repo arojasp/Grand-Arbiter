@@ -25,7 +25,7 @@ what to do next. It never commits or publishes anything.
 
 | Option | When |
 |---|---|
-| `--cards` | Before an app release: rebuilds the card seed in the APK if Scryfall has newer data. Users already update cards from Settings, so this isn't needed on every run (Scryfall changes every 12 h and the seed is several MB in git). |
+| `--cards` | Rarely needed now: every app release rebuilds the APK's card seed from that day's Scryfall data (`.github/workflows/release.yml`), without committing it. Use it to refresh the committed seed by hand (it's the fallback if Scryfall fails during a release). |
 | `--symbols` | When a set introduces a new mana/card symbol (rare). |
 | `--only rules` / `releasenotes` / `cards` / `symbols` | Just one pipeline. |
 | `--no-tests` | Skip Gradle (e.g. you'll run the tests from Android Studio). |

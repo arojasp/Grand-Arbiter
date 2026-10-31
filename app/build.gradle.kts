@@ -15,6 +15,10 @@ android {
         applicationId = "es.alejandro.grandarbiter"
         minSdk = 26
         targetSdk = 37
+        // versionName = A.B.C for app changes (code). A release that only brings new documents
+        // (rules, cards, release notes) keeps A.B.C and appends a 3-digit counter to the patch:
+        // 1.2.3 -> 1.2.3001 -> 1.2.3002; the next code release (1.2.4) drops it again.
+        // versionCode always goes up by one.
         versionCode = 7
         versionName = "1.1.2"
 

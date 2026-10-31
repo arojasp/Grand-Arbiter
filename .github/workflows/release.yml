@@ -1,6 +1,11 @@
 # Release: push a tag vX.Y.Z on main -> checks -> waits for your approval (environment "play")
-# -> signed AAB -> Google Play INTERNAL track, available to internal testers at once.
+# -> today's card data from Scryfall -> signed AAB -> Google Play INTERNAL track, available to
+# internal testers at once.
 # Production stays manual: promote the release in the Play Console after testing it.
+#
+# Versions: A.B.C tracks app changes; a 3-digit counter appended to the patch tracks document
+# changes since that A.B.C (1.2.3001, 1.2.3002; 1.2.4 = new app, no document changes).
+# Tags follow: v1.2.3, v1.2.3001.
 #
 # Procedure:
 #   1. On develop: bump versionCode/versionName (app/build.gradle.kts) and edit distribution/whatsnew/*.
@@ -46,7 +51,13 @@ jobs:
           code=$(sed -n 's/^ *versionCode = \([0-9]*\)/\1/p' app/build.gradle.kts)
           [ "$tag" = "v$name" ] || { echo "::error::Tag $tag but versionName is $name."; exit 1; }
           python3 .github/scripts/check_whatsnew.py
-          echo "Releasing $name ($code)" >> "$GITHUB_STEP_SUMMARY"
+          patch="${name##*.}"
+          if [ ${#patch} -gt 3 ]; then
+            kind="app ${name%.*}.${patch:0:${#patch}-3}, documents update #${patch: -3}"
+          else
+            kind="app release"
+          fi
+          echo "Releasing $name ($code): $kind" >> "$GITHUB_STEP_SUMMARY"
 
       - uses: gradle/actions/wrapper-validation@v5
 
@@ -94,6 +105,27 @@ jobs:
             if [ -z "${!name}" ]; then echo "::error::Secret $name is missing in the environment \"play\"."; missing=1; fi
           done
           exit $missing
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Fresh card data from Scryfall
+        # The APK's card seed is rebuilt from today's Scryfall data and NOT committed (a commit would
+        # add ~12 MB to the repo every time). If anything fails, the committed seed stays.
+        run: |
+          set +e
+          seed=app/src/main/assets/cards/seed.json
+          date_of() { python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['oracleUpdatedAt'][:10])" "$1"; }
+          before=$(date_of "$seed")
+          if python tools/cards/fetch_scryfall.py && python tools/cards/build_cards.py \
+             && ./gradlew :app:testDebugUnitTest --tests "es.alejandro.grandarbiter.data.cards.BundledCardsAssetTest"; then
+            echo "Cards: Scryfall data from $(date_of "$seed") (committed seed: $before)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            git checkout -- app/src/main/assets/cards
+            echo "::warning::Couldn't refresh the card data: the APK keeps the committed seed ($before)."
+            echo "Cards: committed seed, Scryfall data from $before (refresh failed, see the log)" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload key
         env:

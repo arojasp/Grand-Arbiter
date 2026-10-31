@@ -106,10 +106,10 @@ fun ToolsScreen(
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                item { SectionHeader(stringResource(R.string.tools_active), stringResource(R.string.tools_active_caption), accent = colors.primary) }
+                item { SectionHeader(stringResource(R.string.tools_active), accent = colors.primary) }
                 ACTIVE_TOOLS.forEach { tool -> item { ToolCard(tool, onOpen) } }
                 item { Spacer(Modifier.height(24.dp)) }
-                item { SectionHeader(stringResource(R.string.tools_references), stringResource(R.string.tools_references_caption), accent = colors.surfaceContainerHighest) }
+                item { SectionHeader(stringResource(R.string.tools_references), accent = colors.surfaceContainerHighest) }
                 REFERENCES.forEach { tool -> item { ReferenceRow(tool, onOpen) } }
             }
         }
@@ -128,14 +128,12 @@ private fun Modifier.atmosphere(): Modifier = drawBehind {
 }
 
 @Composable
-private fun SectionHeader(title: String, caption: String, accent: Color) {
+private fun SectionHeader(title: String, accent: Color) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.width(6.dp).height(24.dp).clip(CircleShape).background(accent))
         Spacer(Modifier.width(8.dp))
         Text(title, style = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Medium),
             color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
-        Text(caption.uppercase(), style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium, letterSpacing = 1.1.sp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

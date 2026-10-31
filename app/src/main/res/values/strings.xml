@@ -12,13 +12,13 @@
     <string name="home_reset_timer">Reset</string>
     <string name="home_document_library">Document Library</string>
     <string name="home_cr_title">Comprehensive Rules</string>
-    <string name="home_cr_description">Complete game rules database. The ultimate authority on game mechanics and interactions.</string>
+    <string name="home_cr_description">All the game rules.</string>
     <string name="home_ipg_title">Infraction Procedure Guide</string>
-    <string name="home_ipg_description">Latest tournament guidelines and penalty instructions.</string>
+    <string name="home_ipg_description">Infractions and penalties at Competitive REL.</string>
     <string name="home_mtr_title">Magic Tournament Rules</string>
-    <string name="home_mtr_description">Standard operating procedures for all sanctioned play.</string>
+    <string name="home_mtr_description">Rules for sanctioned tournaments.</string>
     <string name="home_jar_title">Judging at Regular</string>
-    <string name="home_jar_description">Rules and philosophy for local, regular REL events.</string>
+    <string name="home_jar_description">Infractions and fixes at Regular REL.</string>
     <string name="home_badge_cr">CR</string>
     <string name="home_badge_ipg">IPG</string>
     <string name="home_badge_mtr">MTR</string>
@@ -53,7 +53,7 @@
         <item quantity="other">%1$d cards found</item>
     </plurals>
     <string name="cards_found_many">%1$d+ cards found</string>
-    <string name="cards_end">End of Oracle records</string>
+    <string name="cards_end">End of results</string>
     <string name="cards_label_name">Card name</string>
     <string name="cards_label_mana">Mana cost</string>
     <string name="cards_label_type">Type</string>
@@ -129,7 +129,7 @@
     <string name="settings_high_contrast">High contrast mode</string>
     <string name="settings_high_contrast_hint">Increase legibility</string>
     <string name="settings_keep_screen_on">Keep screen on</string>
-    <string name="settings_keep_screen_on_hint">Prevent sleep while the app is open</string>
+    <string name="settings_keep_screen_on_hint">While the app is open</string>
     <string name="settings_documents">Documents</string>
     <string name="settings_open_pdf">Open the official PDF</string>
     <string name="settings_version">Version %1$s</string>
@@ -140,9 +140,7 @@
 
     <!-- Tools -->
     <string name="tools_active">Active tools</string>
-    <string name="tools_active_caption">In-tournament</string>
     <string name="tools_references">References</string>
-    <string name="tools_references_caption">Knowledge base</string>
     <string name="tools_coming_soon">Coming soon</string>
     <string name="tools_deck_counter">Deck Counter</string>
     <string name="tools_deck_counter_desc">Validate deck and sideboard composition</string>
@@ -151,7 +149,7 @@
     <string name="tools_draft_timer">Draft Timer</string>
     <string name="tools_draft_timer_desc">Every pick, review and deck construction, with the MTR times</string>
     <string name="tools_banned_lists">Banned &amp; Restricted Lists</string>
-    <string name="tools_banned_lists_desc">Up-to-date ban lists per format</string>
+    <string name="tools_banned_lists_desc">Ban lists by format</string>
     <string name="tools_quick_references">Quick References</string>
     <string name="banned_title">Banned &amp; Restricted</string>
     <string name="banned_search_placeholder">Search cards or formats</string>
@@ -190,7 +188,7 @@
     <string name="hj_reminder_shuffle">Shuffle your opponent\'s deck and offer a final cut after every search.</string>
     <string name="hj_reminder_pace">Maintain a reasonable pace of play to ensure rounds finish on time.</string>
     <string name="hj_reminder_communication">Ensure clear communication of all game states and triggered abilities.</string>
-    <string name="hj_reminder_results">Report results immediately using the provided event link or slips.</string>
+    <string name="hj_reminder_results">Report results as soon as the match ends.</string>
     <string name="hj_player_instruction">Player instruction</string>
     <string name="hj_call_judge">Raise your hand and call</string>
     <string name="hj_judge">JUDGE!</string>
@@ -223,7 +221,7 @@
     <string name="qr_close_menu">Close menu</string>
     <string name="qr_more">More options</string>
     <string name="qr_restore">Restore built-in references</string>
-    <string name="qr_restore_message">Adds back the built-in references you deleted (Layers, Steps to Cast a Spell, Copiable Values). Your own references are not changed.</string>
+    <string name="qr_restore_message">Restores deleted built-in references. Your own aren\'t changed.</string>
     <string name="qr_restore_confirm">Restore</string>
     <string name="qr_cancel">Cancel</string>
     <string name="qr_no_rules">no rules yet</string>
@@ -259,7 +257,7 @@
     <string name="app_update_ready">A new version of Grand Arbiter is ready</string>
     <string name="app_update_restart">Restart</string>
     <string name="app_update_required_title">Update required</string>
-    <string name="app_update_required_message">This version of Grand Arbiter is too old to keep the rules documents up to date. Until you update, you can keep using the documents already installed.</string>
+    <string name="app_update_required_message">This version can\'t receive new documents. The installed ones still work.</string>
     <string name="app_update_now">Update</string>
     <string name="app_update_later">Not now</string>
 
@@ -268,15 +266,15 @@
     <string name="reader_copied">%1$s copied</string>
     <string name="reader_glossary">Glossary</string>
     <string name="tools_release_notes">Release Notes</string>
-    <string name="release_notes_caption">Wizards of the Coast\'s official release notes for each set, newest first, readable offline.</string>
+    <string name="release_notes_caption">Official release notes for each set, available offline.</string>
     <string name="release_notes_latest">Latest</string>
     <string name="release_notes_open">Open %1$s release notes</string>
     <string name="glossary_search_placeholder">Search a term</string>
     <string name="home_badge_release_notes">RN</string>
-    <string name="home_release_notes_description">Official notes for each set: general notes and card clarifications</string>
+    <string name="home_release_notes_description">Card clarifications for each set.</string>
     <string name="home_release_notes_latest">Latest: %1$s</string>
     <string name="release_notes_open_browser">Open in browser</string>
-    <string name="release_notes_offline">Couldn\'t load the release notes. Check your connection: pages you\'ve opened before may still be available offline.</string>
+    <string name="release_notes_offline">Couldn\'t load the page. Pages opened before may work offline.</string>
     <string name="release_notes_retry">Retry</string>
     <string name="release_notes_modified">Release notes · updated %1$s</string>
     <string name="release_notes_view_original">View original</string>

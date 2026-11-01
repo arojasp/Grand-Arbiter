@@ -214,7 +214,7 @@ fun JudgeCallTimerCard(
                         letterSpacing = 1.sp,
                         fontWeight = FontWeight.Bold
                     ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = formatTime(elapsedTime),
@@ -329,7 +329,7 @@ fun DocumentLibraryCard(
                 Text(
                     text = item.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 3,
                     lineHeight = 20.sp
                 )
@@ -343,12 +343,12 @@ fun DocumentLibraryCard(
                         painter = painterResource(R.drawable.ic_event),
                         contentDescription = null,
                         modifier = Modifier.size(12.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = item.date,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

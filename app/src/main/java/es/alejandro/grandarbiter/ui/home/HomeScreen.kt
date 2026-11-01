@@ -303,7 +303,7 @@ fun DocumentLibraryCard(
                 ) {
                     Surface(
                         shape = RoundedCornerShape(4.dp),
-                        color = if (item.hasAccent) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.1f),
+                        color = if (item.hasAccent) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
                         modifier = Modifier.size(width = 40.dp, height = 24.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {

@@ -12,11 +12,11 @@ this branch, so it does not conflict with releases made from develop in the mean
 
 **en-US**
 
-Redesign, part 1: high contrast mode now gives cards and panels clear edges, secondary text is easier to read, and the light theme and the navigation bar are fixed.
+Redesign, part 1: simpler document cards on Home, high contrast mode now gives cards and panels clear edges, secondary text is easier to read, and the light theme and the navigation bar are fixed.
 
 **es-ES**
 
-Rediseño, parte 1: el modo de alto contraste ahora marca con claridad los bordes de tarjetas y paneles, los textos secundarios se leen mejor y se corrigen el tema claro y la barra de navegación.
+Rediseño, parte 1: tarjetas de documentos más simples en Inicio, el modo de alto contraste ahora marca con claridad los bordes de tarjetas y paneles, los textos secundarios se leen mejor y se corrigen el tema claro y la barra de navegación.
 
 ## Entries
 
@@ -28,3 +28,9 @@ Rediseño, parte 1: el modo de alto contraste ahora marca con claridad los borde
 | `83fdf34` | Navigation bar: labels laid out correctly; screen readers no longer read each tab twice. | Barra de navegación: etiquetas bien colocadas; los lectores de pantalla ya no leen cada pestaña dos veces. |
 | `c417b19`, `133b952` | Secondary text, hints and icons are easier to read across the app. | Los textos secundarios, sugerencias e iconos se leen mejor en toda la app. |
 | `133b952` | High contrast mode now makes a visible difference: cards and panels get clear edges, and borders and dividers are drawn at full strength. | El modo de alto contraste ahora se nota: tarjetas y paneles tienen bordes claros, y bordes y separadores se dibujan con su color completo. |
+
+### Phase 1 — Home
+
+| Commit | English | Español |
+|---|---|---|
+| Home: document cards with the acronym as the title | Home: simpler document cards. The acronym (CR, IPG, MTR, JAR) is the title, with the full name and effective date below; no more descriptions. | Inicio: tarjetas de documentos más simples. El acrónimo (CR, IPG, MTR, JAR) es el título, con el nombre completo y la fecha de vigencia debajo; sin descripciones. |

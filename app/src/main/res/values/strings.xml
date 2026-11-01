@@ -12,13 +12,9 @@
     <string name="home_reset_timer">Reset</string>
     <string name="home_document_library">Document Library</string>
     <string name="home_cr_title">Comprehensive Rules</string>
-    <string name="home_cr_description">All the game rules.</string>
     <string name="home_ipg_title">Infraction Procedure Guide</string>
-    <string name="home_ipg_description">Infractions and penalties at Competitive REL.</string>
     <string name="home_mtr_title">Magic Tournament Rules</string>
-    <string name="home_mtr_description">Rules for sanctioned tournaments.</string>
     <string name="home_jar_title">Judging at Regular</string>
-    <string name="home_jar_description">Infractions and fixes at Regular REL.</string>
     <string name="home_badge_cr">CR</string>
     <string name="home_badge_ipg">IPG</string>
     <string name="home_badge_mtr">MTR</string>
@@ -270,8 +266,6 @@
     <string name="release_notes_latest">Latest</string>
     <string name="release_notes_open">Open %1$s release notes</string>
     <string name="glossary_search_placeholder">Search a term</string>
-    <string name="home_badge_release_notes">RN</string>
-    <string name="home_release_notes_description">Card clarifications for each set.</string>
     <string name="home_release_notes_latest">Latest: %1$s</string>
     <string name="release_notes_open_browser">Open in browser</string>
     <string name="release_notes_offline">Couldn\'t load the page. Pages opened before may work offline.</string>

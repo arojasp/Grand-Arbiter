@@ -1,21 +1,17 @@
 package es.alejandro.grandarbiter.ui.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +28,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -284,61 +279,28 @@ fun DocumentLibraryCard(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         )
     ) {
-        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-            if (item.hasAccent) {
-                Box(
-                    modifier = Modifier
-                        .width(4.dp)
-                        .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.primary)
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            // Judges say "IPG", not "Infraction Procedure Guide": the acronym is the title.
+            Text(
+                text = item.label,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            item.name?.let { name ->
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            if (item.date.isNotEmpty()) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = if (item.hasAccent) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
-                        modifier = Modifier.size(width = 40.dp, height = 24.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = item.badge,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 10.sp
-                                ),
-                                color = if (item.hasAccent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                }
-
-                Text(
-                    text = item.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 3,
-                    lineHeight = 20.sp
-                )
-
-                Row(
-                    modifier = Modifier.padding(top = 4.dp),
+                    modifier = Modifier.padding(top = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
@@ -359,13 +321,12 @@ fun DocumentLibraryCard(
     }
 }
 
+/** [label]: the acronym, or the name when there is no acronym in use; [name]: full name under it. */
 data class DocumentLibraryItem(
     val id: String,
-    val badge: String,
-    val title: String,
-    val description: String,
+    val label: String,
+    val name: String?,
     val date: String,
-    val hasAccent: Boolean = false
 )
 
 @Composable
@@ -373,42 +334,17 @@ fun getDocumentLibraryItems(effectiveDates: Map<String, LocalDate>, latestReleas
     val labels = effectiveDates.mapValues { (_, date) -> effectiveLabel(date) }
     fun date(id: String) = labels[id].orEmpty()
     return listOf(
-    DocumentLibraryItem(
-        id = "cr",
-        badge = stringResource(R.string.home_badge_cr),
-        title = stringResource(R.string.home_cr_title),
-        description = stringResource(R.string.home_cr_description),
-        date = date("cr"),
-        hasAccent = true
-    ),
-    DocumentLibraryItem(
-        id = "ipg",
-        badge = stringResource(R.string.home_badge_ipg),
-        title = stringResource(R.string.home_ipg_title),
-        description = stringResource(R.string.home_ipg_description),
-        date = date("ipg")
-    ),
-    DocumentLibraryItem(
-        id = "mtr",
-        badge = stringResource(R.string.home_badge_mtr),
-        title = stringResource(R.string.home_mtr_title),
-        description = stringResource(R.string.home_mtr_description),
-        date = date("mtr")
-    ),
-    DocumentLibraryItem(
-        id = "jar",
-        badge = stringResource(R.string.home_badge_jar),
-        title = stringResource(R.string.home_jar_title),
-        description = stringResource(R.string.home_jar_description),
-        date = date("jar")
-    ),
-    DocumentLibraryItem(
-        id = RELEASE_NOTES_ID,
-        badge = stringResource(R.string.home_badge_release_notes),
-        title = stringResource(R.string.tools_release_notes),
-        description = stringResource(R.string.home_release_notes_description),
-        date = latestReleaseNotes?.let { stringResource(R.string.home_release_notes_latest, it) }.orEmpty()
-    )
+        DocumentLibraryItem("cr", stringResource(R.string.home_badge_cr), stringResource(R.string.home_cr_title), date("cr")),
+        DocumentLibraryItem("ipg", stringResource(R.string.home_badge_ipg), stringResource(R.string.home_ipg_title), date("ipg")),
+        DocumentLibraryItem("mtr", stringResource(R.string.home_badge_mtr), stringResource(R.string.home_mtr_title), date("mtr")),
+        DocumentLibraryItem("jar", stringResource(R.string.home_badge_jar), stringResource(R.string.home_jar_title), date("jar")),
+        // No acronym in common use ("RN"): the name is the title.
+        DocumentLibraryItem(
+            RELEASE_NOTES_ID,
+            stringResource(R.string.tools_release_notes),
+            null,
+            latestReleaseNotes?.let { stringResource(R.string.home_release_notes_latest, it) }.orEmpty(),
+        ),
     )
 }
 

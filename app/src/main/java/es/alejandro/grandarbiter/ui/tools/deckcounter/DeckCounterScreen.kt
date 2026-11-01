@@ -285,7 +285,7 @@ private fun History(groups: List<Int>) {
     Box(Modifier.fillMaxWidth().heightIn(min = 28.dp), contentAlignment = Alignment.CenterStart) {
         if (groups.isEmpty()) {
             Text(stringResource(R.string.deck_history_empty), style = MaterialTheme.typography.bodySmall,
-                color = colors.onSurfaceVariant.copy(alpha = 0.6f))
+                color = colors.onSurfaceVariant)
         } else {
             LazyRow(state = listState, horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.semantics { contentDescription = DeckCount.history(groups) }) {

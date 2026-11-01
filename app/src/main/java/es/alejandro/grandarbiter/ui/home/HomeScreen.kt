@@ -54,6 +54,7 @@ import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 
 @Composable
 fun HomeScreen(
@@ -179,6 +180,7 @@ fun JudgeCallTimerCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
+        border = highContrastBorder(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         )
@@ -277,6 +279,7 @@ fun DocumentLibraryCard(
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
+        border = highContrastBorder(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         )

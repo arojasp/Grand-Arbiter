@@ -53,6 +53,7 @@ import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.ui.navigation.Screen
 import es.alejandro.grandarbiter.ui.theme.GoldDeep
 import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Figma: "Grand Arbiter - Tools with Disabled State" (node 19:723). The tools hub: in-tournament
@@ -149,7 +150,7 @@ private fun ToolCard(tool: Tool, onOpen: (String) -> Unit) {
             .alpha(if (enabled) 1f else 0.5f)
             .clip(shape)
             .background(Brush.linearGradient(listOf(Color(0x0DE2C364), colors.surfaceContainer.copy(alpha = 0.5f))))
-            .border(1.dp, colors.primary.copy(alpha = 0.1f), shape)
+            .border(1.dp, colors.primary.softened(0.1f), shape)
             .clickable(enabled = enabled, role = Role.Button) { tool.route?.let(onOpen) }
             .padding(16.dp)
     ) {

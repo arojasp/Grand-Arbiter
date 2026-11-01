@@ -40,6 +40,7 @@ import es.alejandro.grandarbiter.domain.draft.DraftPosition
 import es.alejandro.grandarbiter.domain.draft.DraftSnapshot
 import es.alejandro.grandarbiter.domain.draft.DraftStep
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /**
  * Figma "Draft Timer - Format picker": the formats, only the available ones can be opened.
@@ -90,7 +91,7 @@ private fun FormatCard(format: DraftFormat, onClick: () -> Unit) {
             .alpha(if (enabled) 1f else 0.6f)
             .clip(shape)
             .background(colors.surfaceContainer)
-            .border(1.dp, if (enabled) colors.primary.copy(alpha = 0.6f) else colors.outlineVariant, shape)
+            .border(1.dp, if (enabled) colors.primary.softened(0.6f) else colors.outlineVariant, shape)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,

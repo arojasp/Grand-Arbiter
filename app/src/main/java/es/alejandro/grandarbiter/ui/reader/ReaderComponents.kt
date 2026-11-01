@@ -66,6 +66,7 @@ import es.alejandro.grandarbiter.domain.model.rules.SNIPPET_MATCH_START
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 
 // ---------------------------------------------------------------- text
 
@@ -321,6 +322,7 @@ fun PartCard(
     Card(
         modifier = modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(12.dp),
+        border = highContrastBorder(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Row(
@@ -405,7 +407,7 @@ fun ReaderSearchField(
         placeholder = {
             Text(
                 text = placeholder,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
             )
         },

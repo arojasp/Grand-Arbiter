@@ -62,6 +62,7 @@ import es.alejandro.grandarbiter.ui.reader.ReaderSearchField
 import es.alejandro.grandarbiter.ui.reader.highlightedSnippet
 import es.alejandro.grandarbiter.ui.reader.sectionLabel
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Create / edit a quick reference: title, the rules (in order, each with an optional note) and a
@@ -162,7 +163,7 @@ fun QuickReferenceEditScreen(
                     val added = state.addedIds
                     Panel {
                         state.results.forEachIndexed { i, result ->
-                            if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp), color = colors.outlineVariant.copy(alpha = 0.4f))
+                            if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp), color = colors.outlineVariant.softened(0.4f))
                             SearchResultRow(result, added = (result.target.anchorId ?: result.target.pageId) in added) { viewModel.add(result) }
                         }
                     }

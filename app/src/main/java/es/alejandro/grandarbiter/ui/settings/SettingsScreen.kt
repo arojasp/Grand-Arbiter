@@ -70,6 +70,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Figma: "Settings" (node 22:1888). Differences on purpose:
@@ -158,7 +159,7 @@ private fun AccessibilitySection(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
                             .background(colors.surfaceContainerLow)
-                            .border(1.dp, colors.outlineVariant.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                            .border(1.dp, colors.outlineVariant.softened(0.2f), RoundedCornerShape(8.dp))
                             .padding(12.dp)
                     ) {
                         Text(stringResource(R.string.settings_text_preview),
@@ -266,7 +267,7 @@ private fun DocumentsSection(documents: List<RulesDocumentInfo>) {
                         Modifier.weight(1f),
                     )
                     Icon(Icons.AutoMirrored.Filled.OpenInNew, stringResource(R.string.settings_open_pdf),
-                        tint = colors.onSurfaceVariant.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+                        tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
                 }
             }
         }
@@ -426,7 +427,7 @@ private fun AboutSection() {
                         .size(40.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(colors.primary.copy(alpha = 0.1f))
-                        .border(1.dp, colors.primary.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
+                        .border(1.dp, colors.primary.softened(0.2f), RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(painterResource(R.drawable.ic_launcher_foreground), null, tint = colors.primary, modifier = Modifier.size(56.dp))
@@ -480,7 +481,7 @@ private fun SettingsPanel(content: @Composable () -> Unit) {
             .fillMaxWidth()
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), shape)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.softened(0.3f), shape)
     ) { content() }
 }
 
@@ -491,7 +492,7 @@ private fun PanelRow(content: @Composable () -> Unit) {
 
 @Composable
 private fun PanelDivider() {
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.softened(0.3f))
 }
 
 @Composable

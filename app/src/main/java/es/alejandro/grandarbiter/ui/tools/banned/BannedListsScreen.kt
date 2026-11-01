@@ -69,6 +69,7 @@ import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import org.koin.androidx.compose.koinViewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Figma: "Banned & Restricted Lists" (node 19:1296). Built from the card data's legalities
@@ -184,7 +185,7 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
                 Spacer(Modifier.width(14.dp))
                 Box(Modifier.weight(1f)) {
                     if (query.isEmpty()) {
-                        Text(stringResource(R.string.banned_search_placeholder), style = Body, color = colors.onSurfaceVariant.copy(alpha = 0.5f))
+                        Text(stringResource(R.string.banned_search_placeholder), style = Body, color = colors.onSurfaceVariant)
                     }
                     field()
                 }
@@ -217,7 +218,7 @@ private fun FormatItem(
             .fillMaxWidth()
             .clip(shape)
             .background(colors.surfaceContainerLow)
-            .then(if (expanded) Modifier.border(1.dp, colors.primary.copy(alpha = 0.2f), shape) else Modifier)
+            .then(if (expanded) Modifier.border(1.dp, colors.primary.softened(0.2f), shape) else Modifier)
     ) {
         Row(
             Modifier.fillMaxWidth().clickable(enabled = view.list.entries.isNotEmpty(), role = Role.Button, onClick = onToggle).padding(16.dp),
@@ -297,7 +298,7 @@ private fun CommunityHeader() {
             style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium, letterSpacing = 1.4.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.width(16.dp))
-        HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+        HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant.softened(0.3f))
     }
 }
 
@@ -325,7 +326,7 @@ private fun CategoryBlock(
                 Text(pluralStringResource(R.plurals.banned_categories, entries.size, entries.size), style = Body.copy(fontWeight = FontWeight.Medium),
                     color = colors.onSurfaceVariant)
                 Text(BanCategory.entries.filter { it in groups }.map { categoryLabel(it) }.joinToString(" · "),
-                    style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant.copy(alpha = 0.7f))
+                    style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
             }
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(20.dp).rotate(rotation))

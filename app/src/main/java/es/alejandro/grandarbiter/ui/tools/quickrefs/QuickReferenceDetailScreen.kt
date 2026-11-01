@@ -69,6 +69,7 @@ import es.alejandro.grandarbiter.ui.reader.displayNumber
 import es.alejandro.grandarbiter.ui.theme.GoldDeep
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Figma: reference detail (19:1103). For each saved rule, the official text as installed:
@@ -231,7 +232,7 @@ private fun SubruleCard(group: List<PageSection>, onRefClick: (String) -> Unit, 
             }
         }
         group.drop(1).forEachIndexed { i, sub ->
-            HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = colors.outlineVariant.copy(alpha = if (i == 0) 0.6f else 0.3f))
+            HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = colors.outlineVariant.softened(if (i == 0) 0.6f else 0.3f))
             Row(Modifier.fillMaxWidth().clickable { onOpen(sub) }.padding(start = 16.dp, end = 4.dp, top = 10.dp, bottom = 10.dp)) {
                 Text(displayNumber(sub.number).orEmpty(),
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),

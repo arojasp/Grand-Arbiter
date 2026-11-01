@@ -149,7 +149,10 @@ fun GrandArbiterTheme(
     }
     // Text size: scale every sp on top of the user's system font size.
     val density = LocalDensity.current
-    CompositionLocalProvider(LocalDensity provides Density(density.density, density.fontScale * textScale.factor)) {
+    CompositionLocalProvider(
+        LocalDensity provides Density(density.density, density.fontScale * textScale.factor),
+        LocalHighContrast provides highContrast,
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = Typography,

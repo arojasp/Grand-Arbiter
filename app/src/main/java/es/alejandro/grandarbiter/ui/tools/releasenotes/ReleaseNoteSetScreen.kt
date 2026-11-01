@@ -73,6 +73,7 @@ import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 
 // ---------------------------------------------------------------- what the list shows
 
@@ -333,6 +334,7 @@ private fun SectionHeader(section: NotesItem.Section, expanded: Boolean, modifie
     Card(
         modifier = modifier.fillMaxWidth().clickable(onClick = onToggle),
         shape = RoundedCornerShape(12.dp),
+        border = highContrastBorder(),
         colors = CardDefaults.cardColors(containerColor = colors.surfaceContainerLow),
     ) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {

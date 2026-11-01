@@ -64,6 +64,7 @@ import es.alejandro.grandarbiter.ui.reader.BlockView
 import es.alejandro.grandarbiter.ui.theme.GoldDeep
 import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Figma: "Head Judge Announcement - Refined Layout" (node 19:1441). A script for the HJ:
@@ -138,7 +139,7 @@ private fun Panel(modifier: Modifier = Modifier, borderAlpha: Float = 0.3f, back
     val shape = RoundedCornerShape(12.dp)
     Column(
         modifier.fillMaxWidth().clip(shape).background(background)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = borderAlpha), shape)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.softened(borderAlpha), shape)
     ) { content() }
 }
 
@@ -150,18 +151,18 @@ private fun TopicsCard(checked: Set<String>, onToggle: (AnnouncementTopic) -> Un
     Panel(Modifier) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             AnnouncementTopic.entries.forEachIndexed { i, topic ->
-                if (i > 0) HorizontalDivider(color = colors.outlineVariant.copy(alpha = 0.2f))
+                if (i > 0) HorizontalDivider(color = colors.outlineVariant.softened(0.2f))
                 val done = topic.name in checked
                 Row(
                     Modifier.fillMaxWidth().clickable(role = Role.Checkbox) { onToggle(topic) }.padding(vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(if (done) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank, null,
-                        tint = if (done) colors.primary else colors.onSurfaceVariant.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+                        tint = if (done) colors.primary else colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(12.dp))
                     Text(stringResource(topic.label()).uppercase(),
                         style = Body.copy(fontWeight = FontWeight.Medium, letterSpacing = 0.1.sp),
-                        color = if (done) colors.onSurfaceVariant.copy(alpha = 0.6f) else colors.onSurfaceVariant)
+                        color = if (done) colors.onSurfaceVariant.softened(0.6f) else colors.onSurfaceVariant)
                 }
             }
         }
@@ -235,11 +236,11 @@ private fun TimeCard(rel: Rel?, minutes: Int, onMinutes: (Int) -> Unit) {
                 }
             }
             Row(verticalAlignment = Alignment.Top) {
-                Icon(Icons.Outlined.WarningAmber, null, tint = colors.error.copy(alpha = 0.8f), modifier = Modifier.size(20.dp))
+                Icon(Icons.Outlined.WarningAmber, null, tint = colors.error, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(stringResource(R.string.hj_tardiness).uppercase(), style = Label.copy(letterSpacing = 0.5.sp),
-                        color = colors.error.copy(alpha = 0.8f))
+                        color = colors.error)
                     Text(
                         stringResource(
                             when (rel) {
@@ -289,7 +290,7 @@ private fun Reminder(text: String) {
     val shape = RoundedCornerShape(8.dp)
     Row(
         Modifier.fillMaxWidth().clip(shape).background(colors.surfaceContainer)
-            .border(1.dp, colors.outlineVariant.copy(alpha = 0.2f), shape).padding(12.dp),
+            .border(1.dp, colors.outlineVariant.softened(0.2f), shape).padding(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
         Icon(Icons.Filled.CheckBox, null, tint = colors.primary, modifier = Modifier.size(18.dp))
@@ -304,7 +305,7 @@ private fun PlayerInstruction() {
     val shape = RoundedCornerShape(12.dp)
     Row(
         Modifier.fillMaxWidth().clip(shape).background(colors.primary.copy(alpha = 0.1f))
-            .border(2.dp, colors.primary.copy(alpha = 0.2f), shape).padding(16.dp),
+            .border(2.dp, colors.primary.softened(0.2f), shape).padding(16.dp),
         verticalAlignment = Alignment.Top,
     ) {
         Icon(Icons.Outlined.Campaign, null, tint = colors.primary, modifier = Modifier.size(24.dp))
@@ -334,7 +335,7 @@ private fun VenueCard(note: String, onChange: (String) -> Unit) {
     val text = draft ?: note
     Row(
         Modifier.fillMaxWidth().clip(shape).background(colors.surfaceContainer)
-            .border(1.dp, colors.outlineVariant.copy(alpha = 0.2f), shape).padding(12.dp),
+            .border(1.dp, colors.outlineVariant.softened(0.2f), shape).padding(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
         Icon(Icons.Outlined.Info, null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
@@ -349,7 +350,7 @@ private fun VenueCard(note: String, onChange: (String) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 decorationBox = { field ->
                     Box {
-                        if (text.isEmpty()) Text(stringResource(R.string.hj_venue_hint), style = Body, color = colors.onSurfaceVariant.copy(alpha = 0.6f))
+                        if (text.isEmpty()) Text(stringResource(R.string.hj_venue_hint), style = Body, color = colors.onSurfaceVariant)
                         field()
                     }
                 },

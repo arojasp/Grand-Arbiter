@@ -42,6 +42,7 @@ import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.softened
 
 class ReleaseNotesViewModel(private val repository: ReleaseNotesRepository) : ViewModel() {
     val sets: StateFlow<List<ReleaseNoteSet>> = repository.sets
@@ -91,7 +92,7 @@ fun ReleaseNotesScreen(onBack: () -> Unit, onOpenSet: (ReleaseNoteSet) -> Unit, 
             item {
                 Panel {
                     sets.forEachIndexed { i, set ->
-                        if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp), color = colors.outlineVariant.copy(alpha = 0.4f))
+                        if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp), color = colors.outlineVariant.softened(0.4f))
                         SetRow(set, latest = i == 0) { onOpenSet(set) }
                     }
                 }

@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 
 const val ARG_TERM = "term"
 
@@ -157,6 +158,7 @@ private fun TermCard(entry: GlossaryEntry, expanded: Boolean, onRefClick: (Strin
     Card(
         modifier = modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(12.dp),
+        border = highContrastBorder(),
         colors = CardDefaults.cardColors(containerColor = colors.surfaceContainerLow),
     ) {
         Row(

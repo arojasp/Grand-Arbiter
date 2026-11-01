@@ -86,7 +86,7 @@ fun CopyRuleButton(reference: String, onCopy: () -> Unit, modifier: Modifier = M
             Icon(
                 Icons.Outlined.ContentCopy,
                 contentDescription = stringResource(R.string.reader_copy, reference),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp),
             )
         }

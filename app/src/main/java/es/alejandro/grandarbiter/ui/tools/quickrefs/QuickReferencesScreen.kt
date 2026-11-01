@@ -64,6 +64,7 @@ import es.alejandro.grandarbiter.ui.components.outlined
 import es.alejandro.grandarbiter.ui.theme.GoldDeep
 import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Figma: Quick References (19:1045) and its "new reference" menu (19:1214).
@@ -129,7 +130,7 @@ fun QuickReferencesScreen(
                     item {
                         Panel {
                             list.forEachIndexed { i, ref ->
-                                if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp), color = colors.outlineVariant.copy(alpha = 0.4f))
+                                if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp), color = colors.outlineVariant.softened(0.4f))
                                 ReferenceRow(ref) { onOpen(ref.id) }
                             }
                         }

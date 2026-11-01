@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /** What the button is doing, for a caption next to it ("Keep holding…", "Hold to confirm"). */
 enum class HoldState { IDLE, HOLDING, TAPPED }
@@ -71,7 +72,7 @@ fun HoldToConfirmButton(
             .heightIn(min = 48.dp)
             .clip(CircleShape)
             .drawBehind { drawRect(gold.copy(alpha = 0.35f), size = Size(size.width * progress.value, size.height)) }
-            .border(1.dp, gold.copy(alpha = 0.6f), CircleShape)
+            .border(1.dp, gold.softened(0.6f), CircleShape)
             .semantics {
                 role = Role.Button
                 onClick(label = text) { confirm(); true }

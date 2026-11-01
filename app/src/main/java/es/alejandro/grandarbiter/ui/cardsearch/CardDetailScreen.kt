@@ -76,6 +76,7 @@ import es.alejandro.grandarbiter.ui.components.Section
 import es.alejandro.grandarbiter.ui.components.Tag
 import es.alejandro.grandarbiter.ui.components.outlined
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Figma: "Oracle Search - Card Detail Refined Grid" (node 19:932).
@@ -162,7 +163,7 @@ private fun HeaderBlock(card: CardDetail) {
                 }
             }
         }
-        HorizontalDivider(Modifier.padding(vertical = 16.dp), color = colors.outlineVariant.copy(alpha = 0.3f))
+        HorizontalDivider(Modifier.padding(vertical = 16.dp), color = colors.outlineVariant.softened(0.3f))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             card.typeLine?.let { LabeledValue(stringResource(R.string.cards_label_type), it, Modifier.weight(1f)) }
             statsFor(card)?.let { (label, value) -> LabeledValue(label, value, Modifier.weight(1f)) }

@@ -43,6 +43,7 @@ import es.alejandro.grandarbiter.domain.model.rules.PageRef
 import es.alejandro.grandarbiter.domain.model.rules.RulesSearchResult
 import es.alejandro.grandarbiter.domain.model.rules.TocEntry
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 
 @Composable
 fun ReaderContentsScreen(
@@ -107,6 +108,7 @@ private fun GlossaryEntryCard(onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
+        border = highContrastBorder(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -127,6 +129,7 @@ private fun TocGroup(entry: TocEntry, expanded: Boolean, onToggle: () -> Unit, o
     Card(
         modifier = Modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(12.dp),
+        border = highContrastBorder(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Row(
@@ -200,6 +203,7 @@ private fun SearchResults(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
+                    border = highContrastBorder(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                 ) {
                     Column(Modifier.padding(vertical = 8.dp)) {
@@ -220,6 +224,7 @@ private fun SearchResults(
             Card(
                 modifier = Modifier.fillMaxWidth().clickable { onOpenPage(result.target) },
                 shape = RoundedCornerShape(12.dp),
+                border = highContrastBorder(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
             ) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

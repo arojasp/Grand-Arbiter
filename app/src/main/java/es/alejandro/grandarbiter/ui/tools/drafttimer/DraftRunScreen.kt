@@ -66,6 +66,7 @@ import es.alejandro.grandarbiter.ui.theme.GoldDeep
 import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Figma "Draft Timer - Pick / Review / Deck construction / Time up". The judge keeps time with it:
@@ -204,7 +205,7 @@ private fun RochesterPickContent(s: DraftSnapshot, p: DraftPosition.Running, ste
     )
     val shape = RoundedCornerShape(12.dp)
     Column(
-        Modifier.fillMaxWidth().clip(shape).background(colors.surfaceContainerLow).border(1.dp, colors.primary.copy(alpha = 0.6f), shape)
+        Modifier.fillMaxWidth().clip(shape).background(colors.surfaceContainerLow).border(1.dp, colors.primary.softened(0.6f), shape)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -308,7 +309,7 @@ private fun TimeUpContent(s: DraftSnapshot) {
         right = { DraftChip(stringResource(R.string.draft_time), colors.error, outlined = true) },
     )
     CountdownFrame(stringResource(R.string.draft_construction), "0:00", 0f, stringResource(R.string.draft_time_is_up),
-        color = colors.error, size = 80, borderColor = colors.error.copy(alpha = 0.6f))
+        color = colors.error, size = 80, borderColor = colors.error.softened(0.6f))
     val constructionMs = s.config.constructionMinutes * 60_000L
     // Rochester picks end on "Picked": the timeline counts each at its 5 s maximum, so these are upper bounds.
     val bound = if (s.config.format == DraftFormat.ROCHESTER) "≤ " else ""
@@ -351,12 +352,12 @@ private fun Countdown(
         sub = if (waiting) waitingSub ?: stringResource(R.string.draft_time_is_up) else sub,
         color = when {
             waiting -> colors.primary
-            paused -> colors.onSurfaceVariant.copy(alpha = 0.6f)
+            paused -> colors.onSurfaceVariant.softened(0.6f)
             else -> colors.onSurface
         },
         labelColor = if (paused) colors.primary else colors.onSurfaceVariant,
         size = size,
-        borderColor = if (waiting) colors.primary.copy(alpha = 0.6f) else colors.outlineVariant,
+        borderColor = if (waiting) colors.primary.softened(0.6f) else colors.outlineVariant,
         verticalPadding = verticalPadding,
         subColor = if (waiting && waitingSub != null) colors.primary else colors.onSurfaceVariant,
     )

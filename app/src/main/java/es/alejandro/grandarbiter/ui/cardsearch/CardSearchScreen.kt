@@ -172,7 +172,7 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, inTe
                     if (query.isEmpty()) {
                         Text(
                             stringResource(if (inText) R.string.cards_search_text_placeholder else R.string.cards_search_placeholder),
-                            color = colors.onSurfaceVariant.copy(alpha = 0.6f), fontSize = 16.sp, maxLines = 1,
+                            color = colors.onSurfaceVariant, fontSize = 16.sp, maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
@@ -243,7 +243,7 @@ private fun ResultsMeta(count: Int, inText: Boolean, onInTextChange: (Boolean) -
                     Icons.Default.FilterList,
                     contentDescription = stringResource(R.string.cards_filter),
                     // Gold when a filter is on, so it's never applied without the judge noticing.
-                    tint = if (inText) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    tint = if (inText) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp),
                 )
             }

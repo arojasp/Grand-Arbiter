@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import java.util.Locale
 import kotlin.math.ceil
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /* Shared pieces of the Draft Timer screens (Figma section "Draft Timer", node 206:2). */
 
@@ -80,7 +81,7 @@ internal fun DraftChip(text: String, color: Color = MaterialTheme.colorScheme.on
     Box(
         Modifier.clip(CircleShape)
             .background(if (outlined) colors.surfaceContainer else colors.surfaceContainerHighest)
-            .border(1.dp, if (outlined) color.copy(alpha = 0.6f) else colors.outlineVariant, CircleShape)
+            .border(1.dp, if (outlined) color.softened(0.6f) else colors.outlineVariant, CircleShape)
             .padding(horizontal = 12.dp, vertical = 4.dp)
     ) {
         Text(text.uppercase(), style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.6.sp), color = color)

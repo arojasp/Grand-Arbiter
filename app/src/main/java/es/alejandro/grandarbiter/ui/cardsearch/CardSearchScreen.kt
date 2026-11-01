@@ -233,7 +233,7 @@ private fun ResultsMeta(count: Int, inText: Boolean, onInTextChange: (Boolean) -
     ) {
         Text(
             label.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium, letterSpacing = 0.55.sp),
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.55.sp),
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f).alpha(0.6f),
         )
@@ -268,7 +268,7 @@ private fun ResultRow(card: CardSummary, onClick: () -> Unit) {
         ) {
             Text(
                 text = card.name,
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -303,7 +303,7 @@ private fun EndOfRecords(text: String, modifier: Modifier = Modifier) {
         Icon(Icons.AutoMirrored.Outlined.MenuBook, null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(56.dp))
         Text(
             text.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium, letterSpacing = 0.5.sp),
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.5.sp),
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp),

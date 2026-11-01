@@ -41,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.data.rules.bundle.Block
@@ -245,7 +244,7 @@ private fun SectionRow(section: PageSection, page: RulesPage, highlighted: Boole
             Row {
                 Text(
                     text = section.number.orEmpty(),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(end = 8.dp),
                 )

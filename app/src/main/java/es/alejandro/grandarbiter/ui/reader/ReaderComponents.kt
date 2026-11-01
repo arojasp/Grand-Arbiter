@@ -207,7 +207,7 @@ private fun ExampleView(block: Block.Example, onRefClick: (String) -> Unit, modi
             Text(
                 text = block.label?.let { stringResource(R.string.reader_example_labeled, it) }
                     ?: stringResource(R.string.reader_example),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             MarkupText(
@@ -227,7 +227,7 @@ private fun ListView(block: Block.BulletList, onRefClick: (String) -> Unit, modi
                 Text(
                     text = if (block.ordered) "${index + 1}." else "•",
                     modifier = Modifier.width(24.dp),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 MarkupText(item, onRefClick, Modifier.weight(1f))
@@ -271,7 +271,7 @@ private fun TableRow(cells: List<String>, header: Boolean, fixedWidth: androidx.
             ) {
                 MarkupText(
                     cell, onRefClick,
-                    style = if (header) MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                    style = if (header) MaterialTheme.typography.labelLarge
                     else MaterialTheme.typography.bodySmall,
                 )
             }

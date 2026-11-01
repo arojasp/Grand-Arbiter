@@ -49,7 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -298,7 +297,7 @@ private fun IndexRowView(row: IndexRow, onToggle: () -> Unit, onAdd: () -> Unit)
         Spacer(Modifier.width(8.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(row.label,
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = if (row.depth == 0) FontWeight.Bold else FontWeight.Medium),
+                style = if (row.depth == 0) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleSmall,   // hierarchy by size
                 color = colors.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis)
             row.detail?.let {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)

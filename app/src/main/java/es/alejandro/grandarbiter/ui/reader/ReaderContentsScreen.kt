@@ -32,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.ui.components.Label
@@ -114,7 +113,7 @@ private fun GlossaryEntryCard(onClick: () -> Unit) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = stringResource(R.string.reader_glossary),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )
@@ -142,7 +141,7 @@ private fun TocGroup(entry: TocEntry, expanded: Boolean, onToggle: () -> Unit, o
         ) {
             Text(
                 text = sectionLabel(entry.number, entry.title),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )

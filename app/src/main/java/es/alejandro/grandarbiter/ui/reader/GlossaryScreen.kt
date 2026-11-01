@@ -36,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -165,7 +164,7 @@ private fun TermCard(entry: GlossaryEntry, expanded: Boolean, onRefClick: (Strin
             Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(entry.term, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            Text(entry.term, style = MaterialTheme.typography.titleMedium,
                 color = if (expanded) colors.primary else colors.onSurface, modifier = Modifier.weight(1f))
             Icon(painterResource(if (expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right), null,
                 tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))

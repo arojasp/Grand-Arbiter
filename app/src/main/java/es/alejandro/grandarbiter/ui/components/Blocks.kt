@@ -74,7 +74,7 @@ fun Tag(
     Surface(shape = RoundedCornerShape(4.dp), color = container) {
         Text(
             text.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.sp, lineHeight = 15.sp),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 15.sp),
             color = content,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
         )

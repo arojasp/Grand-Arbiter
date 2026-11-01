@@ -48,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
@@ -235,7 +234,7 @@ private fun SubruleCard(group: List<PageSection>, onRefClick: (String) -> Unit, 
             HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = colors.outlineVariant.softened(if (i == 0) 0.6f else 0.3f))
             Row(Modifier.fillMaxWidth().clickable { onOpen(sub) }.padding(start = 16.dp, end = 4.dp, top = 10.dp, bottom = 10.dp)) {
                 Text(displayNumber(sub.number).orEmpty(),
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.labelLarge,
                     color = colors.primary, modifier = Modifier.widthIn(min = 48.dp))
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {

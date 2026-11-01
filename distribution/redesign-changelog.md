@@ -38,3 +38,9 @@ Rediseño, parte 1: un Inicio más limpio. El temporizador y los documentos cabe
 | Home: documents as one grouped list | Home: the documents are one compact list, so the timer and all of them fit on one screen. | Inicio: los documentos forman una sola lista compacta, así el temporizador y todos ellos caben en una pantalla. |
 | Home: compact judge call timer | Home: the judge call timer is compact and left-aligned (time and buttons on one row), with a line explaining what it is for. Buttons now read "Start" / "Pause". | Inicio: el temporizador de llamada a juez es compacto y alineado a la izquierda (tiempo y botones en una fila), con una línea que explica para qué sirve. Los botones dicen "Start" / "Pause". |
 | Home: timer reset needs a hold | Home: to reset the judge call timer, press and hold the button, so an accidental tap doesn't lose the time. | Inicio: para reiniciar el temporizador de llamada a juez hay que mantener pulsado el botón, así un toque accidental no borra el tiempo. |
+
+### Phase 2 — Design system
+
+| Commit | English | Español |
+|---|---|---|
+| Typography: Bold only for the top level | Calmer typography: bold is kept for the main titles, so what matters stands out (rule reader, Quick References, Card Search). | Tipografía más tranquila: la negrita se reserva para los títulos principales, así destaca lo importante (lector de reglas, Quick References, Card Search). |

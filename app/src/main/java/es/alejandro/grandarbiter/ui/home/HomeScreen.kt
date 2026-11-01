@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -317,7 +316,7 @@ private fun UpdatedLabel() {
     ) {
         Text(
             text = stringResource(R.string.home_updated),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
         )
     }

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -43,13 +42,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
-import es.alejandro.grandarbiter.ui.reader.effectiveLabel
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import es.alejandro.grandarbiter.ui.theme.highContrastBorder
+import es.alejandro.grandarbiter.ui.theme.softened
+import es.alejandro.grandarbiter.ui.components.Panel
+import androidx.compose.material3.HorizontalDivider
 import es.alejandro.grandarbiter.domain.updates.SectionUpdates
 import androidx.compose.material3.Surface
 
@@ -155,11 +158,8 @@ fun HomeScreenContent(
                 )
             }
 
-            items(documentItems) { item ->
-                DocumentLibraryCard(
-                    item = item,
-                    onClick = { onNavigateToDocument(item.id) }
-                )
+            item {
+                DocumentLibraryList(items = documentItems, onOpen = onNavigateToDocument)
             }
 
             item {
@@ -268,28 +268,31 @@ fun JudgeCallTimerCard(
     }
 }
 
+/** The documents as one grouped list (Panel + dividers), like the other lists in the app. */
 @Composable
-fun DocumentLibraryCard(
-    item: DocumentLibraryItem,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier
+fun DocumentLibraryList(items: List<DocumentLibraryItem>, onOpen: (String) -> Unit, modifier: Modifier = Modifier) {
+    Panel(color = MaterialTheme.colorScheme.surfaceContainer, shape = RoundedCornerShape(16.dp)) {
+        Column(modifier) {
+            items.forEachIndexed { i, item ->
+                if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp), color = MaterialTheme.colorScheme.outlineVariant.softened(0.4f))
+                DocumentRow(item, onClick = { onOpen(item.id) })
+            }
+        }
+    }
+}
+
+/** One row: acronym (+ «Updated») and date on top, full name under it. The whole row is one button. */
+@Composable
+private fun DocumentRow(item: DocumentLibraryItem, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        border = highContrastBorder(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        )
+            .clickable(onClick = onClick)
+            .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 // Judges say "IPG", not "Infraction Procedure Guide": the acronym is the title.
                 Text(
@@ -298,6 +301,15 @@ fun DocumentLibraryCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 if (item.updated) UpdatedLabel()
+                Spacer(Modifier.weight(1f))
+                if (item.date.isNotEmpty()) {
+                    Text(
+                        text = item.date,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
             }
             item.name?.let { name ->
                 Text(
@@ -306,26 +318,13 @@ fun DocumentLibraryCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            if (item.date.isNotEmpty()) {
-                Row(
-                    modifier = Modifier.padding(top = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_event),
-                        contentDescription = null,
-                        modifier = Modifier.size(12.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = item.date,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
         }
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,   // the row's text names it
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }
 
@@ -345,7 +344,7 @@ private fun UpdatedLabel() {
     }
 }
 
-/** [label]: the acronym, or the name when there is no acronym in use; [name]: full name under it. */
+/** [label]: the acronym, or the name when there is no acronym in use; [name]: the line under it; [date]: effective date. */
 data class DocumentLibraryItem(
     val id: String,
     val label: String,
@@ -360,19 +359,20 @@ fun getDocumentLibraryItems(
     latestReleaseNotes: String? = null,
     updatedSections: Set<String> = emptySet(),
 ): List<DocumentLibraryItem> {
-    val labels = effectiveDates.mapValues { (_, date) -> effectiveLabel(date) }
-    fun date(id: String) = labels[id].orEmpty()
+    // Effective date, without the word: next to a rules document it reads as its version date.
+    val format = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+    fun date(id: String) = effectiveDates[id]?.format(format).orEmpty()
     return listOf(
         DocumentLibraryItem("cr", stringResource(R.string.home_badge_cr), stringResource(R.string.home_cr_title), date("cr")),
         DocumentLibraryItem("ipg", stringResource(R.string.home_badge_ipg), stringResource(R.string.home_ipg_title), date("ipg")),
         DocumentLibraryItem("mtr", stringResource(R.string.home_badge_mtr), stringResource(R.string.home_mtr_title), date("mtr")),
         DocumentLibraryItem("jar", stringResource(R.string.home_badge_jar), stringResource(R.string.home_jar_title), date("jar")),
-        // No acronym in common use ("RN"): the name is the title.
+        // No acronym in common use ("RN"): the name is the title; the newest set goes under it.
         DocumentLibraryItem(
             RELEASE_NOTES_ID,
             stringResource(R.string.tools_release_notes),
-            null,
-            latestReleaseNotes?.let { stringResource(R.string.home_release_notes_latest, it) }.orEmpty(),
+            latestReleaseNotes?.let { stringResource(R.string.home_release_notes_latest, it) },
+            date = "",
         ),
     ).map { it.copy(updated = it.id in updatedSections) }
 }

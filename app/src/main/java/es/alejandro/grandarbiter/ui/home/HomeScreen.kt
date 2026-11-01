@@ -50,6 +50,8 @@ import java.time.LocalDate
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import es.alejandro.grandarbiter.ui.theme.highContrastBorder
+import es.alejandro.grandarbiter.domain.updates.SectionUpdates
+import androidx.compose.material3.Surface
 
 @Composable
 fun HomeScreen(
@@ -62,10 +64,12 @@ fun HomeScreen(
     val isRunning by viewModel.isRunning.collectAsState()
     val effectiveDates by viewModel.effectiveDates.collectAsState()
     val latestReleaseNotes by viewModel.latestReleaseNotes.collectAsState()
+    val updatedSections by viewModel.updatedSections.collectAsState()
 
     HomeScreenContent(
         effectiveDates = effectiveDates,
         latestReleaseNotes = latestReleaseNotes,
+        updatedSections = updatedSections,
         elapsedTime = elapsedTime,
         isRunning = isRunning,
         onToggleTimer = viewModel::toggleTimer,
@@ -87,6 +91,7 @@ fun HomeScreenContent(
     onNavigateToDocument: (String) -> Unit,
     modifier: Modifier = Modifier,
     latestReleaseNotes: String? = null,
+    updatedSections: Set<String> = emptySet(),
     onOpenSettings: () -> Unit = {},
 ) {
     Scaffold(
@@ -122,7 +127,7 @@ fun HomeScreenContent(
             )
         }
     ) { innerPadding ->
-        val documentItems = getDocumentLibraryItems(effectiveDates, latestReleaseNotes)
+        val documentItems = getDocumentLibraryItems(effectiveDates, latestReleaseNotes, updatedSections)
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -285,12 +290,15 @@ fun DocumentLibraryCard(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            // Judges say "IPG", not "Infraction Procedure Guide": the acronym is the title.
-            Text(
-                text = item.label,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Judges say "IPG", not "Infraction Procedure Guide": the acronym is the title.
+                Text(
+                    text = item.label,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (item.updated) UpdatedLabel()
+            }
             item.name?.let { name ->
                 Text(
                     text = name,
@@ -321,16 +329,37 @@ fun DocumentLibraryCard(
     }
 }
 
+/** «Updated»: the section changed since the user last entered it (SectionVersions). */
+@Composable
+private fun UpdatedLabel() {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    ) {
+        Text(
+            text = stringResource(R.string.home_updated),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+        )
+    }
+}
+
 /** [label]: the acronym, or the name when there is no acronym in use; [name]: full name under it. */
 data class DocumentLibraryItem(
     val id: String,
     val label: String,
     val name: String?,
     val date: String,
+    val updated: Boolean = false,
 )
 
 @Composable
-fun getDocumentLibraryItems(effectiveDates: Map<String, LocalDate>, latestReleaseNotes: String? = null): List<DocumentLibraryItem> {
+fun getDocumentLibraryItems(
+    effectiveDates: Map<String, LocalDate>,
+    latestReleaseNotes: String? = null,
+    updatedSections: Set<String> = emptySet(),
+): List<DocumentLibraryItem> {
     val labels = effectiveDates.mapValues { (_, date) -> effectiveLabel(date) }
     fun date(id: String) = labels[id].orEmpty()
     return listOf(
@@ -345,11 +374,11 @@ fun getDocumentLibraryItems(effectiveDates: Map<String, LocalDate>, latestReleas
             null,
             latestReleaseNotes?.let { stringResource(R.string.home_release_notes_latest, it) }.orEmpty(),
         ),
-    )
+    ).map { it.copy(updated = it.id in updatedSections) }
 }
 
 /** Not a rules document: Home routes it to the release notes list. */
-const val RELEASE_NOTES_ID = "release_notes"
+const val RELEASE_NOTES_ID = SectionUpdates.RELEASE_NOTES
 
 private fun formatTime(millis: Long): String {
     val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60
@@ -368,6 +397,24 @@ fun HomeScreenPreview() {
             onToggleTimer = {},
             onResetTimer = {},
             onNavigateToDocument = {}
+        )
+    }
+}
+
+/** «Updated» on the CR, in dark and high contrast (the label only shows after a real update). */
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenUpdatedPreview() {
+    GrandArbiterTheme(highContrast = true) {
+        HomeScreenContent(
+            effectiveDates = mapOf("cr" to LocalDate.of(2026, 9, 25), "ipg" to LocalDate.of(2024, 9, 23)),
+            elapsedTime = 0L,
+            isRunning = false,
+            onToggleTimer = {},
+            onResetTimer = {},
+            onNavigateToDocument = {},
+            latestReleaseNotes = "Star Trek",
+            updatedSections = setOf("cr"),
         )
     }
 }

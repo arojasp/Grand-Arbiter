@@ -9,6 +9,9 @@ package es.alejandro.grandarbiter.domain.updates
  */
 object SectionUpdates {
 
+    /** Section id of the set release notes; documents use their DocumentId key ("cr", "ipg"…). */
+    const val RELEASE_NOTES = "release_notes"
+
     /**
      * Sections whose installed version is not the one the user last saw. "Not the one", not
      * "newer": set codes have no order, and a rolled-back document is also different content.

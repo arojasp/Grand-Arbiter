@@ -266,6 +266,7 @@
     <string name="release_notes_latest">Latest</string>
     <string name="release_notes_open">Open %1$s release notes</string>
     <string name="glossary_search_placeholder">Search a term</string>
+    <string name="home_updated">Updated</string>
     <string name="home_release_notes_latest">Latest: %1$s</string>
     <string name="release_notes_open_browser">Open in browser</string>
     <string name="release_notes_offline">Couldn\'t load the page. Pages opened before may work offline.</string>

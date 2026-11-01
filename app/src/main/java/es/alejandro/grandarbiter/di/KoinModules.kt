@@ -1,6 +1,7 @@
 package es.alejandro.grandarbiter.di
 
 import androidx.room.Room
+import es.alejandro.grandarbiter.data.updates.SectionVersions
 import es.alejandro.grandarbiter.data.cards.CardRepositoryImpl
 import es.alejandro.grandarbiter.data.cards.local.AssetCardDataSource
 import es.alejandro.grandarbiter.data.cards.local.CardImporter
@@ -137,6 +138,7 @@ val appModule = module {
     single<DraftSessionStore> { PrefsDraftSessionStore(androidContext()) }
     single<DraftAlerts> { AndroidDraftAlerts(androidContext()) }
     single { DraftTimingsRepository(get()) }
+    single { SectionVersions(get(), get(), get()) }
 }
 
 val viewModelModule = module {

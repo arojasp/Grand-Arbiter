@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.data.rules.bundle.DocumentId
+import es.alejandro.grandarbiter.data.updates.SectionVersions
 import es.alejandro.grandarbiter.data.rules.bundle.GlossaryEntry
 import es.alejandro.grandarbiter.domain.model.rules.PageRef
 import es.alejandro.grandarbiter.domain.model.rules.RulesDocumentInfo
@@ -50,10 +51,15 @@ data class ReaderContentsUiState(
 class ReaderContentsViewModel(
     savedStateHandle: SavedStateHandle,
     private val repository: RulesRepository,
+    sectionVersions: SectionVersions,
 ) : ViewModel() {
 
     val documentId: DocumentId =
         DocumentId.entries.firstOrNull { it.key == savedStateHandle.get<String>(ARG_DOCUMENT) } ?: DocumentId.CR
+
+    init {
+        viewModelScope.launch { sectionVersions.markSeen(documentId.key) }   // its «Updated» label goes
+    }
 
     /** Re-emits when a bundle import finishes (first launch), so the contents appear by themselves. */
     val uiState: StateFlow<ReaderContentsUiState> = repository.observeDocuments()
@@ -100,6 +106,7 @@ class ReaderPageViewModel(
     savedStateHandle: SavedStateHandle,
     private val repository: RulesRepository,
     private val glossaryProvider: GlossaryProvider,
+    sectionVersions: SectionVersions,
 ) : ViewModel() {
 
     private val documentKey: String = checkNotNull(savedStateHandle.get<String>(ARG_DOCUMENT))
@@ -117,6 +124,8 @@ class ReaderPageViewModel(
         viewModelScope.launch {
             _uiState.value = ReaderPageUiState(page = repository.page(pageId), anchorId = anchorId, isLoading = false)
         }
+        // Pages are reached from search, Quick References, links…: any of them counts as entering the document.
+        viewModelScope.launch { sectionVersions.markSeen(documentKey) }
         if (documentKey == DocumentId.CR.key) {
             viewModelScope.launch { _glossary.value = glossaryProvider.linker() }
         }

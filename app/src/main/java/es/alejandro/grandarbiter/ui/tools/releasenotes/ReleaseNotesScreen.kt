@@ -35,6 +35,8 @@ import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.data.releasenotes.ReleaseNoteSet
 import es.alejandro.grandarbiter.data.releasenotes.ReleaseNotesRepository
+import es.alejandro.grandarbiter.data.updates.SectionVersions
+import es.alejandro.grandarbiter.domain.updates.SectionUpdates
 import es.alejandro.grandarbiter.ui.components.Panel
 import es.alejandro.grandarbiter.ui.components.Tag
 import es.alejandro.grandarbiter.ui.theme.GoldDeep
@@ -44,12 +46,19 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import es.alejandro.grandarbiter.ui.theme.softened
 
-class ReleaseNotesViewModel(private val repository: ReleaseNotesRepository) : ViewModel() {
+class ReleaseNotesViewModel(
+    private val repository: ReleaseNotesRepository,
+    private val sectionVersions: SectionVersions,
+) : ViewModel() {
     val sets: StateFlow<List<ReleaseNoteSet>> = repository.sets
 
     init {
+        viewModelScope.launch { sectionVersions.markSeen(SectionUpdates.RELEASE_NOTES) }   // its «Updated» label goes
         // Shows the stored list at once, then picks up any set published since (silent if offline).
-        viewModelScope.launch { repository.refresh() }
+        viewModelScope.launch {
+            repository.refresh()
+            sectionVersions.markSeen(SectionUpdates.RELEASE_NOTES)   // a set that just appeared is on screen: seen too
+        }
     }
 }
 

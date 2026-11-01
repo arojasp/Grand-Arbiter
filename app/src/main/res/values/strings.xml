@@ -6,9 +6,9 @@
 
     <!-- Home Screen -->
     <string name="home_judge_call">Judge Call</string>
-    <string name="home_time_to_add">TIME TO ADD</string>
-    <string name="home_start_timer">Start Timer</string>
-    <string name="home_pause_timer">Pause Timer</string>
+    <string name="home_judge_call_subtitle">Time to add to the match</string>
+    <string name="home_start_timer">Start</string>
+    <string name="home_pause_timer">Pause</string>
     <string name="home_reset_timer">Reset</string>
     <string name="home_document_library">Document Library</string>
     <string name="home_cr_title">Comprehensive Rules</string>

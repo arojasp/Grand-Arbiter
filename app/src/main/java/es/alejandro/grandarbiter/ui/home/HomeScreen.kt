@@ -18,8 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,18 +41,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
+import es.alejandro.grandarbiter.domain.model.ThemeMode
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 import es.alejandro.grandarbiter.ui.theme.softened
 import es.alejandro.grandarbiter.ui.components.Panel
 import androidx.compose.material3.HorizontalDivider
 import es.alejandro.grandarbiter.domain.updates.SectionUpdates
 import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 
 @Composable
 fun HomeScreen(
@@ -169,6 +173,11 @@ fun HomeScreenContent(
     }
 }
 
+/**
+ * Judge call timer: title, what it is for, then the time and its controls on one row. With a large
+ * text size the controls wrap under the time instead of squeezing it (FlowRow).
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun JudgeCallTimerCard(
     elapsedTime: Long,
@@ -177,91 +186,58 @@ fun JudgeCallTimerCard(
     onResetTimer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        border = highContrastBorder(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_timer),
-                contentDescription = null,
-                modifier = Modifier.size(28.dp),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-
+    val colors = MaterialTheme.colorScheme
+    Panel(color = colors.surfaceContainer, shape = RoundedCornerShape(16.dp), contentModifier = modifier) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = stringResource(R.string.home_judge_call),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold
-                )
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = colors.onSurface
             )
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            Text(
+                text = stringResource(R.string.home_judge_call_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant
+            )
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                itemVerticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(R.string.home_time_to_add),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        letterSpacing = 1.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
                 Text(
                     text = formatTime(elapsedTime),
-                    style = MaterialTheme.typography.displayMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    // Tabular figures: the digits keep their width, so the time doesn't jiggle while counting.
+                    style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
+                    color = if (isRunning) colors.primary else colors.onSurface,   // running is a real state
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
                 )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = onToggleTimer,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isRunning) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
-                        contentColor = if (isRunning) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Text(
-                        text = stringResource(if (isRunning) R.string.home_pause_timer else R.string.home_start_timer),
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.Bold
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(
+                        onClick = onResetTimer,
+                        modifier = Modifier.size(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.home_reset_timer))
+                    }
+                    Button(
+                        onClick = onToggleTimer,
+                        modifier = Modifier.height(48.dp).widthIn(min = 112.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isRunning) colors.secondary else colors.primary,
+                            contentColor = if (isRunning) colors.onSecondary else colors.onPrimary
                         )
-                    )
-                }
-
-                OutlinedButton(
-                    onClick = onResetTimer,
-                    modifier = Modifier
-                        .size(height = 48.dp, width = 64.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = stringResource(R.string.home_reset_timer)
-                    )
+                    ) {
+                        Icon(if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(if (isRunning) R.string.home_pause_timer else R.string.home_start_timer),
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
                 }
             }
         }
@@ -415,6 +391,23 @@ fun HomeScreenUpdatedPreview() {
             onNavigateToDocument = {},
             latestReleaseNotes = "Star Trek",
             updatedSections = setOf("cr"),
+        )
+    }
+}
+
+/** Timer running, light theme. */
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenRunningLightPreview() {
+    GrandArbiterTheme(themeMode = ThemeMode.LIGHT) {
+        HomeScreenContent(
+            effectiveDates = mapOf("cr" to LocalDate.of(2026, 9, 25)),
+            elapsedTime = 157_000L,
+            isRunning = true,
+            onToggleTimer = {},
+            onResetTimer = {},
+            onNavigateToDocument = {},
+            latestReleaseNotes = "Star Trek",
         )
     }
 }

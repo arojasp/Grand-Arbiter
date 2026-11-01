@@ -39,6 +39,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.semantics.contentDescription
+import kotlinx.coroutines.CoroutineScope
 import es.alejandro.grandarbiter.ui.theme.softened
 
 /** What the button is doing, for a caption next to it ("Keep holding…", "Hold to confirm"). */
@@ -73,32 +81,7 @@ fun HoldToConfirmButton(
             .clip(CircleShape)
             .drawBehind { drawRect(gold.copy(alpha = 0.35f), size = Size(size.width * progress.value, size.height)) }
             .border(1.dp, gold.softened(0.6f), CircleShape)
-            .semantics {
-                role = Role.Button
-                onClick(label = text) { confirm(); true }
-            }
-            .pointerInput(holdMillis) {
-                awaitEachGesture {
-                    awaitFirstDown()
-                    stateChange(HoldState.HOLDING)
-                    val hold = scope.launch {
-                        progress.animateTo(1f, tween(holdMillis, easing = LinearEasing))
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        confirm()
-                    }
-                    waitForUpOrCancellation()
-                    if (hold.isActive) {
-                        // Released before the end: nothing happens. A quick tap teaches the gesture.
-                        val wasTap = progress.value < 0.25f
-                        hold.cancel()
-                        scope.launch { progress.animateTo(0f, tween(150)) }
-                        stateChange(if (wasTap) HoldState.TAPPED else HoldState.IDLE)
-                    } else {
-                        scope.launch { progress.snapTo(0f) }
-                        stateChange(HoldState.IDLE)
-                    }
-                }
-            }
+            .holdToConfirm(text, progress, holdMillis, scope, haptics, onConfirm = { confirm() }, onStateChange = { stateChange(it) })
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
@@ -108,6 +91,83 @@ fun HoldToConfirmButton(
         if (ringAtEnd) HoldRing(progress.value)
     }
 }
+
+/**
+ * Icon-only [HoldToConfirmButton] (48 dp, rounded square): same gesture, same fill. For a small
+ * destructive control next to others, like the judge call timer's reset.
+ */
+@Composable
+fun HoldToConfirmIconButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier,
+    holdMillis: Int = DEFAULT_HOLD_MILLIS,
+    onStateChange: (HoldState) -> Unit = {},
+) {
+    val colors = MaterialTheme.colorScheme
+    val gold = colors.primary
+    val haptics = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
+    val progress = remember { Animatable(0f) }
+    val confirm by rememberUpdatedState(onConfirm)
+    val stateChange by rememberUpdatedState(onStateChange)
+    val shape = RoundedCornerShape(12.dp)
+
+    Box(
+        modifier
+            .size(48.dp)
+            .clip(shape)
+            .drawBehind { drawRect(gold.copy(alpha = 0.35f), size = Size(size.width * progress.value, size.height)) }
+            .border(1.dp, colors.outline, shape)
+            .semantics { this.contentDescription = contentDescription }
+            .holdToConfirm(contentDescription, progress, holdMillis, scope, haptics, onConfirm = { confirm() }, onStateChange = { stateChange(it) }),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = null, tint = gold)
+    }
+}
+
+/**
+ * The gesture behind both hold-to-confirm buttons: held for [holdMillis] it fills [progress], ticks
+ * and confirms; released early it empties and reports TAPPED (a quick tap) or IDLE. Accessibility
+ * services get a normal click action, since TalkBack users can't "hold".
+ */
+private fun Modifier.holdToConfirm(
+    label: String,
+    progress: Animatable<Float, AnimationVector1D>,
+    holdMillis: Int,
+    scope: CoroutineScope,
+    haptics: HapticFeedback,
+    onConfirm: () -> Unit,
+    onStateChange: (HoldState) -> Unit,
+): Modifier = this
+    .semantics {
+        role = Role.Button
+        onClick(label = label) { onConfirm(); true }
+    }
+    .pointerInput(holdMillis) {
+        awaitEachGesture {
+            awaitFirstDown()
+            onStateChange(HoldState.HOLDING)
+            val hold = scope.launch {
+                progress.animateTo(1f, tween(holdMillis, easing = LinearEasing))
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                onConfirm()
+            }
+            waitForUpOrCancellation()
+            if (hold.isActive) {
+                // Released before the end: nothing happens. A quick tap teaches the gesture.
+                val wasTap = progress.value < 0.25f
+                hold.cancel()
+                scope.launch { progress.animateTo(0f, tween(150)) }
+                onStateChange(if (wasTap) HoldState.TAPPED else HoldState.IDLE)
+            } else {
+                scope.launch { progress.snapTo(0f) }
+                onStateChange(HoldState.IDLE)
+            }
+        }
+    }
 
 /** Faint full ring + the part already held: says "hold me" at rest, shows progress while held. */
 @Composable

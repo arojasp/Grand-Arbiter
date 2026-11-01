@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +22,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -59,6 +57,13 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import es.alejandro.grandarbiter.ui.components.HoldState
+import es.alejandro.grandarbiter.ui.components.HoldToConfirmIconButton
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(
@@ -175,7 +180,7 @@ fun HomeScreenContent(
 
 /**
  * Judge call timer: title, what it is for, then the time and its controls on one row. With a large
- * text size the controls wrap under the time instead of squeezing it (FlowRow).
+ * text size the controls wrap under the time instead of squeezing it (FlowRow). Reset is hold-to-confirm.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -187,6 +192,9 @@ fun JudgeCallTimerCard(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+    // Reset needs a hold (losing the time by accident is costly); the subtitle teaches it, as in the Draft timer.
+    var hold by remember { mutableStateOf(HoldState.IDLE) }
+    LaunchedEffect(hold) { if (hold == HoldState.TAPPED) { delay(1_500); hold = HoldState.IDLE } }
     Panel(color = colors.surfaceContainer, shape = RoundedCornerShape(16.dp), contentModifier = modifier) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
@@ -195,9 +203,13 @@ fun JudgeCallTimerCard(
                 color = colors.onSurface
             )
             Text(
-                text = stringResource(R.string.home_judge_call_subtitle),
+                text = stringResource(when (hold) {
+                    HoldState.IDLE -> R.string.home_judge_call_subtitle
+                    HoldState.HOLDING -> R.string.draft_keep_holding
+                    HoldState.TAPPED -> R.string.home_hold_to_reset
+                }),
                 style = MaterialTheme.typography.bodyMedium,
-                color = colors.onSurfaceVariant
+                color = if (hold == HoldState.IDLE) colors.onSurfaceVariant else colors.primary
             )
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
@@ -214,14 +226,12 @@ fun JudgeCallTimerCard(
                     modifier = Modifier.weight(1f)
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedButton(
-                        onClick = onResetTimer,
-                        modifier = Modifier.size(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.home_reset_timer))
-                    }
+                    HoldToConfirmIconButton(
+                        icon = Icons.Default.Refresh,
+                        contentDescription = stringResource(R.string.home_reset_timer),
+                        onConfirm = onResetTimer,
+                        onStateChange = { hold = it }
+                    )
                     Button(
                         onClick = onToggleTimer,
                         modifier = Modifier.height(48.dp).widthIn(min = 112.dp),

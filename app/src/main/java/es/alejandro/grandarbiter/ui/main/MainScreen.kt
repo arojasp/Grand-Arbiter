@@ -2,7 +2,6 @@ package es.alejandro.grandarbiter.ui.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -87,12 +86,8 @@ fun MainScreenContent(
                     items.forEach { item ->
                         val title = stringResource(item.titleRes)
                         NavigationBarItem(
-                            icon = {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(item.icon, contentDescription = title)
-                                    Text(title)
-                                }
-                            },
+                            icon = { Icon(item.icon, contentDescription = null) },   // the label names it
+                            label = { Text(title) },
                             selected = isSelected(item),
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -113,7 +108,7 @@ fun MainScreenContent(
                     items.forEach { item ->
                         val title = stringResource(item.titleRes)
                         NavigationRailItem(
-                            icon = { Icon(item.icon, contentDescription = title) },
+                            icon = { Icon(item.icon, contentDescription = null) },   // the label names it
                             label = { Text(title) },
                             selected = isSelected(item),
                             colors = NavigationRailItemDefaults.colors(

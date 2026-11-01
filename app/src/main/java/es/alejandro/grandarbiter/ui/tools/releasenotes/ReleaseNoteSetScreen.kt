@@ -237,7 +237,7 @@ fun ReleaseNoteSetScreen(
                 },
                 title = {
                     Column {
-                        Text(doc?.name.orEmpty(), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        Text(doc?.name.orEmpty(), style = MaterialTheme.typography.titleMedium,
                             color = colors.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(doc?.lastModified?.let { stringResource(R.string.release_notes_modified, formatDate(it)) }
                             ?: stringResource(R.string.tools_release_notes),
@@ -375,7 +375,7 @@ private fun BlockView(item: NotesItem.Block, showSection: Boolean, onCopy: (Rele
     val noRefs: (String) -> Unit = {}
     when (val block = item.block) {
         is ReleaseNotesBlock.Paragraph -> MarkupText(block.text, noRefs)
-        is ReleaseNotesBlock.Heading -> MarkupText(block.text, noRefs, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
+        is ReleaseNotesBlock.Heading -> MarkupText(block.text, noRefs, style = MaterialTheme.typography.titleSmall)
         is ReleaseNotesBlock.Items -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             block.items.forEach { Row { Text("•  ", color = colors.onSurfaceVariant); MarkupText(it, noRefs) } }
         }
@@ -384,7 +384,7 @@ private fun BlockView(item: NotesItem.Block, showSection: Boolean, onCopy: (Rele
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f).padding(top = 8.dp)) {
                         if (showSection) Label(item.sectionTitle)
-                        Text(block.name, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = colors.onSurface)
+                        Text(block.name, style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
                     }
                     CopyRuleButton(block.name, { onCopy(block) })
                 }

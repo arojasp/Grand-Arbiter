@@ -105,7 +105,7 @@ private fun GlossarySheet(entry: GlossaryEntry, onDismiss: () -> Unit, onRefClic
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Label(stringResource(R.string.reader_glossary))
-                Text(entry.term, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                Text(entry.term, style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface)
                 MarkupText(entry.definition, onRefClick)
             }
@@ -198,7 +198,7 @@ private fun PageHeader(section: PageSection, onCopy: () -> Unit) {
         Row(verticalAlignment = Alignment.Top) {
             Text(
                 text = sectionLabel(section.number, section.title),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f).padding(top = 6.dp),
             )
@@ -234,7 +234,7 @@ private fun SectionRow(section: PageSection, page: RulesPage, highlighted: Boole
             Row(verticalAlignment = Alignment.Top) {
                 Text(
                     text = sectionLabel(section.number, section.title),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f).padding(top = 8.dp),
                 )

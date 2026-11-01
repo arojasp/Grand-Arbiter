@@ -185,7 +185,7 @@ fun BlockView(block: Block, onRefClick: (String) -> Unit, modifier: Modifier = M
         is Block.Paragraph -> MarkupText(block.text, onRefClick, modifier)
         is Block.Heading -> MarkupText(
             block.text, onRefClick, modifier.padding(top = 4.dp),
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleSmall,
         )
         is Block.Example -> ExampleView(block, onRefClick, modifier)
         is Block.BulletList -> ListView(block, onRefClick, modifier)
@@ -336,7 +336,7 @@ fun PartCard(
             val title = InlineMarkup.plainText(part.title.orEmpty())
             Text(
                 text = if (part.exampleCount > 0) stringResource(R.string.reader_part_with_count, title, part.exampleCount) else title,
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Icon(
@@ -367,7 +367,7 @@ fun ReaderTopBar(title: String, subtitle: String?, onBack: () -> Unit) {
             Column {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

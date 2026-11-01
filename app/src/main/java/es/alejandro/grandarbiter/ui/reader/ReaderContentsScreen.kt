@@ -211,7 +211,7 @@ private fun SearchResults(
                         glossaryHits.forEach { entry ->
                             Text(
                                 text = entry.term,
-                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.fillMaxWidth().clickable { onOpenGlossary(entry.term) }.padding(horizontal = 12.dp, vertical = 10.dp),
                             )
@@ -230,7 +230,7 @@ private fun SearchResults(
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = sectionLabel(result.number, result.title),
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
                     Text(

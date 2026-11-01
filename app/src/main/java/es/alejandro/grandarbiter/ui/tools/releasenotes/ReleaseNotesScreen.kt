@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -83,7 +82,7 @@ fun ReleaseNotesScreen(onBack: () -> Unit, onOpenSet: (ReleaseNoteSet) -> Unit, 
                 },
                 title = {
                     Text(stringResource(R.string.tools_release_notes),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = colors.primary)
+                        style = MaterialTheme.typography.titleLarge, color = colors.primary)
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background),
             )

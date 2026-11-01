@@ -102,7 +102,7 @@ fun QuickReferenceEditScreen(
                 },
                 title = {
                     Text(stringResource(if (state.id == null) R.string.qr_new_title else R.string.qr_edit_title),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = colors.primary)
+                        style = MaterialTheme.typography.titleLarge, color = colors.primary)
                 },
                 actions = {
                     TextButton(onClick = viewModel::save, enabled = state.canSave) { Text(stringResource(R.string.qr_save)) }
@@ -232,7 +232,7 @@ private fun RuleEditor(
         Panel {
             Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(rule.label, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    Text(rule.label, style = MaterialTheme.typography.titleSmall,
                         color = colors.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                     IconButton(onClick = { onMove(-1) }, enabled = canMoveUp) { Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.qr_move_up)) }
                     IconButton(onClick = { onMove(1) }, enabled = canMoveDown) { Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.qr_move_down)) }
@@ -259,7 +259,7 @@ private fun SearchResultRow(result: RulesSearchResult, added: Boolean, onAdd: ()
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(sectionLabel(result.number, result.title), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            Text(sectionLabel(result.number, result.title), style = MaterialTheme.typography.titleSmall,
                 color = colors.onSurface)
             Text(highlightedSnippet(result.snippet), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant,
                 maxLines = 2, overflow = TextOverflow.Ellipsis)

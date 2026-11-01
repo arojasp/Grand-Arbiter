@@ -90,7 +90,7 @@ fun ToolsScreen(
                 },
                 title = {
                     Text(stringResource(R.string.nav_tools),
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.headlineMedium,
                         color = colors.primary)
                 },
                 actions = {

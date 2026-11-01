@@ -107,7 +107,7 @@ fun CardDetailScreen(
                 title = {
                     Text(
                         stringResource(R.string.cards_details),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 22.sp, letterSpacing = (-0.55).sp),
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp, letterSpacing = (-0.55).sp),
                         color = MaterialTheme.colorScheme.primary,
                     )
                 },
@@ -235,7 +235,7 @@ private fun FaceText(face: CardFace) {
     val colors = MaterialTheme.colorScheme
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(face.name, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            Text(face.name, style = MaterialTheme.typography.titleMedium,
                 color = colors.onSurface, modifier = Modifier.weight(1f))
             face.manaCost?.let { ManaCostSymbols(it, Modifier.padding(start = 8.dp), size = 18.dp) }
         }

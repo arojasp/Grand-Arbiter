@@ -44,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -104,7 +103,7 @@ fun ReleaseNoteViewerScreen(onBack: () -> Unit, viewModel: ReleaseNoteViewerView
                 },
                 title = {
                     Column {
-                        Text(set?.name.orEmpty(), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        Text(set?.name.orEmpty(), style = MaterialTheme.typography.titleMedium,
                             color = colors.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(stringResource(R.string.tools_release_notes), style = MaterialTheme.typography.labelMedium,
                             color = colors.onSurfaceVariant)

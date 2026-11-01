@@ -106,7 +106,7 @@ fun QuickReferenceDetailScreen(
                 },
                 title = {
                     val title = (state as? QuickReferenceDetailState.Loaded)?.detail?.title.orEmpty()
-                    Text(title, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    Text(title, style = MaterialTheme.typography.titleLarge,
                         color = colors.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 },
                 actions = {
@@ -265,7 +265,7 @@ private fun SectionHeading(section: PageSection, prominent: Boolean) {
         number?.let { Tag(it, content = if (prominent) GoldDeep else MaterialTheme.colorScheme.onSurfaceVariant) }
         if (number != null && title != null) Spacer(Modifier.width(8.dp))
         title?.let {
-            Text(it, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface)
+            Text(it, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }

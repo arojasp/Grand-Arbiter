@@ -209,7 +209,7 @@ private fun DocumentOption(document: DocumentId, onClick: () -> Unit) {
     val shape = RoundedCornerShape(12.dp)
     Surface(onClick = onClick, shape = shape, color = colors.surfaceContainerHigh, modifier = Modifier.outlined(shape, colors.outlineVariant)) {
         Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), horizontalAlignment = Alignment.End) {
-            Text(document.shortLabel(), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = colors.onSurface)
+            Text(document.shortLabel(), style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
             Text(stringResource(document.titleRes()), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
         }
     }

@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
@@ -112,7 +111,7 @@ fun ReleaseNoteCardScreen(onBack: () -> Unit, viewModel: ReleaseNoteCardViewMode
                 },
                 title = {
                     Column {
-                        Text(note?.setName.orEmpty(), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        Text(note?.setName.orEmpty(), style = MaterialTheme.typography.titleMedium,
                             color = colors.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(note?.sectionTitle.orEmpty(), style = MaterialTheme.typography.labelMedium,
                             color = colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -155,7 +154,7 @@ private fun CardNote(note: ReleaseNoteCard) {
             Panel {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(card.name, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        Text(card.name, style = MaterialTheme.typography.titleLarge,
                             color = colors.onSurface, modifier = Modifier.weight(1f))
                         if (cost != null) {
                             Spacer(Modifier.width(8.dp))

@@ -114,11 +114,7 @@ fun HomeScreenContent(
                 title = {
                     Text(
                         text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            letterSpacing = 0.5.sp
-                        )
+                        style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.primary, letterSpacing = 0.5.sp)
                     )
                 },
                 actions = {
@@ -159,10 +155,7 @@ fun HomeScreenContent(
             item {
                 Text(
                     text = stringResource(R.string.home_document_library),
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    ),
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
                     modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                 )
             }
@@ -199,7 +192,7 @@ fun JudgeCallTimerCard(
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = stringResource(R.string.home_judge_call),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium,
                 color = colors.onSurface
             )
             Text(
@@ -220,7 +213,7 @@ fun JudgeCallTimerCard(
                 Text(
                     text = formatTime(elapsedTime),
                     // Tabular figures: the digits keep their width, so the time doesn't jiggle while counting.
-                    style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
+                    style = MaterialTheme.typography.displayMedium.copy(fontFeatureSettings = "tnum"),
                     color = if (isRunning) colors.primary else colors.onSurface,   // running is a real state
                     maxLines = 1,
                     modifier = Modifier.weight(1f)
@@ -245,7 +238,7 @@ fun JudgeCallTimerCard(
                         Spacer(Modifier.width(8.dp))
                         Text(
                             text = stringResource(if (isRunning) R.string.home_pause_timer else R.string.home_start_timer),
-                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                            style = MaterialTheme.typography.titleSmall
                         )
                     }
                 }
@@ -283,7 +276,7 @@ private fun DocumentRow(item: DocumentLibraryItem, onClick: () -> Unit) {
                 // Judges say "IPG", not "Infraction Procedure Guide": the acronym is the title.
                 Text(
                     text = item.label,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 if (item.updated) UpdatedLabel()

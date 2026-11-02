@@ -50,3 +50,4 @@ Rediseño, parte 1: un Inicio más limpio. El temporizador y los documentos cabe
 | Commit | English | Español |
 |---|---|---|
 | One chevron icon: ic_chevron_right everywhere; Blocks: Label and Tag from the theme's labelSmall | The same arrow on every list, and slightly larger tags (TOKEN, set codes). | La misma flecha en todas las listas y etiquetas algo más grandes (TOKEN, códigos de set). |
+| Reader contents and search: one grouped list; Reader: glossary as one list, spacing and weights | Rules reader: the contents, search results and glossary are compact lists with the section numbers in a column, and IPG infractions read "2.1 Missed Trigger" under their chapter. | Lector de reglas: el índice, los resultados de búsqueda y el glosario son listas compactas con los números de sección en columna, y las infracciones del IPG se leen "2.1 Missed Trigger" bajo su capítulo. |

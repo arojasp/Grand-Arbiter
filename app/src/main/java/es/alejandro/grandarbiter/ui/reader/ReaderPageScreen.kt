@@ -210,7 +210,7 @@ private fun PageHeader(section: PageSection, onCopy: () -> Unit) {
 
 @Composable
 private fun BlockColumn(blocks: List<Block>, onRefClick: (String) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         blocks.forEach { BlockView(it, onRefClick) }
     }
 }

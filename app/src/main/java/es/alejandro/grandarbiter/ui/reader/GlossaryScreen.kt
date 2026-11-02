@@ -3,7 +3,6 @@ package es.alejandro.grandarbiter.ui.reader
 import android.net.Uri
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,12 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -53,7 +48,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import es.alejandro.grandarbiter.ui.theme.highContrastBorder
+import androidx.compose.foundation.lazy.itemsIndexed
+import es.alejandro.grandarbiter.ui.components.ListDivider
+import es.alejandro.grandarbiter.ui.components.groupedItem
 
 const val ARG_TERM = "term"
 
@@ -138,9 +135,10 @@ fun GlossaryScreen(
                 list.isEmpty() -> Text(stringResource(R.string.reader_no_results), color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 32.dp).align(Alignment.CenterHorizontally))
                 else -> CompositionLocalProvider(LocalGlossary provides links) {
-                    LazyColumn(state = listState, verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(bottom = 24.dp)) {
-                        items(list, key = { it.term }) { entry ->
-                            TermCard(entry, expanded = entry.term == open, onRefClick, Modifier.animateItem()) {
+                    LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 24.dp)) {
+                        // 700+ terms: one grouped list that stays lazy (design-decisions §3).
+                        itemsIndexed(list, key = { _, it -> it.term }) { i, entry ->
+                            TermRow(entry, expanded = entry.term == open, onRefClick, Modifier.animateItem().groupedItem(i, list.size), divider = i > 0) {
                                 open = if (open == entry.term) null else entry.term
                             }
                         }
@@ -152,18 +150,22 @@ fun GlossaryScreen(
 }
 
 @Composable
-private fun TermCard(entry: GlossaryEntry, expanded: Boolean, onRefClick: (String) -> Unit, modifier: Modifier, onToggle: () -> Unit) {
+private fun TermRow(
+    entry: GlossaryEntry,
+    expanded: Boolean,
+    onRefClick: (String) -> Unit,
+    modifier: Modifier,
+    divider: Boolean,
+    onToggle: () -> Unit,
+) {
     val colors = MaterialTheme.colorScheme
-    Card(
-        modifier = modifier.fillMaxWidth().animateContentSize(),
-        shape = RoundedCornerShape(12.dp),
-        border = highContrastBorder(),
-        colors = CardDefaults.cardColors(containerColor = colors.surfaceContainerLow),
-    ) {
+    Column(modifier.animateContentSize()) {
+        if (divider) ListDivider()
         Row(
             Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // Gold while open: a real state (design-decisions §1).
             Text(entry.term, style = MaterialTheme.typography.titleMedium,
                 color = if (expanded) colors.primary else colors.onSurface, modifier = Modifier.weight(1f))
             Icon(painterResource(if (expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right), null,

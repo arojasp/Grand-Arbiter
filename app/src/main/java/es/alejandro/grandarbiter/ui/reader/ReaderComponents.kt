@@ -101,7 +101,7 @@ fun MarkupText(
                         val styles = TextLinkStyles(
                             style = SpanStyle(
                                 color = linkColor,
-                                fontWeight = if (span.bold) FontWeight.Bold else FontWeight.SemiBold,
+                                fontWeight = if (span.bold) FontWeight.Bold else FontWeight.Medium,   // native weights only (no SemiBold)
                                 textDecoration = TextDecoration.Underline,
                             )
                         )
@@ -209,8 +209,8 @@ private fun ExampleView(block: Block.Example, onRefClick: (String) -> Unit, modi
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant)
         )
-        Spacer(modifier = Modifier.width(10.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = block.label?.let { stringResource(R.string.reader_example_labeled, it) }
                     ?: stringResource(R.string.reader_example),
@@ -228,7 +228,7 @@ private fun ExampleView(block: Block.Example, onRefClick: (String) -> Unit, modi
 
 @Composable
 private fun ListView(block: Block.BulletList, onRefClick: (String) -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         block.items.forEachIndexed { index, item ->
             Row {
                 Text(
@@ -311,8 +311,7 @@ fun PenaltyBadge(penalty: Penalty, modifier: Modifier = Modifier, compact: Boole
         Text(
             text = stringResource(penaltyLabel(penalty)).uppercase(),
             modifier = Modifier.padding(horizontal = 8.dp, vertical = if (compact) 1.dp else 4.dp),
-            style = (if (compact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium)
-                .copy(fontWeight = FontWeight.Bold),
+            style = if (compact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium,
             color = content,
         )
     }
@@ -336,7 +335,7 @@ fun PartCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onToggle)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -356,7 +355,7 @@ fun PartCard(
         if (expanded) {
             Column(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 part.blocks.forEach { BlockView(it, onRefClick) }
             }
@@ -414,8 +413,8 @@ fun ReaderSearchField(
         placeholder = {
             Text(
                 text = placeholder,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp,
             )
         },
         leadingIcon = {

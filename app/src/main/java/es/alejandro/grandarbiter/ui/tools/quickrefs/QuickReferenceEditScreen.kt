@@ -1,13 +1,9 @@
 package es.alejandro.grandarbiter.ui.tools.quickrefs
 
-import androidx.compose.ui.res.painterResource
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
@@ -28,8 +25,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,13 +53,14 @@ import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.rules.RulesSearchResult
 import es.alejandro.grandarbiter.ui.components.Label
+import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
 import es.alejandro.grandarbiter.ui.components.Section
+import es.alejandro.grandarbiter.ui.components.groupedItem
 import es.alejandro.grandarbiter.ui.reader.ReaderSearchField
 import es.alejandro.grandarbiter.ui.reader.highlightedSnippet
 import es.alejandro.grandarbiter.ui.reader.sectionLabel
 import org.koin.androidx.compose.koinViewModel
-import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Create / edit a quick reference: title, the rules (in order, each with an optional note) and a
@@ -114,8 +113,9 @@ fun QuickReferenceEditScreen(
         LazyColumn(
             modifier = Modifier.padding(innerPadding).imePadding(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // No spacedBy: the index rows below are one grouped list, so each item sets its own gap
+            // (12 dp inside a group, 24 dp before a group's label).
             item {
                 OutlinedTextField(
                     value = state.title,
@@ -128,11 +128,11 @@ fun QuickReferenceEditScreen(
                 )
             }
 
-            item { Label(stringResource(R.string.qr_rules_count, state.rules.size), Modifier.padding(start = 4.dp, top = 8.dp)) }
+            item { Label(stringResource(R.string.qr_rules_count, state.rules.size), Modifier.padding(start = 4.dp, top = 24.dp)) }
             if (state.rules.isEmpty()) {
                 item {
                     Text(stringResource(R.string.qr_rules_empty), style = MaterialTheme.typography.bodyMedium,
-                        color = colors.onSurfaceVariant, modifier = Modifier.padding(horizontal = 4.dp))
+                        color = colors.onSurfaceVariant, modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 12.dp))
                 }
             }
             items(state.rules, key = { it.rule.sectionId }) { rule ->
@@ -144,39 +144,43 @@ fun QuickReferenceEditScreen(
                     onMove = { viewModel.move(rule.rule.sectionId, it) },
                     onRemove = { viewModel.remove(rule.rule.sectionId) },
                     onNote = { viewModel.setNote(rule.rule.sectionId, it) },
-                    modifier = Modifier.animateItem(),
+                    modifier = Modifier.animateItem().padding(top = 12.dp),
                 )
             }
 
             item {
-                Section(stringResource(R.string.qr_add_rules)) {
+                Box(Modifier.padding(top = 24.dp)) { Section(stringResource(R.string.qr_add_rules)) {
                     ReaderSearchField(
                         query = state.query,
                         onQueryChange = viewModel::setQuery,
                         placeholder = stringResource(R.string.qr_search_placeholder, state.documentId.shortLabel()),
                     )
-                }
+                } }
             }
             if (state.results.isNotEmpty()) {
                 item {
                     val added = state.addedIds
-                    Panel {
+                    Box(Modifier.padding(top = 12.dp)) { Panel {
                         state.results.forEachIndexed { i, result ->
-                            if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp), color = colors.outlineVariant.softened(0.4f))
+                            if (i > 0) ListDivider()
                             SearchResultRow(result, added = (result.target.anchorId ?: result.target.pageId) in added) { viewModel.add(result) }
                         }
-                    }
+                    } }
                 }
             }
 
             // No search: the document's index, to add rules by browsing (chapters > pages > rules).
             if (state.query.isBlank() && state.index.isNotEmpty()) {
                 item {
-                    Label(stringResource(R.string.qr_browse, state.documentId.shortLabel()), Modifier.padding(start = 4.dp, top = 8.dp))
+                    Label(stringResource(R.string.qr_browse, state.documentId.shortLabel()), Modifier.padding(start = 4.dp, top = 24.dp))
                 }
-                items(state.indexRows, key = { "index:" + it.sectionId }) { row ->
+                val rows = state.indexRows
+                itemsIndexed(rows, key = { _, row -> "index:" + row.sectionId }) { i, row ->
                     IndexRowView(
                         row = row,
+                        divider = i > 0,
+                        modifier = Modifier.padding(top = if (i == 0) 12.dp else 0.dp)
+                            .groupedItem(i, rows.size, color = colors.surfaceContainerHigh, radius = 12.dp),
                         onToggle = { viewModel.toggle(row.sectionId) },
                         onAdd = { viewModel.addSection(row.sectionId, row.label) },
                     )
@@ -185,7 +189,7 @@ fun QuickReferenceEditScreen(
 
             if (state.id != null) {
                 item {
-                    TextButton(onClick = { confirmDelete = true }, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+                    TextButton(onClick = { confirmDelete = true }, modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
                         Icon(Icons.Outlined.Delete, null, tint = colors.error)
                         Spacer(Modifier.width(8.dp))
                         Text(stringResource(R.string.qr_delete), color = colors.error)
@@ -254,7 +258,7 @@ private fun RuleEditor(
 private fun SearchResultRow(result: RulesSearchResult, added: Boolean, onAdd: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Row(
-        Modifier.fillMaxWidth().clickable(enabled = !added, onClick = onAdd).padding(horizontal = 12.dp, vertical = 10.dp),
+        Modifier.fillMaxWidth().clickable(enabled = !added, onClick = onAdd).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -268,49 +272,54 @@ private fun SearchResultRow(result: RulesSearchResult, added: Boolean, onAdd: ()
             if (added) Icons.Default.CheckCircle else Icons.Default.AddCircleOutline,
             stringResource(if (added) R.string.qr_added else R.string.qr_add_rule),
             tint = if (added) colors.primary else colors.onSurfaceVariant,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(24.dp),
         )
     }
 }
 
-/** One index entry: tap opens/closes it (chapters, pages); the + adds it (pages, rules). */
+/**
+ * One index entry, a row of a grouped list: tap opens/closes it (chapters, pages); the + adds it (pages, rules).
+ * Deeper levels are indented inside the same list.
+ */
 @Composable
-private fun IndexRowView(row: IndexRow, onToggle: () -> Unit, onAdd: () -> Unit) {
+private fun IndexRowView(row: IndexRow, divider: Boolean, onToggle: () -> Unit, onAdd: () -> Unit, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
-    Row(
-        Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(enabled = row.expandable || (row.addable && !row.added), onClick = if (row.expandable) onToggle else onAdd)
-            .padding(start = 4.dp + 16.dp * row.depth, end = 4.dp, top = 6.dp, bottom = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(Modifier.size(24.dp), contentAlignment = Alignment.Center) {
-            when {
-                row.loading -> CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                row.expandable -> Icon(
-                    painterResource(if (row.expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right),
-                    stringResource(if (row.expanded) R.string.qr_collapse else R.string.qr_expand),
-                    tint = colors.onSurfaceVariant,
-                )
+    Column(modifier) {
+        if (divider) ListDivider()
+        Row(
+            Modifier.fillMaxWidth()
+                .clickable(enabled = row.expandable || (row.addable && !row.added), onClick = if (row.expandable) onToggle else onAdd)
+                .padding(start = 12.dp + 16.dp * row.depth, end = 4.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.size(24.dp), contentAlignment = Alignment.Center) {
+                when {
+                    row.loading -> CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                    row.expandable -> Icon(
+                        painterResource(if (row.expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right),
+                        stringResource(if (row.expanded) R.string.qr_collapse else R.string.qr_expand),
+                        tint = colors.onSurfaceVariant,
+                    )
+                }
             }
-        }
-        Spacer(Modifier.width(8.dp))
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(row.label,
-                style = if (row.depth == 0) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleSmall,   // hierarchy by size
-                color = colors.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            row.detail?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.width(8.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(row.label,
+                    style = if (row.depth == 0) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleSmall,   // hierarchy by size
+                    color = colors.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                row.detail?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
             }
-        }
-        if (row.addable) {
-            IconButton(onClick = onAdd, enabled = !row.added) {
-                Icon(
-                    if (row.added) Icons.Default.CheckCircle else Icons.Default.AddCircleOutline,
-                    stringResource(if (row.added) R.string.qr_added else R.string.qr_add_rule),
-                    tint = if (row.added) colors.primary else colors.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp),
-                )
+            if (row.addable) {
+                IconButton(onClick = onAdd, enabled = !row.added) {
+                    Icon(
+                        if (row.added) Icons.Default.CheckCircle else Icons.Default.AddCircleOutline,
+                        stringResource(if (row.added) R.string.qr_added else R.string.qr_add_rule),
+                        tint = if (row.added) colors.primary else colors.onSurfaceVariant,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
         }
     }

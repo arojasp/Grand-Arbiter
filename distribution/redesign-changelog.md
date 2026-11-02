@@ -44,3 +44,9 @@ Rediseño, parte 1: un Inicio más limpio. El temporizador y los documentos cabe
 | Commit | English | Español |
 |---|---|---|
 | Typography: Bold only for the top level | Calmer typography: bold is kept for the main titles, so what matters stands out (rule reader, Quick References, Card Search). | Tipografía más tranquila: la negrita se reserva para los títulos principales, así destaca lo importante (lector de reglas, Quick References, Card Search). |
+
+### Phase 3 — Rest of the app
+
+| Commit | English | Español |
+|---|---|---|
+| One chevron icon: ic_chevron_right everywhere; Blocks: Label and Tag from the theme's labelSmall | The same arrow on every list, and slightly larger tags (TOKEN, set codes). | La misma flecha en todas las listas y etiquetas algo más grandes (TOKEN, códigos de set). |

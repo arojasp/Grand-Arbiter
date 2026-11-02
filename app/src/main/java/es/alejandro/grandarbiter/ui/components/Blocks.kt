@@ -19,6 +19,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.unit.Dp
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
  * Building blocks of the Figma design (card detail, settings…): uppercase section labels,
@@ -80,6 +87,48 @@ fun Tag(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
         )
     }
+}
+
+/** Divider between the rows of a grouped list (Panel or [groupedItem]): inset 12 dp, softened. */
+@Composable
+fun ListDivider(modifier: Modifier = Modifier) {
+    HorizontalDivider(modifier.padding(horizontal = 12.dp), color = MaterialTheme.colorScheme.outlineVariant.softened(0.4f))
+}
+
+/**
+ * One row of a grouped list inside a LazyColumn: looks like a [Panel] list (rounded outer corners,
+ * 1 dp outlineVariant edge), but every row stays a lazy item. For long lists (search results);
+ * short ones use a Panel. Rows after the first draw a [ListDivider] themselves.
+ */
+@Composable
+fun Modifier.groupedItem(
+    index: Int,
+    count: Int,
+    color: Color = MaterialTheme.colorScheme.surfaceContainer,
+    radius: Dp = 16.dp,
+): Modifier {
+    val first = index == 0
+    val last = index == count - 1
+    val shape = RoundedCornerShape(
+        topStart = if (first) radius else 0.dp, topEnd = if (first) radius else 0.dp,
+        bottomStart = if (last) radius else 0.dp, bottomEnd = if (last) radius else 0.dp,
+    )
+    val edge = MaterialTheme.colorScheme.outlineVariant
+    return this
+        .fillMaxWidth()
+        .clip(shape)
+        .background(color)
+        .drawWithContent {
+            drawContent()
+            // The outline of a taller shape: the edges shared with the next/previous row fall outside the clip.
+            val stroke = 1.dp.toPx()
+            val extraTop = if (first) 0f else stroke * 2
+            val extraBottom = if (last) 0f else stroke * 2
+            val outlineSize = Size(size.width - stroke, size.height - stroke + extraTop + extraBottom)
+            translate(stroke / 2, stroke / 2 - extraTop) {
+                drawOutline(shape.createOutline(outlineSize, layoutDirection, this), edge, style = Stroke(stroke))
+            }
+        }
 }
 
 /** 1dp outline in the design's border color. */

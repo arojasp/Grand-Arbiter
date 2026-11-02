@@ -145,6 +145,13 @@ private fun AnnotatedString.Builder.appendWithGlossary(
 /** "100." for chapters/sections without a dot, "2.1" / "603.2a" as printed. */
 fun displayNumber(number: String?): String? = number?.let { if ('.' in it) it else "$it." }
 
+/**
+ * IPG infractions are titled "Game Play Error — Missed Trigger". Under their chapter ("Game Play
+ * Errors") the category repeats it, so the contents show "Missed Trigger". Titles without " — "
+ * (every other document) are unchanged.
+ */
+fun withoutCategory(title: String): String = title.substringAfter(" — ")
+
 fun sectionLabel(number: String?, title: String?): String =
     listOfNotNull(displayNumber(number), title?.let { InlineMarkup.plainText(it) }).joinToString(" ")
 

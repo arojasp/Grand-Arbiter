@@ -8,15 +8,17 @@ When the redesign is released: copy the **Play draft** below into
 together with the versionCode/versionName bump, as usual. The `whatsnew` files are not touched on
 this branch, so it does not conflict with releases made from develop in the meantime.
 
-## Play draft (keep it under 500 characters per language)
+## Play text (released in 1.2.0, versionCode 9)
 
-**en-US**
+Copied to `whatsnew/whatsnew-en-US` and `whatsnew/whatsnew-es-ES` with the version bump.
 
-Redesign, part 1: a cleaner Home. The timer and the documents fit on one screen, and an «Updated» label marks what changed until you open it. High contrast mode now gives cards and panels clear edges, secondary text is easier to read, and the light theme and navigation bar are fixed.
+**en-US** (471 characters)
 
-**es-ES**
+A redesign of the whole app. The rules reader, Release Notes, Banned & Restricted, Quick References and Tools are clearer, more compact lists. An «Updated» label marks changed documents until you open them. One consistent gold, bigger touch targets, and text that reads well in the light and high contrast themes. Quick References: long-press a rule to copy it. HJ Announcement: simpler REL choice and the MTR round times. Resetting the judge call timer now needs a hold.
 
-Rediseño, parte 1: un Inicio más limpio. El temporizador y los documentos caben en una pantalla, y una etiqueta «Updated» marca lo que ha cambiado hasta que lo abres. El modo de alto contraste ahora marca los bordes de tarjetas y paneles, los textos secundarios se leen mejor y se corrigen el tema claro y la barra de navegación.
+**es-ES** (493 characters)
+
+Rediseño de toda la app. El lector de reglas, las Release Notes, Banned & Restricted, Quick References y Tools son listas más claras y compactas. Una etiqueta «Updated» marca los documentos que cambian hasta que los abres. Un solo dorado, zonas táctiles más grandes y textos legibles en tema claro y alto contraste. Quick References: mantén pulsada una regla para copiarla. Anuncio del HJ: REL más simple y tiempos de ronda del MTR. Reiniciar el temporizador de juez requiere mantener pulsado.
 
 ## Entries
 

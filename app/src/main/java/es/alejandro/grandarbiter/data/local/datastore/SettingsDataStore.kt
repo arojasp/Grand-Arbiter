@@ -21,7 +21,6 @@ class SettingsDataStore(private val context: Context) {
     private val TEXT_SCALE = stringPreferencesKey("text_scale")
     private val HIGH_CONTRAST = booleanPreferencesKey("high_contrast")
     private val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
-    private val VENUE_NOTE = stringPreferencesKey("hj_venue_note")
     private val DRAFT_BEEP = booleanPreferencesKey("draft_beep")
     private val DRAFT_VIBRATE = booleanPreferencesKey("draft_vibrate")
     private val SEEN_PREFIX = "seen_version_"   // + section id: "seen_version_cr" = "2026-09-25"
@@ -36,10 +35,6 @@ class SettingsDataStore(private val context: Context) {
     }.distinctUntilChanged()
 
     val themeMode: Flow<ThemeMode> = displaySettings.map { it.themeMode }.distinctUntilChanged()
-
-    /** Head Judge announcement: venue notes (restrooms, water…) kept between rounds and events. */
-    val venueNote: Flow<String> = context.dataStore.data.map { it[VENUE_NOTE].orEmpty() }.distinctUntilChanged()
-    suspend fun setVenueNote(note: String) = set(VENUE_NOTE, note)
 
     /** Draft timer: short beep with the vibration when a step runs out. Off by default. */
     val draftBeep: Flow<Boolean> = context.dataStore.data.map { it[DRAFT_BEEP] ?: false }.distinctUntilChanged()

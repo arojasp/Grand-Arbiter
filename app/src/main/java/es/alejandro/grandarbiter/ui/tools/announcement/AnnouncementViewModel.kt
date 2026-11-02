@@ -3,7 +3,6 @@ package es.alejandro.grandarbiter.ui.tools.announcement
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.data.rules.bundle.Block
 import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import kotlinx.coroutines.flow.SharingStarted
@@ -11,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
@@ -30,7 +28,6 @@ data class RoundsTable(val table: Block.Table, val notes: List<Block>, val pageI
 class AnnouncementViewModel(
     private val state: SavedStateHandle,
     rules: RulesRepository,
-    private val settings: SettingsDataStore,
 ) : ViewModel() {
 
     val checked: StateFlow<Set<String>> = state.getStateFlow(KEY_CHECKED, emptySet<String>())
@@ -51,9 +48,6 @@ class AnnouncementViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    val venueNote: StateFlow<String> = settings.venueNote
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
-
     fun toggle(topic: AnnouncementTopic) {
         val now = checked.value
         state[KEY_CHECKED] = if (topic.name in now) now - topic.name else now + topic.name
@@ -61,7 +55,6 @@ class AnnouncementViewModel(
 
     fun resetChecklist() { state[KEY_CHECKED] = emptySet<String>() }
     fun setRel(value: Rel) { state[KEY_REL] = value.name }
-    fun setVenueNote(value: String) = viewModelScope.launch { settings.setVenueNote(value) }
 
     companion object {
         const val APPENDIX_E = "mtr/appendix-e"

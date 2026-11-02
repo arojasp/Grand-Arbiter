@@ -190,7 +190,7 @@
     <string name="hj_call_judge">Raise your hand and call</string>
     <string name="hj_judge">JUDGE!</string>
     <string name="hj_venue">Venue info</string>
-    <string name="hj_venue_hint">Worth announcing: restrooms, water, food… Add your venue notes here.</string>
+    <string name="hj_venue_reminder">Worth announcing: where the restrooms are, water, food…</string>
 
     <!-- Deck counter -->
     <string name="deck_format_constructed">Constructed</string>

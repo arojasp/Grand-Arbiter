@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.outlined.Campaign
@@ -36,13 +34,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -65,7 +59,7 @@ import org.koin.androidx.compose.koinViewModel
  *  - topics are tickable (reset each round), REL and round time are selectable;
  *  - tardiness text follows the REL (IPG 3.1 / JAR), the rounds table is MTR Appendix E as installed;
  *  - reminders are one list; the player instruction is the one emphasized block (it is read aloud);
- *  - venue info is the HJ's own note, saved on the device.
+ *  - venue info is a reminder of what to mention (restrooms, water…), not a field to fill in.
  */
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,7 +72,6 @@ fun HeadJudgeAnnouncementScreen(
     val checked by viewModel.checked.collectAsState()
     val rel by viewModel.rel.collectAsState()
     val rounds by viewModel.roundsTable.collectAsState()
-    val venue by viewModel.venueNote.collectAsState()
     val colors = MaterialTheme.colorScheme
 
     Scaffold(
@@ -115,7 +108,7 @@ fun HeadJudgeAnnouncementScreen(
             rounds?.let { r -> item { RoundsCard(r, onOpenRules) } }
             item { Reminders() }
             item { PlayerInstruction() }
-            item { VenueCard(venue, viewModel::setVenueNote) }
+            item { VenueReminder() }
         }
     }
 }
@@ -287,33 +280,16 @@ private fun PlayerInstruction() {
     }
 }
 
+/** A reminder for the HJ of what to mention about the venue. Text only (Alejandro: not a field to fill in). */
 @Composable
-private fun VenueCard(note: String, onChange: (String) -> Unit) {
+private fun VenueReminder() {
     val colors = MaterialTheme.colorScheme
-    // Typing edits local state; the saved note (DataStore, async) only seeds it. Binding the field
-    // straight to the stored flow would make the cursor jump while typing.
-    var draft by rememberSaveable { mutableStateOf<String?>(null) }
-    val text = draft ?: note
     AnnouncementPanel {
         Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Icon(Icons.Outlined.Info, null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Label(stringResource(R.string.hj_venue))
-                BasicTextField(
-                    value = text,
-                    onValueChange = { draft = it; onChange(it) },
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurface),
-                    cursorBrush = SolidColor(colors.primary),
-                    modifier = Modifier.fillMaxWidth(),
-                    decorationBox = { field ->
-                        Box {
-                            if (text.isEmpty()) {
-                                Text(stringResource(R.string.hj_venue_hint), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
-                            }
-                            field()
-                        }
-                    },
-                )
+                Text(stringResource(R.string.hj_venue_reminder), style = MaterialTheme.typography.bodyMedium, color = colors.onSurface)
             }
         }
     }

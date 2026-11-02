@@ -27,6 +27,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,8 +49,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -179,16 +178,16 @@ private fun LayOutContent(s: DraftSnapshot, p: DraftPosition.Running, step: Draf
         stringResource(R.string.draft_layout_sub, formatDuration(step.durationMs)))
     DraftCard {
         DraftLabel(stringResource(R.string.draft_up_next))
-        Text(stringResource(R.string.draft_picks_first, step.opener), style = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
+        Text(stringResource(R.string.draft_picks_first, step.opener), style = MaterialTheme.typography.titleLarge,
             color = colors.onSurface)
         // The way around the table: the other five seats; the last one takes two and the picks come back.
         val clockwise = step.direction == PassDirection.LEFT
         val then = RochesterOrder.picks(step.opener, clockwise, RochesterOrder.PLAYERS).drop(1).joinToString(" → ")
-        Text(stringResource(R.string.draft_picks_then, then), style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp), color = colors.onSurfaceVariant)
+        Text(stringResource(R.string.draft_picks_then, then), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         val group = (step.pack - 1) / RochesterOrder.PLAYERS
         Text(stringResource(R.string.draft_rotation_packs, rotationText(step.direction),
                 group * RochesterOrder.PLAYERS + 1, minOf((group + 1) * RochesterOrder.PLAYERS, s.config.totalPacks)),
-            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold), color = colors.primary)
+            style = MaterialTheme.typography.titleSmall, color = colors.primary)
     }
 }
 
@@ -211,9 +210,10 @@ private fun RochesterPickContent(s: DraftSnapshot, p: DraftPosition.Running, ste
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         DraftLabel(stringResource(R.string.draft_now_picking), colors.onSurfaceVariant)
-        Text(actor, style = TextStyle(fontSize = 72.sp, lineHeight = 80.sp, fontWeight = FontWeight.Bold), color = colors.primary)
+        // Huge numerals: displayLarge sized per use, the one exception to literal sizes (design-decisions §9).
+        Text(actor, style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp, lineHeight = 80.sp), color = colors.primary)
         Text(stringResource(R.string.draft_card_of, step.pick, s.config.cardsPerPack),
-            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium), color = colors.onSurface)
+            style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
     }
     Countdown(
         label = stringResource(if (waiting) R.string.draft_time else R.string.draft_pick_short),
@@ -257,7 +257,7 @@ private fun PickContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftS
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             DraftLabel(stringResource(R.string.draft_pack_progress))
             Text(stringResource(R.string.draft_pick_of, step.pick, picksInPack),
-                style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         PickSegments(done = step.pick - 1, total = picksInPack)
     }
@@ -274,16 +274,16 @@ private fun ReviewContent(s: DraftSnapshot, p: DraftPosition.Running, step: Draf
     Countdown(stringResource(R.string.draft_review_label), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatDuration(step.durationMs)))
     DraftCard {
         DraftLabel(stringResource(R.string.draft_up_next))
-        Text(stringResource(R.string.draft_pack_n, step.nextPack), style = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
+        Text(stringResource(R.string.draft_pack_n, step.nextPack), style = MaterialTheme.typography.titleLarge,
             color = colors.onSurface)
-        Text(directionText(step.nextDirection), style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold), color = colors.primary)
+        Text(directionText(step.nextDirection), style = MaterialTheme.typography.titleSmall, color = colors.primary)
         (s.nextStep as? DraftStep.Pick)?.let { first ->
             Text(stringResource(R.string.draft_first_pick, first.cardsLeft, first.durationMs / 1000),
-                style = TextStyle(fontSize = 14.sp), color = colors.onSurfaceVariant)
+                style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
     }
     DraftCard(background = colors.surfaceContainerLow) {
-        Text(stringResource(R.string.draft_review_note), style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp), color = colors.onSurfaceVariant)
+        Text(stringResource(R.string.draft_review_note), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
     }
 }
 
@@ -297,7 +297,7 @@ private fun ConstructionContent(s: DraftSnapshot, p: DraftPosition.Running, wait
     Countdown(stringResource(R.string.draft_construction), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatClock(p.step.durationMs)), size = 80)
     DraftCard {
         DraftLabel(stringResource(R.string.draft_when_time_is_up))
-        Text(stringResource(R.string.draft_when_time_is_up_text), style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp), color = colors.onSurfaceVariant)
+        Text(stringResource(R.string.draft_when_time_is_up_text), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
     }
 }
 
@@ -341,7 +341,7 @@ private fun Countdown(
     size: Int = 96,
     /** Shown at 0:00 instead of [sub]; default "Time is up". */
     waitingSub: String? = null,
-    verticalPadding: Int = 28,
+    verticalPadding: Int = 24,
 ) {
     val colors = MaterialTheme.colorScheme
     val paused = !running && !waiting
@@ -394,7 +394,7 @@ private fun CountdownFrame(
     size: Int,
     labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     borderColor: Color = MaterialTheme.colorScheme.outlineVariant,
-    verticalPadding: Int = 28,
+    verticalPadding: Int = 24,
     subColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -406,9 +406,9 @@ private fun CountdownFrame(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         DraftLabel(label, labelColor)
-        Text(time, style = TextStyle(fontSize = size.sp, lineHeight = (size + 8).sp, fontWeight = FontWeight.Bold, letterSpacing = (-2).sp), color = color)
+        Text(time, style = MaterialTheme.typography.displayLarge.copy(fontSize = size.sp, lineHeight = (size + 8).sp, letterSpacing = (-2).sp, fontFeatureSettings = "tnum"), color = color)
         DraftProgress(fraction)
-        Text(sub, style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp), color = subColor, textAlign = TextAlign.Center)
+        Text(sub, style = MaterialTheme.typography.bodySmall, color = subColor, textAlign = TextAlign.Center)
     }
 }
 
@@ -449,9 +449,10 @@ private fun NextCard(next: DraftStep?) {
 private fun SummaryRow(label: String, value: String, emphasis: Boolean = false) {
     val colors = MaterialTheme.colorScheme
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = if (emphasis) FontWeight.Bold else FontWeight.Normal),
+        // Same as the setup estimate: the total stands out by role and gold, not Bold.
+        Text(label, style = if (emphasis) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyMedium,
             color = if (emphasis) colors.onSurface else colors.onSurfaceVariant)
-        Text(value, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = if (emphasis) FontWeight.Bold else FontWeight.Medium),
+        Text(value, style = (if (emphasis) MaterialTheme.typography.titleSmall else MaterialTheme.typography.labelLarge).copy(fontFeatureSettings = "tnum"),
             color = if (emphasis) colors.primary else colors.onSurface)
     }
 }
@@ -514,7 +515,7 @@ private fun Footer(s: DraftSnapshot, viewModel: DraftRunViewModel, onEnd: () -> 
                     HoldState.HOLDING -> R.string.hold_keep_holding
                     HoldState.TAPPED -> R.string.draft_hold_to_confirm
                 }),
-                style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp),
+                style = MaterialTheme.typography.bodySmall,
                 color = if (hold == HoldState.IDLE) colors.onSurfaceVariant else colors.primary,
             )
         }
@@ -541,7 +542,7 @@ private fun RochesterPickFooter(s: DraftSnapshot, viewModel: DraftRunViewModel, 
             HoldState.HOLDING -> R.string.hold_keep_holding
             HoldState.TAPPED -> R.string.draft_hold_to_confirm
         }),
-        style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp),
+        style = MaterialTheme.typography.bodySmall,
         color = if (hold == HoldState.IDLE) colors.onSurfaceVariant else colors.primary,
     )
     EndDraftLink(onEnd)
@@ -566,7 +567,8 @@ private fun PrimaryButton(text: String, onClick: () -> Unit) {
         Modifier.fillMaxWidth().height(56.dp).clip(CircleShape).background(GoldDeep).clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold), color = OnGoldDeep)
+        // The big full-width action at the table: titleMedium (16 sp) for distance; other buttons use labelLarge.
+        Text(text, style = MaterialTheme.typography.titleMedium, color = OnGoldDeep)
     }
 }
 
@@ -574,8 +576,10 @@ private fun PrimaryButton(text: String, onClick: () -> Unit) {
 private fun EndDraftLink(onEnd: () -> Unit) {
     Text(
         stringResource(R.string.draft_end),
-        Modifier.clip(CircleShape).clickable(role = Role.Button, onClick = onEnd).padding(horizontal = 16.dp, vertical = 8.dp),
-        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
+        // Touch target ≥ 48 dp: the text alone with 8 dp padding was ~36 dp tall.
+        Modifier.minimumInteractiveComponentSize().clip(CircleShape).clickable(role = Role.Button, onClick = onEnd)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        style = {T}.labelLarge,
         color = MaterialTheme.colorScheme.error,
     )
 }

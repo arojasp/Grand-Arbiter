@@ -1,17 +1,9 @@
 package es.alejandro.grandarbiter.ui.tools.releasenotes
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Card
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.clickable
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,9 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Language
@@ -38,11 +32,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,11 +55,16 @@ import es.alejandro.grandarbiter.data.releasenotes.ReleaseNotesDocument
 import es.alejandro.grandarbiter.data.releasenotes.ReleaseNotesRepository
 import es.alejandro.grandarbiter.ui.cardsearch.OracleText
 import es.alejandro.grandarbiter.ui.components.Label
-import es.alejandro.grandarbiter.ui.components.Panel
+import es.alejandro.grandarbiter.ui.components.ListDivider
+import es.alejandro.grandarbiter.ui.components.groupedItem
 import es.alejandro.grandarbiter.ui.reader.CopyRuleButton
 import es.alejandro.grandarbiter.ui.reader.MarkupText
 import es.alejandro.grandarbiter.ui.reader.ReaderSearchField
 import es.alejandro.grandarbiter.ui.reader.rememberCopyText
+import es.alejandro.grandarbiter.ui.theme.highContrastBorder
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -69,10 +73,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 
 // ---------------------------------------------------------------- what the list shows
 
@@ -236,7 +236,7 @@ fun ReleaseNoteSetScreen(
                 },
                 title = {
                     Column {
-                        Text(doc?.name.orEmpty(), style = MaterialTheme.typography.titleMedium,
+                        Text(doc?.name.orEmpty(), style = MaterialTheme.typography.titleLarge,
                             color = colors.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(doc?.lastModified?.let { stringResource(R.string.release_notes_modified, formatDate(it)) }
                             ?: stringResource(R.string.tools_release_notes),
@@ -297,13 +297,17 @@ private fun Notes(
         LazyColumn(
             state = listState,
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(shown, key = { it.key }) { item ->
+            // One grouped list, like the rules documents' contents: section headers are rows, an open
+            // section's content follows inside the same list. No spacedBy: it would split the group.
+            itemsIndexed(shown, key = { _, it -> it.key }) { i, item ->
+                val grouped = Modifier.animateItem().groupedItem(i, shown.size)
+                // Dividers: before each section header and card row; between every search result.
+                val divider = i > 0 && (searching || item !is NotesItem.Block)
                 when (item) {
                     is NotesItem.Section -> {
                         val open = item.index in expanded
-                        SectionHeader(item, open, Modifier.animateItem()) {
+                        SectionHeader(item, open, divider, grouped) {
                             expanded = if (open) expanded - item.index else expanded + item.index
                             if (!open) {
                                 // Opening a long section: bring its header to the top, content follows.
@@ -312,12 +316,15 @@ private fun Notes(
                             }
                         }
                     }
-                    is NotesItem.Block -> SelectionContainer(Modifier.animateItem()) {
-                        BlockView(item, showSection = searching) { card ->
-                            copy(card.name, ReleaseNotesItems.copyText(card, state.doc.name))
+                    is NotesItem.Block -> SelectionContainer(grouped) {
+                        Column {
+                            if (divider) ListDivider(Modifier.padding(bottom = 12.dp))
+                            BlockView(item, showSection = searching) { card ->
+                                copy(card.name, ReleaseNotesItems.copyText(card, state.doc.name))
+                            }
                         }
                     }
-                    is NotesItem.CardRow -> CardRowView(item, showSection = searching, Modifier.animateItem()) {
+                    is NotesItem.CardRow -> CardRowView(item, showSection = searching, divider, grouped) {
                         onOpenCard(item.section, item.index)
                     }
                 }
@@ -326,23 +333,22 @@ private fun Notes(
     }
 }
 
-/** Collapsible section header, styled like the rules documents' contents. */
+/** Collapsible section header: a row of the grouped list, like the rules documents' contents. */
 @Composable
-private fun SectionHeader(section: NotesItem.Section, expanded: Boolean, modifier: Modifier, onToggle: () -> Unit) {
+private fun SectionHeader(section: NotesItem.Section, expanded: Boolean, divider: Boolean, modifier: Modifier, onToggle: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Card(
-        modifier = modifier.fillMaxWidth().clickable(onClick = onToggle),
-        shape = RoundedCornerShape(12.dp),
-        border = highContrastBorder(),
-        colors = CardDefaults.cardColors(containerColor = colors.surfaceContainerLow),
-    ) {
-        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(modifier) {
+        if (divider) ListDivider()
+        Row(
+            Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
                 Text(section.title, style = MaterialTheme.typography.titleMedium,
                     color = if (expanded) colors.primary else colors.onSurface)
                 if (section.cardList) {   // only the Card-Specific sections say how many cards they list
                     Text(pluralStringResource(R.plurals.release_notes_cards, section.cards, section.cards),
-                        style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                        style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                 }
             }
             Icon(painterResource(if (expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right), null,
@@ -351,47 +357,63 @@ private fun SectionHeader(section: NotesItem.Section, expanded: Boolean, modifie
     }
 }
 
-/** A card name in a Card-Specific section (or a search hit): opens the card's own screen. */
+/**
+ * A card name in a Card-Specific section (or a search hit): opens the card's own screen.
+ * Indented under its open section; flush in search results, which have no headers.
+ */
 @Composable
-private fun CardRowView(row: NotesItem.CardRow, showSection: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun CardRowView(row: NotesItem.CardRow, showSection: Boolean, divider: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Row(
-        modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(colors.surfaceContainer)
-            .clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            if (showSection) Label(row.sectionTitle)
-            Text(row.name, style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
+    val indent = if (showSection) 16.dp else 32.dp
+    Column(modifier) {
+        if (divider) ListDivider(Modifier.padding(start = indent - 12.dp))
+        Row(
+            Modifier.fillMaxWidth().clickable(onClick = onClick).padding(start = indent, end = 12.dp, top = 12.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                if (showSection) Label(row.sectionTitle)
+                Text(row.name, style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
+            }
+            Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
-        Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
     }
 }
 
+/** Content of an open section, inside the grouped list: 16 dp sides, 12 dp under each block. */
 @Composable
 private fun BlockView(item: NotesItem.Block, showSection: Boolean, onCopy: (ReleaseNotesBlock.Card) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val noRefs: (String) -> Unit = {}
+    val inGroup = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
     when (val block = item.block) {
-        is ReleaseNotesBlock.Paragraph -> MarkupText(block.text, noRefs)
-        is ReleaseNotesBlock.Heading -> MarkupText(block.text, noRefs, style = MaterialTheme.typography.titleSmall)
-        is ReleaseNotesBlock.Items -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            block.items.forEach { Row { Text("•  ", color = colors.onSurfaceVariant); MarkupText(it, noRefs) } }
+        is ReleaseNotesBlock.Paragraph -> MarkupText(block.text, noRefs, inGroup)
+        is ReleaseNotesBlock.Heading -> MarkupText(block.text, noRefs, inGroup, style = MaterialTheme.typography.titleSmall)
+        is ReleaseNotesBlock.Items -> Column(inGroup, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            block.items.forEach { Row { Text("•  ", color = colors.primary); MarkupText(it, noRefs) } }
         }
-        is ReleaseNotesBlock.Card -> Panel {
-            Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // A Magic card inside the text: an inset box (it stands for the card), not a nested panel.
+        is ReleaseNotesBlock.Card -> {
+            val shape = RoundedCornerShape(8.dp)
+            val edge = highContrastBorder()
+            Column(
+                inGroup.fillMaxWidth().clip(shape).background(colors.surfaceContainerHigh)
+                    .then(if (edge != null) Modifier.border(edge, shape) else Modifier)
+                    .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f).padding(top = 8.dp)) {
+                    Column(Modifier.weight(1f)) {
                         if (showSection) Label(item.sectionTitle)
                         Text(block.name, style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
                     }
                     CopyRuleButton(block.name, { onCopy(block) })
                 }
-                Column(Modifier.padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Column(Modifier.padding(end = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     block.lines.forEach { OracleText(it, MaterialTheme.typography.bodyMedium, colors.onSurfaceVariant) }
                 }
                 if (block.notes.isNotEmpty()) {
-                    Column(Modifier.padding(end = 12.dp, top = 6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Column(Modifier.padding(end = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         block.notes.forEach { note ->
                             Row {
                                 Text("•  ", color = colors.primary)

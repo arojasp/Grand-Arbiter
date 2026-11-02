@@ -1,7 +1,6 @@
 package es.alejandro.grandarbiter.ui.reader
 
 import android.content.ClipData
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.selection.DisableSelection
@@ -61,7 +60,11 @@ object RuleText {
     }
 }
 
-/** Copies text to the clipboard. Android 13+ confirms it itself; older versions get a toast. */
+/**
+ * Copies text to the clipboard and always confirms it with a toast. Android 13+ is meant to confirm
+ * copies itself, but not every device shows it (seen on Alejandro's phone), and a copy with no
+ * feedback looks like it failed. On devices that do show it, both appear: accepted.
+ */
 @Composable
 fun rememberCopyText(): (label: String, text: String) -> Unit {
     val clipboard = LocalClipboard.current
@@ -71,9 +74,7 @@ fun rememberCopyText(): (label: String, text: String) -> Unit {
     return { label, text ->
         scope.launch {
             clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(label, text)))
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                Toast.makeText(context, copiedFormat.format(label), Toast.LENGTH_SHORT).show()
-            }
+            Toast.makeText(context, copiedFormat.format(label), Toast.LENGTH_SHORT).show()
         }
     }
 }

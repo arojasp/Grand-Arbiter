@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,7 +37,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -63,6 +61,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.components.SelectChip
 import es.alejandro.grandarbiter.ui.theme.GoldDeep
 import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import es.alejandro.grandarbiter.ui.theme.legalColors
@@ -118,7 +117,7 @@ fun DeckCounterScreen(
             // Format + pile
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DeckFormat.entries.forEach { f ->
-                    SmallChip(stringResource(f.label()), selected = f == format) { viewModel.selectFormat(f) }
+                    SelectChip(stringResource(f.label()), selected = f == format) { viewModel.selectFormat(f) }
                 }
             }
             if (format.hasSideboard) {
@@ -211,22 +210,6 @@ private fun DeckFormat.label(): Int = when (this) {
     DeckFormat.CONSTRUCTED -> R.string.deck_format_constructed
     DeckFormat.LIMITED -> R.string.deck_format_limited
     DeckFormat.COMMANDER -> R.string.deck_format_commander
-}
-
-@Composable
-private fun SmallChip(text: String, selected: Boolean, onClick: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Box(
-        Modifier.minimumInteractiveComponentSize()   // the chip is ~32 dp tall; the touch target is 48
-            .clip(CircleShape)
-            .background(if (selected) GoldDeep else colors.surfaceContainerHighest)
-            .border(1.dp, if (selected) GoldDeep else colors.outlineVariant, CircleShape)
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Text(text, style = MaterialTheme.typography.labelLarge,
-            color = if (selected) OnGoldDeep else colors.onSurfaceVariant)
-    }
 }
 
 /** Main deck / Sideboard, each with its own running total. */

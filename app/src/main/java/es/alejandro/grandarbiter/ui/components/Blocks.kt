@@ -11,12 +11,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -25,8 +25,9 @@ import androidx.compose.ui.unit.sp
  * bordered panels and small tags. Colors come from the theme.
  */
 
-/** Figma section label: 11sp, medium, 1.1sp tracking, uppercase. */
-val LabelStyle = TextStyle(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium, letterSpacing = 1.1.sp)
+/** Section label: labelSmall (11 sp Medium) with wider tracking, uppercase. */
+val LabelStyle: TextStyle
+    @Composable @ReadOnlyComposable get() = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.1.sp)
 
 @Composable
 fun Label(text: String, modifier: Modifier = Modifier) {
@@ -74,7 +75,7 @@ fun Tag(
     Surface(shape = RoundedCornerShape(4.dp), color = container) {
         Text(
             text.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 15.sp),
+            style = MaterialTheme.typography.labelSmall,
             color = content,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
         )

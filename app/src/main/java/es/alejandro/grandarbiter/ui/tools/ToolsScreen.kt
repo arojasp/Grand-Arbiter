@@ -75,7 +75,7 @@ fun ToolsScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(stringResource(R.string.nav_tools),
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         color = colors.primary)
                 },
                 actions = {

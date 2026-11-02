@@ -47,7 +47,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.ThemeMode
 import es.alejandro.grandarbiter.domain.updates.SectionUpdates
@@ -114,14 +113,14 @@ fun HomeScreenContent(
                 title = {
                     Text(
                         text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.primary, letterSpacing = 0.5.sp)
+                        style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.primary)
                     )
                 },
                 actions = {
                     IconButton(onClick = onOpenSettings) {
                         Icon(
                             painter = painterResource(R.drawable.ic_settings),
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.cards_settings),   // icon-only button: TalkBack needs a name
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }

@@ -83,7 +83,7 @@ fun CardSearchScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.cards_title),
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
                 },

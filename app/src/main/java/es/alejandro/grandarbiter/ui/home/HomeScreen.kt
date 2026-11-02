@@ -237,7 +237,7 @@ fun JudgeCallTimerCard(
                         Spacer(Modifier.width(8.dp))
                         Text(
                             text = stringResource(if (isRunning) R.string.home_pause_timer else R.string.home_start_timer),
-                            style = MaterialTheme.typography.titleSmall
+                            style = MaterialTheme.typography.labelLarge
                         )
                     }
                 }

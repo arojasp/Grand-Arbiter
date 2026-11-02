@@ -32,17 +32,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftEstimate
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import org.koin.androidx.compose.koinViewModel
 
 /** Figma "Draft Timer - Setup": format values, alerts, estimated duration, Start. */
@@ -64,11 +59,11 @@ fun DraftSetupScreen(
         bottomBar = {
             Box(Modifier.fillMaxWidth().background(colors.background).padding(16.dp)) {
                 Box(
-                    Modifier.fillMaxWidth().height(52.dp).clip(CircleShape).background(GoldDeep)
+                    Modifier.fillMaxWidth().height(52.dp).clip(CircleShape).background(colors.primary)
                         .clickable(role = Role.Button) { viewModel.start(); onStarted() },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(stringResource(R.string.draft_start), style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold), color = OnGoldDeep)
+                    Text(stringResource(R.string.draft_start), style = MaterialTheme.typography.labelLarge, color = colors.onPrimary)
                 }
             }
         },
@@ -99,7 +94,7 @@ fun DraftSetupScreen(
                     SettingRow(stringResource(R.string.draft_mixed_sizes), stringResource(R.string.draft_mixed_sizes_hint)) {
                         Switch(
                             checked = sizes != null, onCheckedChange = { viewModel.setMixedSizes(it) },
-                            colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                            colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                         )
                     }
                     HorizontalDivider(color = colors.outlineVariant)
@@ -121,7 +116,7 @@ fun DraftSetupScreen(
                 SettingRow(stringResource(R.string.draft_manual_start), stringResource(R.string.draft_manual_start_hint)) {
                     Switch(
                         checked = config.manualStart, onCheckedChange = { viewModel.setManualStart(it) },
-                        colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                        colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                     )
                 }
             }
@@ -130,14 +125,14 @@ fun DraftSetupScreen(
                 SettingRow(stringResource(R.string.draft_vibrate), stringResource(R.string.draft_vibrate_hint)) {
                     Switch(
                         checked = vibrate, onCheckedChange = { viewModel.setVibrate(it) },
-                        colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                        colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                     )
                 }
                 HorizontalDivider(color = colors.outlineVariant)
                 SettingRow(stringResource(R.string.draft_beep), stringResource(R.string.draft_beep_hint)) {
                     Switch(
                         checked = beep, onCheckedChange = { viewModel.setBeep(it) },
-                        colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                        colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                     )
                 }
             }
@@ -156,7 +151,7 @@ private fun Stepper(label: String, hint: String?, value: Int, range: IntRange, o
         ) {
             StepButton("−", stringResource(R.string.draft_decrease, label), enabled = value > range.first) { onChange(value - 1) }
             Text(value.toString(), Modifier.width(56.dp), textAlign = TextAlign.Center,
-                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold), color = colors.onSurface)
+                style = MaterialTheme.typography.titleSmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurface)
             StepButton("+", stringResource(R.string.draft_increase, label), enabled = value < range.last) { onChange(value + 1) }
         }
     }
@@ -187,12 +182,12 @@ private fun Choice(
             val on = value == selected
             Box(
                 Modifier.width(width.dp).height(36.dp).clip(CircleShape)
-                    .background(if (on) GoldDeep else colors.surfaceContainerHighest)
+                    .background(if (on) colors.primary else colors.surfaceContainerHighest)
                     .clickable(role = Role.RadioButton) { onSelect(value) },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(label(value), style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold),
-                    color = if (on) OnGoldDeep else colors.onSurfaceVariant)
+                Text(label(value), style = MaterialTheme.typography.labelLarge,
+                    color = if (on) colors.onPrimary else colors.onSurfaceVariant)
             }
         }
     }
@@ -206,7 +201,7 @@ private fun StepButton(symbol: String, description: String, enabled: Boolean, on
             .clickable(enabled = enabled, role = Role.Button, onClickLabel = description, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(symbol, style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Medium), color = colors.primary)
+        Text(symbol, style = MaterialTheme.typography.titleMedium, color = colors.primary)
     }
 }
 
@@ -214,9 +209,9 @@ private fun StepButton(symbol: String, description: String, enabled: Boolean, on
 private fun SettingRow(label: String, hint: String?, trailing: @Composable () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(label, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium), color = colors.onSurface)
-            if (hint != null) Text(hint, style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp), color = colors.onSurfaceVariant)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(label, style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
+            if (hint != null) Text(hint, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
         }
         Spacer(Modifier.width(12.dp))
         trailing()
@@ -252,7 +247,7 @@ private fun EstimateCard(e: DraftEstimate) {
         EstimateRow(stringResource(R.string.draft_total), (if (e.atMost) "≤ " else "≈ ") + formatClock(e.totalMs), emphasis = true)
         if (e.atMost) {
             Text(stringResource(R.string.draft_estimate_at_most_note, e.pickSeconds),
-                style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp), color = colors.onSurfaceVariant)
+                style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
         }
     }
 }
@@ -261,9 +256,10 @@ private fun EstimateCard(e: DraftEstimate) {
 private fun EstimateRow(label: String, value: String, emphasis: Boolean = false) {
     val colors = MaterialTheme.colorScheme
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = if (emphasis) FontWeight.Bold else FontWeight.Normal),
+        // The total stands out by role and color, not by Bold (design-decisions §9).
+        Text(label, style = if (emphasis) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyMedium,
             color = if (emphasis) colors.onSurface else colors.onSurfaceVariant)
-        Text(value, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = if (emphasis) FontWeight.Bold else FontWeight.Medium),
+        Text(value, style = (if (emphasis) MaterialTheme.typography.titleSmall else MaterialTheme.typography.labelLarge).copy(fontFeatureSettings = "tnum"),
             color = if (emphasis) colors.primary else colors.onSurface)
     }
 }

@@ -1,10 +1,6 @@
 package es.alejandro.grandarbiter.ui.tools.deckcounter
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,12 +19,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.outlined.RestartAlt
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +35,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,20 +50,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
+import es.alejandro.grandarbiter.ui.components.SelectChip
+import es.alejandro.grandarbiter.ui.theme.legalColors
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -74,8 +71,6 @@ import org.koin.androidx.compose.koinViewModel
  * cards. Added for real deck checks: main/sideboard piles, format targets (Constructed 60+/15,
  * Limited 40+, Commander 100), undo, a reset that can be undone, haptic tick per tap.
  */
-
-private val OkGreen = Color(0xFF86EFAC)   // same green as "Legal" in the card detail
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,7 +96,7 @@ fun DeckCounterScreen(
         containerColor = colors.background,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.reader_back), tint = colors.primary)
@@ -109,7 +104,7 @@ fun DeckCounterScreen(
                 },
                 title = {
                     Text(stringResource(R.string.tools_deck_counter),
-                        style = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold), color = colors.primary)
+                        style = MaterialTheme.typography.titleLarge, color = colors.primary)
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background),
             )
@@ -120,7 +115,7 @@ fun DeckCounterScreen(
             // Format + pile
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DeckFormat.entries.forEach { f ->
-                    SmallChip(stringResource(f.label()), selected = f == format) { viewModel.selectFormat(f) }
+                    SelectChip(stringResource(f.label()), selected = f == format) { viewModel.selectFormat(f) }
                 }
             }
             if (format.hasSideboard) {
@@ -132,7 +127,9 @@ fun DeckCounterScreen(
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     total.toString(),
-                    style = TextStyle(fontSize = size.sp, lineHeight = (size + 8).sp, fontWeight = FontWeight.Black, letterSpacing = (-2).sp),
+                    // Huge numeral: displayLarge resized (Bold from Type.kt; was Black 900, not a native weight).
+                    style = MaterialTheme.typography.displayLarge.copy(
+                        fontSize = size.sp, lineHeight = (size + 8).sp, fontFeatureSettings = "tnum"),
                     color = colors.primary,
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
@@ -213,21 +210,6 @@ private fun DeckFormat.label(): Int = when (this) {
     DeckFormat.COMMANDER -> R.string.deck_format_commander
 }
 
-@Composable
-private fun SmallChip(text: String, selected: Boolean, onClick: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Box(
-        Modifier.clip(CircleShape)
-            .background(if (selected) GoldDeep else colors.surfaceContainerHighest)
-            .border(1.dp, if (selected) GoldDeep else colors.outlineVariant, CircleShape)
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Text(text, style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium),
-            color = if (selected) OnGoldDeep else colors.onSurfaceVariant)
-    }
-}
-
 /** Main deck / Sideboard, each with its own running total. */
 @Composable
 private fun PileTabs(pile: Pile, mainTotal: Int, sideTotal: Int, onSelect: (Pile) -> Unit) {
@@ -239,18 +221,18 @@ private fun PileTabs(pile: Pile, mainTotal: Int, sideTotal: Int, onSelect: (Pile
             val selected = p == pile
             Row(
                 Modifier.weight(1f).clip(RoundedCornerShape(6.dp))
-                    .background(if (selected) GoldDeep else Color.Transparent)
+                    .background(if (selected) colors.primary else Color.Transparent)
                     .clickable(role = Role.Tab) { onSelect(p) }
                     .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(stringResource(if (p == Pile.MAIN) R.string.deck_pile_main else R.string.deck_pile_side),
-                    style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
-                    color = if (selected) OnGoldDeep else colors.onSurfaceVariant)
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (selected) colors.onPrimary else colors.onSurfaceVariant)
                 Spacer(Modifier.width(8.dp))
-                Text(total.toString(), style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold),
-                    color = if (selected) OnGoldDeep else colors.onSurface)
+                Text(total.toString(), style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
+                    color = if (selected) colors.onPrimary else colors.onSurface)
             }
         }
     }
@@ -267,14 +249,14 @@ private fun StatusLine(status: CountStatus, format: DeckFormat, pile: Pile) {
                 format.mainExact -> R.string.deck_status_exact_ok
                 else -> R.string.deck_status_ok
             }, if (pile == Pile.SIDEBOARD) format.sideboardMax ?: 0 else format.mainSize,
-        ) to OkGreen
+        ) to legalColors().content   // "OK": the same green as "Legal", readable in both themes
         is CountStatus.Over -> stringResource(
             if (pile == Pile.SIDEBOARD) R.string.deck_status_side_over else R.string.deck_status_over,
             status.extra, if (pile == Pile.SIDEBOARD) format.sideboardMax ?: 0 else format.mainSize,
         ) to colors.error
         CountStatus.NoLimit -> stringResource(R.string.deck_status_no_limit) to colors.onSurfaceVariant
     }
-    Text(text, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium), color = color)
+    Text(text, style = MaterialTheme.typography.titleSmall, color = color)
 }
 
 @Composable
@@ -285,7 +267,7 @@ private fun History(groups: List<Int>) {
     Box(Modifier.fillMaxWidth().heightIn(min = 28.dp), contentAlignment = Alignment.CenterStart) {
         if (groups.isEmpty()) {
             Text(stringResource(R.string.deck_history_empty), style = MaterialTheme.typography.bodySmall,
-                color = colors.onSurfaceVariant.copy(alpha = 0.6f))
+                color = colors.onSurfaceVariant)
         } else {
             LazyRow(state = listState, horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.semantics { contentDescription = DeckCount.history(groups) }) {
@@ -295,7 +277,7 @@ private fun History(groups: List<Int>) {
                             .background(if (i == groups.lastIndex) colors.primary.copy(alpha = 0.2f) else colors.surfaceContainerHigh)
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
-                        Text(n.toString(), style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
+                        Text(n.toString(), style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
                             color = if (i == groups.lastIndex) colors.primary else colors.onSurfaceVariant)
                     }
                 }
@@ -308,11 +290,11 @@ private fun History(groups: List<Int>) {
 private fun CountPad(n: Int, modifier: Modifier, onClick: () -> Unit) {
     val addLabel = stringResource(R.string.deck_add, n)
     Box(
-        modifier.clip(RoundedCornerShape(12.dp)).background(GoldDeep)
+        modifier.clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primary)
             .clickable(role = Role.Button, onClickLabel = addLabel, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(n.toString(), style = TextStyle(fontSize = 44.sp, fontWeight = FontWeight.Medium), color = OnGoldDeep)
+        Text(n.toString(), style = MaterialTheme.typography.displayLarge.copy(fontSize = 44.sp, lineHeight = 52.sp), color = MaterialTheme.colorScheme.onPrimary)
     }
 }
 
@@ -337,6 +319,6 @@ private fun ActionButton(
     ) {
         androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides content) { icon() }
         Spacer(Modifier.width(8.dp))
-        Text(text, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium), color = content)
+        Text(text, style = MaterialTheme.typography.labelLarge, color = content)
     }
 }

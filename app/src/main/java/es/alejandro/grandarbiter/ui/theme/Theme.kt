@@ -95,7 +95,7 @@ private val DarkColorScheme = darkColorScheme(
 
 /**
  * High contrast: same navy surfaces, but near-white text, brighter gold and strong borders.
- * (The full generated *HighContrast palettes in Color.kt use the old brown background.)
+ * Only the high-contrast colors these schemes use are kept in Color.kt (the generated palettes had the old brown background).
  */
 private val DarkHighContrastScheme = DarkColorScheme.copy(
     primary = Color(0xFFFFD978),
@@ -149,7 +149,10 @@ fun GrandArbiterTheme(
     }
     // Text size: scale every sp on top of the user's system font size.
     val density = LocalDensity.current
-    CompositionLocalProvider(LocalDensity provides Density(density.density, density.fontScale * textScale.factor)) {
+    CompositionLocalProvider(
+        LocalDensity provides Density(density.density, density.fontScale * textScale.factor),
+        LocalHighContrast provides highContrast,
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = Typography,

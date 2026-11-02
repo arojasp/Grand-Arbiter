@@ -66,6 +66,7 @@ import es.alejandro.grandarbiter.domain.model.rules.SNIPPET_MATCH_START
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 
 // ---------------------------------------------------------------- text
 
@@ -100,7 +101,7 @@ fun MarkupText(
                         val styles = TextLinkStyles(
                             style = SpanStyle(
                                 color = linkColor,
-                                fontWeight = if (span.bold) FontWeight.Bold else FontWeight.SemiBold,
+                                fontWeight = if (span.bold) FontWeight.Bold else FontWeight.Medium,   // native weights only (no SemiBold)
                                 textDecoration = TextDecoration.Underline,
                             )
                         )
@@ -144,6 +145,13 @@ private fun AnnotatedString.Builder.appendWithGlossary(
 /** "100." for chapters/sections without a dot, "2.1" / "603.2a" as printed. */
 fun displayNumber(number: String?): String? = number?.let { if ('.' in it) it else "$it." }
 
+/**
+ * IPG infractions are titled "Game Play Error — Missed Trigger". Under their chapter ("Game Play
+ * Errors") the category repeats it, so the contents show "Missed Trigger". Titles without " — "
+ * (every other document) are unchanged.
+ */
+fun withoutCategory(title: String): String = title.substringAfter(" — ")
+
 fun sectionLabel(number: String?, title: String?): String =
     listOfNotNull(displayNumber(number), title?.let { InlineMarkup.plainText(it) }).joinToString(" ")
 
@@ -184,7 +192,7 @@ fun BlockView(block: Block, onRefClick: (String) -> Unit, modifier: Modifier = M
         is Block.Paragraph -> MarkupText(block.text, onRefClick, modifier)
         is Block.Heading -> MarkupText(
             block.text, onRefClick, modifier.padding(top = 4.dp),
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleSmall,
         )
         is Block.Example -> ExampleView(block, onRefClick, modifier)
         is Block.BulletList -> ListView(block, onRefClick, modifier)
@@ -201,12 +209,12 @@ private fun ExampleView(block: Block.Example, onRefClick: (String) -> Unit, modi
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant)
         )
-        Spacer(modifier = Modifier.width(10.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = block.label?.let { stringResource(R.string.reader_example_labeled, it) }
                     ?: stringResource(R.string.reader_example),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             MarkupText(
@@ -220,13 +228,13 @@ private fun ExampleView(block: Block.Example, onRefClick: (String) -> Unit, modi
 
 @Composable
 private fun ListView(block: Block.BulletList, onRefClick: (String) -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         block.items.forEachIndexed { index, item ->
             Row {
                 Text(
                     text = if (block.ordered) "${index + 1}." else "•",
                     modifier = Modifier.width(24.dp),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 MarkupText(item, onRefClick, Modifier.weight(1f))
@@ -270,7 +278,7 @@ private fun TableRow(cells: List<String>, header: Boolean, fixedWidth: androidx.
             ) {
                 MarkupText(
                     cell, onRefClick,
-                    style = if (header) MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                    style = if (header) MaterialTheme.typography.labelLarge
                     else MaterialTheme.typography.bodySmall,
                 )
             }
@@ -303,8 +311,7 @@ fun PenaltyBadge(penalty: Penalty, modifier: Modifier = Modifier, compact: Boole
         Text(
             text = stringResource(penaltyLabel(penalty)).uppercase(),
             modifier = Modifier.padding(horizontal = 8.dp, vertical = if (compact) 1.dp else 4.dp),
-            style = (if (compact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium)
-                .copy(fontWeight = FontWeight.Bold),
+            style = if (compact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium,
             color = content,
         )
     }
@@ -321,20 +328,21 @@ fun PartCard(
     Card(
         modifier = modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(12.dp),
+        border = highContrastBorder(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onToggle)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             val title = InlineMarkup.plainText(part.title.orEmpty())
             Text(
                 text = if (part.exampleCount > 0) stringResource(R.string.reader_part_with_count, title, part.exampleCount) else title,
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Icon(
@@ -347,7 +355,7 @@ fun PartCard(
         if (expanded) {
             Column(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 part.blocks.forEach { BlockView(it, onRefClick) }
             }
@@ -365,7 +373,7 @@ fun ReaderTopBar(title: String, subtitle: String?, onBack: () -> Unit) {
             Column {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -405,8 +413,8 @@ fun ReaderSearchField(
         placeholder = {
             Text(
                 text = placeholder,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         },
         leadingIcon = {

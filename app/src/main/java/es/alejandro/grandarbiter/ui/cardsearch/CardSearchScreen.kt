@@ -50,8 +50,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,10 +58,10 @@ import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.ui.components.Tag
-import org.koin.androidx.compose.koinViewModel
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import org.koin.androidx.compose.koinViewModel
 
 /** Figma: "Oracle Search - Results State" (node 19:820). */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,7 +83,7 @@ fun CardSearchScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.cards_title),
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
                 },
@@ -153,7 +151,7 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, inTe
         value = query,
         onValueChange = onQueryChange,
         singleLine = true,
-        textStyle = TextStyle(color = colors.onSurface, fontSize = 16.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.5.sp),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),   // typed text: body, Regular
         cursorBrush = SolidColor(colors.primary),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         modifier = Modifier.fillMaxWidth(),
@@ -167,12 +165,12 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, inTe
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(painterResource(R.drawable.ic_search), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(14.dp))
+                Spacer(Modifier.width(12.dp))
                 Box(Modifier.weight(1f)) {
                     if (query.isEmpty()) {
                         Text(
                             stringResource(if (inText) R.string.cards_search_text_placeholder else R.string.cards_search_placeholder),
-                            color = colors.onSurfaceVariant.copy(alpha = 0.6f), fontSize = 16.sp, maxLines = 1,
+                            style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant, maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
@@ -233,7 +231,7 @@ private fun ResultsMeta(count: Int, inText: Boolean, onInTextChange: (Boolean) -
     ) {
         Text(
             label.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium, letterSpacing = 0.55.sp),
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.55.sp),
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f).alpha(0.6f),
         )
@@ -243,7 +241,7 @@ private fun ResultsMeta(count: Int, inText: Boolean, onInTextChange: (Boolean) -
                     Icons.Default.FilterList,
                     contentDescription = stringResource(R.string.cards_filter),
                     // Gold when a filter is on, so it's never applied without the judge noticing.
-                    tint = if (inText) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    tint = if (inText) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp),
                 )
             }
@@ -268,7 +266,7 @@ private fun ResultRow(card: CardSummary, onClick: () -> Unit) {
         ) {
             Text(
                 text = card.name,
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -303,7 +301,7 @@ private fun EndOfRecords(text: String, modifier: Modifier = Modifier) {
         Icon(Icons.AutoMirrored.Outlined.MenuBook, null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(56.dp))
         Text(
             text.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium, letterSpacing = 0.5.sp),
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.5.sp),
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp),

@@ -511,7 +511,7 @@ private fun Footer(s: DraftSnapshot, viewModel: DraftRunViewModel, onEnd: () -> 
             Text(
                 stringResource(when (hold) {
                     HoldState.IDLE -> R.string.draft_hold_hint
-                    HoldState.HOLDING -> R.string.draft_keep_holding
+                    HoldState.HOLDING -> R.string.hold_keep_holding
                     HoldState.TAPPED -> R.string.draft_hold_to_confirm
                 }),
                 style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp),
@@ -538,7 +538,7 @@ private fun RochesterPickFooter(s: DraftSnapshot, viewModel: DraftRunViewModel, 
     Text(
         stringResource(when (hold) {
             HoldState.IDLE -> R.string.draft_picked_hint
-            HoldState.HOLDING -> R.string.draft_keep_holding
+            HoldState.HOLDING -> R.string.hold_keep_holding
             HoldState.TAPPED -> R.string.draft_hold_to_confirm
         }),
         style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp),

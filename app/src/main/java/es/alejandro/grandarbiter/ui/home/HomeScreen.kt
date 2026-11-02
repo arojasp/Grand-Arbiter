@@ -197,7 +197,7 @@ fun JudgeCallTimerCard(
             Text(
                 text = stringResource(when (hold) {
                     HoldState.IDLE -> R.string.home_judge_call_subtitle
-                    HoldState.HOLDING -> R.string.draft_keep_holding
+                    HoldState.HOLDING -> R.string.hold_keep_holding
                     HoldState.TAPPED -> R.string.home_hold_to_reset
                 }),
                 style = MaterialTheme.typography.bodyMedium,

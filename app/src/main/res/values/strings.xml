@@ -365,7 +365,7 @@
     <string name="draft_manual_start">Manual start</string>
     <string name="draft_manual_start_hint">At 0:00 the timer stops until you start the next step</string>
     <string name="draft_hold_hint">Press and hold to skip or go back</string>
-    <string name="draft_keep_holding">Keep holding…</string>
+    <string name="hold_keep_holding">Keep holding…</string>
     <string name="draft_hold_to_confirm">Hold to confirm</string>
     <string name="draft_pause">Pause</string>
     <string name="draft_resume">Resume</string>

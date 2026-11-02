@@ -182,6 +182,7 @@
     <string name="hj_tardiness_regular">More than 10 minutes late: the player forfeits the match, and is dropped at the end of the round if still absent. (JAR)</string>
     <string name="hj_rounds">Rounds &amp; structure</string>
     <string name="hj_rounds_source">MTR Appendix E</string>
+    <string name="hj_reminders">Reminders</string>
     <string name="hj_reminder_shuffle">Shuffle your opponent\'s deck and offer a final cut after every search.</string>
     <string name="hj_reminder_pace">Maintain a reasonable pace of play to ensure rounds finish on time.</string>
     <string name="hj_reminder_communication">Ensure clear communication of all game states and triggered abilities.</string>

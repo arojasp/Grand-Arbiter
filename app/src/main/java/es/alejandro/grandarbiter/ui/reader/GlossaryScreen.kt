@@ -116,10 +116,14 @@ fun GlossaryScreen(
     val listState = rememberLazyListState()
 
     // Bring the open term into view (from a search hit, or a term tapped inside a definition).
+    // Only when it isn't on screen: a term tapped in the list is already there, and scrolling it to
+    // the top while it expands looked like opening twice.
     LaunchedEffect(open, entries) {
         val list = entries ?: return@LaunchedEffect
         val index = list.indexOfFirst { it.term == open }
-        if (index >= 0) listState.animateScrollToItem(index)
+        if (index < 0) return@LaunchedEffect
+        val visible = listState.layoutInfo.visibleItemsInfo.any { it.index == index }
+        if (!visible) listState.animateScrollToItem(index)
     }
 
     Scaffold(

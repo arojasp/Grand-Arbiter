@@ -1,7 +1,6 @@
 package es.alejandro.grandarbiter.data.quickrefs
 
 import es.alejandro.grandarbiter.domain.model.rules.PageSection
-import es.alejandro.grandarbiter.ui.tools.quickrefs.groupChildren
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -33,12 +32,5 @@ class RuleSubtreeTest {
 
     @Test fun missingRule_isEmpty() {
         assertTrue(RuleSubtree.of(page, "cr/613.9").isEmpty())
-    }
-
-    @Test fun groupsChildrenWithTheirDescendants() {
-        val groups = groupChildren(page)
-        assertEquals(listOf("613.1", "613.2", "613.4"), groups.map { it.first().number })
-        assertEquals(listOf("613.1", "613.1a", "613.1b"), groups.first().map { it.number })
-        assertTrue(groupChildren(listOf(s("613.2a", 2))).isEmpty())
     }
 }

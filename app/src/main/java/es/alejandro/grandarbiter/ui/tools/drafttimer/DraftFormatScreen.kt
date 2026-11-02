@@ -1,5 +1,7 @@
 package es.alejandro.grandarbiter.ui.tools.drafttimer
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,8 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,16 +30,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftPosition
 import es.alejandro.grandarbiter.domain.draft.DraftSnapshot
 import es.alejandro.grandarbiter.domain.draft.DraftStep
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.theme.softened
 
 /**
  * Figma "Draft Timer - Format picker": the formats, only the available ones can be opened.
@@ -90,18 +88,18 @@ private fun FormatCard(format: DraftFormat, onClick: () -> Unit) {
             .alpha(if (enabled) 1f else 0.6f)
             .clip(shape)
             .background(colors.surfaceContainer)
-            .border(1.dp, if (enabled) colors.primary.copy(alpha = 0.6f) else colors.outlineVariant, shape)
+            .border(1.dp, if (enabled) colors.primary.softened(0.6f) else colors.outlineVariant, shape)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(stringResource(format.title()), style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold),
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(format.title()), style = MaterialTheme.typography.titleSmall,
                 color = if (enabled) colors.onSurface else colors.onSurfaceVariant)
-            Text(stringResource(format.description()), style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp), color = colors.onSurfaceVariant)
+            Text(stringResource(format.description()), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
             if (!enabled) DraftChip(stringResource(R.string.tools_coming_soon))
         }
-        if (enabled) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = colors.primary)
+        if (enabled) Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
     }
 }
 

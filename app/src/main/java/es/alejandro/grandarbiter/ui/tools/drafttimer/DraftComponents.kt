@@ -11,12 +11,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,13 +24,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import java.util.Locale
 import kotlin.math.ceil
+import es.alejandro.grandarbiter.ui.theme.softened
+import es.alejandro.grandarbiter.ui.components.LabelStyle
 
 /* Shared pieces of the Draft Timer screens (Figma section "Draft Timer", node 206:2). */
 
@@ -38,14 +37,14 @@ import kotlin.math.ceil
 @Composable
 internal fun DraftTopBar(title: String, onBack: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    CenterAlignedTopAppBar(
+    TopAppBar(
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.reader_back), tint = colors.primary)
             }
         },
         title = {
-            Text(title, style = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold), color = colors.primary)
+            Text(title, style = MaterialTheme.typography.titleLarge, color = colors.primary)
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background),
     )
@@ -67,10 +66,10 @@ internal fun DraftCard(
     )
 }
 
-/** Small uppercase label: "FORMAT", "UP NEXT"... */
+/** Small uppercase label: "FORMAT", "UP NEXT"... Same style as the app's section labels. */
 @Composable
 internal fun DraftLabel(text: String, color: Color = MaterialTheme.colorScheme.primary) {
-    Text(text.uppercase(), style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.9.sp), color = color)
+    Text(text.uppercase(), style = LabelStyle, color = color)
 }
 
 /** Pill: "PACK 1 OF 3", "COMING SOON". */
@@ -80,10 +79,10 @@ internal fun DraftChip(text: String, color: Color = MaterialTheme.colorScheme.on
     Box(
         Modifier.clip(CircleShape)
             .background(if (outlined) colors.surfaceContainer else colors.surfaceContainerHighest)
-            .border(1.dp, if (outlined) color.copy(alpha = 0.6f) else colors.outlineVariant, CircleShape)
+            .border(1.dp, if (outlined) color.softened(0.6f) else colors.outlineVariant, CircleShape)
             .padding(horizontal = 12.dp, vertical = 4.dp)
     ) {
-        Text(text.uppercase(), style = TextStyle(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.6.sp), color = color)
+        Text(text.uppercase(), style = MaterialTheme.typography.labelSmall, color = color)
     }
 }
 

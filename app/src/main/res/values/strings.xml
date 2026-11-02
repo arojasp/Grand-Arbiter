@@ -6,19 +6,16 @@
 
     <!-- Home Screen -->
     <string name="home_judge_call">Judge Call</string>
-    <string name="home_time_to_add">TIME TO ADD</string>
-    <string name="home_start_timer">Start Timer</string>
-    <string name="home_pause_timer">Pause Timer</string>
+    <string name="home_judge_call_subtitle">Time to add to the match</string>
+    <string name="home_start_timer">Start</string>
+    <string name="home_pause_timer">Pause</string>
+    <string name="home_hold_to_reset">Hold to reset</string>
     <string name="home_reset_timer">Reset</string>
     <string name="home_document_library">Document Library</string>
     <string name="home_cr_title">Comprehensive Rules</string>
-    <string name="home_cr_description">All the game rules.</string>
     <string name="home_ipg_title">Infraction Procedure Guide</string>
-    <string name="home_ipg_description">Infractions and penalties at Competitive REL.</string>
     <string name="home_mtr_title">Magic Tournament Rules</string>
-    <string name="home_mtr_description">Rules for sanctioned tournaments.</string>
     <string name="home_jar_title">Judging at Regular</string>
-    <string name="home_jar_description">Infractions and fixes at Regular REL.</string>
     <string name="home_badge_cr">CR</string>
     <string name="home_badge_ipg">IPG</string>
     <string name="home_badge_mtr">MTR</string>
@@ -139,7 +136,7 @@
     <string name="settings_scryfall_credit">Card data, rulings, mana symbols and card art come from Scryfall (scryfall.com). Grand Arbiter is not produced by or endorsed by Scryfall.</string>
 
     <!-- Tools -->
-    <string name="tools_active">Active tools</string>
+    <string name="tools_in_tournament">In tournament</string>
     <string name="tools_references">References</string>
     <string name="tools_coming_soon">Coming soon</string>
     <string name="tools_deck_counter">Deck Counter</string>
@@ -175,16 +172,16 @@
     <string name="hj_topic_rounds">Number of rounds</string>
     <string name="hj_rel">Enforcement level (REL)</string>
     <string name="hj_rel_regular">Regular</string>
-    <string name="hj_rel_competitive">Competitive</string>
-    <string name="hj_rel_professional">Professional</string>
+    <string name="hj_rel_competitive_professional">Competitive / Professional</string>
     <string name="hj_round_time">Round time</string>
-    <string name="hj_minutes">%1$d min</string>
+    <string name="hj_round_time_rule">50 min recommended, 40 min minimum. Quarterfinals and semifinals 90 min, final untimed. Announce any change. (MTR Appendix B)</string>
     <string name="hj_tardiness">Tardiness</string>
     <string name="hj_tardiness_pick_rel">Select the REL to see when the penalty applies.</string>
     <string name="hj_tardiness_competitive">Not seated when the round starts: Game Loss (Warning within the first minute). After 10 minutes: Match Loss, and dropped unless they report to the Head Judge or Scorekeeper before the round ends. (IPG 3.1)</string>
     <string name="hj_tardiness_regular">More than 10 minutes late: the player forfeits the match, and is dropped at the end of the round if still absent. (JAR)</string>
     <string name="hj_rounds">Rounds &amp; structure</string>
     <string name="hj_rounds_source">MTR Appendix E</string>
+    <string name="hj_reminders">Reminders</string>
     <string name="hj_reminder_shuffle">Shuffle your opponent\'s deck and offer a final cut after every search.</string>
     <string name="hj_reminder_pace">Maintain a reasonable pace of play to ensure rounds finish on time.</string>
     <string name="hj_reminder_communication">Ensure clear communication of all game states and triggered abilities.</string>
@@ -193,7 +190,7 @@
     <string name="hj_call_judge">Raise your hand and call</string>
     <string name="hj_judge">JUDGE!</string>
     <string name="hj_venue">Venue info</string>
-    <string name="hj_venue_hint">Add venue notes: restrooms, water, food… Saved on this device.</string>
+    <string name="hj_venue_reminder">Worth announcing: where the restrooms are, water, food…</string>
 
     <!-- Deck counter -->
     <string name="deck_format_constructed">Constructed</string>
@@ -268,10 +265,8 @@
     <string name="tools_release_notes">Release Notes</string>
     <string name="release_notes_caption">Official release notes for each set, available offline.</string>
     <string name="release_notes_latest">Latest</string>
-    <string name="release_notes_open">Open %1$s release notes</string>
     <string name="glossary_search_placeholder">Search a term</string>
-    <string name="home_badge_release_notes">RN</string>
-    <string name="home_release_notes_description">Card clarifications for each set.</string>
+    <string name="home_updated">Updated</string>
     <string name="home_release_notes_latest">Latest: %1$s</string>
     <string name="release_notes_open_browser">Open in browser</string>
     <string name="release_notes_offline">Couldn\'t load the page. Pages opened before may work offline.</string>
@@ -370,7 +365,7 @@
     <string name="draft_manual_start">Manual start</string>
     <string name="draft_manual_start_hint">At 0:00 the timer stops until you start the next step</string>
     <string name="draft_hold_hint">Press and hold to skip or go back</string>
-    <string name="draft_keep_holding">Keep holding…</string>
+    <string name="hold_keep_holding">Keep holding…</string>
     <string name="draft_hold_to_confirm">Hold to confirm</string>
     <string name="draft_pause">Pause</string>
     <string name="draft_resume">Resume</string>

@@ -3,6 +3,7 @@ package es.alejandro.grandarbiter.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.data.releasenotes.ReleaseNotesRepository
+import es.alejandro.grandarbiter.data.updates.SectionVersions
 import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import es.alejandro.grandarbiter.domain.timer.TimerManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,7 +22,12 @@ class HomeViewModel(
     rulesRepository: RulesRepository,
     private val timerManager: TimerManager,
     releaseNotes: ReleaseNotesRepository,
+    sectionVersions: SectionVersions,
 ) : ViewModel() {
+
+    /** Section ids with the «Updated» label: changed since the user last entered them. */
+    val updatedSections: StateFlow<Set<String>> = sectionVersions.updated
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     /** Name of the newest set with release notes, for the Home card. */
     val latestReleaseNotes: StateFlow<String?> = releaseNotes.sets

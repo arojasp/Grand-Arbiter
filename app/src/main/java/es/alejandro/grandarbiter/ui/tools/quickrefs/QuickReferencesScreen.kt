@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
@@ -29,7 +29,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,18 +50,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.data.rules.bundle.DocumentId
 import es.alejandro.grandarbiter.domain.model.quickrefs.QuickReference
+import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
 import es.alejandro.grandarbiter.ui.components.outlined
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
+import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
 import org.koin.androidx.compose.koinViewModel
 
 /*
@@ -70,8 +67,6 @@ import org.koin.androidx.compose.koinViewModel
  * The FAB opens the document picker; a new reference only holds rules of one document.
  * Built-in references can be deleted; the overflow menu brings them back.
  */
-
-private val ScreenTitle = TextStyle(fontSize = 28.sp, lineHeight = 36.sp, letterSpacing = (-0.7).sp, fontWeight = FontWeight.Bold)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,7 +95,7 @@ fun QuickReferencesScreen(
                             Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.reader_back), tint = colors.primary)
                         }
                     },
-                    title = { Text(stringResource(R.string.tools_quick_references), style = ScreenTitle, color = colors.primary) },
+                    title = { Text(stringResource(R.string.tools_quick_references), style = MaterialTheme.typography.titleLarge, color = colors.primary) },
                     actions = {
                         if (canRestore) {
                             IconButton(onClick = { overflowOpen = true }) {
@@ -129,7 +124,7 @@ fun QuickReferencesScreen(
                     item {
                         Panel {
                             list.forEachIndexed { i, ref ->
-                                if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp), color = colors.outlineVariant.copy(alpha = 0.4f))
+                                if (i > 0) ListDivider()
                                 ReferenceRow(ref) { onOpen(ref.id) }
                             }
                         }
@@ -159,8 +154,8 @@ fun QuickReferencesScreen(
             }
             FloatingActionButton(
                 onClick = { menuOpen = !menuOpen },
-                containerColor = GoldDeep,
-                contentColor = OnGoldDeep,
+                containerColor = colors.primary,
+                contentColor = colors.onPrimary,
                 shape = RoundedCornerShape(12.dp),
             ) {
                 Icon(if (menuOpen) Icons.Default.Close else Icons.Default.Add,
@@ -196,9 +191,9 @@ private fun ReferenceRow(ref: QuickReference, onClick: () -> Unit) {
             Text(ref.title, style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
             val subtitle = ref.firstRuleNumber?.let { "${ref.documentId.shortLabel()} · $it" }
                 ?: "${ref.documentId.shortLabel()} · ${stringResource(R.string.qr_no_rules)}"
-            Text(subtitle, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = colors.onSurfaceVariant)
+        Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
     }
 }
 
@@ -207,8 +202,8 @@ private fun DocumentOption(document: DocumentId, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(12.dp)
     Surface(onClick = onClick, shape = shape, color = colors.surfaceContainerHigh, modifier = Modifier.outlined(shape, colors.outlineVariant)) {
-        Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), horizontalAlignment = Alignment.End) {
-            Text(document.shortLabel(), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = colors.onSurface)
+        Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.End) {
+            Text(document.shortLabel(), style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
             Text(stringResource(document.titleRes()), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
         }
     }
@@ -234,4 +229,21 @@ fun DocumentId.titleRes(): Int = when (this) {
     DocumentId.IPG -> R.string.home_ipg_title
     DocumentId.MTR -> R.string.home_mtr_title
     DocumentId.JAR -> R.string.home_jar_title
+}
+
+/** The list rows, dark and high contrast (the screen itself needs its ViewModel). */
+@Preview(showBackground = true)
+@Composable
+private fun ReferenceListPreview() {
+    GrandArbiterTheme(highContrast = true) {
+        Box(Modifier.padding(16.dp)) { Panel {
+            listOf(
+                QuickReference(1, "Triggers", DocumentId.CR, isPreset = true, firstRuleNumber = "603.2", ruleCount = 3),
+                QuickReference(2, "Hidden information", DocumentId.IPG, isPreset = false, firstRuleNumber = null, ruleCount = 0),
+            ).forEachIndexed { i, ref ->
+                if (i > 0) ListDivider()
+                ReferenceRow(ref) {}
+            }
+        } }
+    }
 }

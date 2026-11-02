@@ -41,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.data.rules.bundle.Block
@@ -105,7 +104,7 @@ private fun GlossarySheet(entry: GlossaryEntry, onDismiss: () -> Unit, onRefClic
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Label(stringResource(R.string.reader_glossary))
-                Text(entry.term, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                Text(entry.term, style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface)
                 MarkupText(entry.definition, onRefClick)
             }
@@ -198,7 +197,7 @@ private fun PageHeader(section: PageSection, onCopy: () -> Unit) {
         Row(verticalAlignment = Alignment.Top) {
             Text(
                 text = sectionLabel(section.number, section.title),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f).padding(top = 6.dp),
             )
@@ -211,7 +210,7 @@ private fun PageHeader(section: PageSection, onCopy: () -> Unit) {
 
 @Composable
 private fun BlockColumn(blocks: List<Block>, onRefClick: (String) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         blocks.forEach { BlockView(it, onRefClick) }
     }
 }
@@ -234,7 +233,7 @@ private fun SectionRow(section: PageSection, page: RulesPage, highlighted: Boole
             Row(verticalAlignment = Alignment.Top) {
                 Text(
                     text = sectionLabel(section.number, section.title),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f).padding(top = 8.dp),
                 )
@@ -245,7 +244,7 @@ private fun SectionRow(section: PageSection, page: RulesPage, highlighted: Boole
             Row {
                 Text(
                     text = section.number.orEmpty(),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(end = 8.dp),
                 )

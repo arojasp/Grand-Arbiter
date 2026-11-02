@@ -19,10 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -31,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,21 +36,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.DisplaySettings
 import es.alejandro.grandarbiter.domain.model.TextScale
@@ -61,15 +53,17 @@ import es.alejandro.grandarbiter.domain.model.cards.CardUpdateState
 import es.alejandro.grandarbiter.domain.model.rules.RulesDocumentInfo
 import es.alejandro.grandarbiter.domain.model.rules.RulesUpdateState
 import es.alejandro.grandarbiter.ui.cardsearch.CardText
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
-import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.components.Label
+import es.alejandro.grandarbiter.ui.components.ListDivider
+import es.alejandro.grandarbiter.ui.components.Panel
+import es.alejandro.grandarbiter.ui.theme.softened
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
+import org.koin.androidx.compose.koinViewModel
 
 /*
  * Figma: "Settings" (node 22:1888). Differences on purpose:
@@ -78,10 +72,6 @@ import java.util.Locale
  *  - Documents: all four (JAR included), real effective dates; tap opens the official PDF in the browser.
  *  - About: real name and version; footer = the notice Wizards' Fan Content Policy requires.
  */
-
-private val TitleStyle = TextStyle(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.5.sp)
-private val CaptionStyle = TextStyle(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.5.sp)
-private val BodyStyle = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.25.sp)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,23 +84,19 @@ fun SettingsScreen(
     val cardData by viewModel.cardData.collectAsState()
     val updateState by viewModel.updateState.collectAsState()
     val rulesUpdateState by viewModel.rulesUpdateState.collectAsState()
-    val border = MaterialTheme.colorScheme.outlineVariant
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier.drawBehind {
-                    drawLine(border, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
-                },
+            TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.reader_back), tint = GoldDeep)
+                        Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.reader_back), tint = MaterialTheme.colorScheme.primary)
                     }
                 },
                 title = {
                     Text(stringResource(R.string.settings_title),
-                        style = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Medium), color = GoldDeep)
+                        style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
@@ -144,8 +130,8 @@ private fun AccessibilitySection(
             PanelRow {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(R.string.settings_text_size), style = TitleStyle, color = colors.onSurface, modifier = Modifier.weight(1f))
-                        Text(stringResource(display.textScale.label()), style = CaptionStyle, color = colors.onSurfaceVariant)
+                        Text(stringResource(R.string.settings_text_size), style = MaterialTheme.typography.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
+                        Text(stringResource(display.textScale.label()), style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
                     }
                     Segmented(
                         options = TextScale.entries,
@@ -158,12 +144,12 @@ private fun AccessibilitySection(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
                             .background(colors.surfaceContainerLow)
-                            .border(1.dp, colors.outlineVariant.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                            .border(1.dp, colors.outlineVariant.softened(0.2f), RoundedCornerShape(8.dp))
                             .padding(12.dp)
                     ) {
                         Text(stringResource(R.string.settings_text_preview),
-                            style = TextStyle(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Medium,
-                                fontStyle = FontStyle.Italic, letterSpacing = 0.5.sp),
+                            // Sample of reading text at the chosen size.
+                            style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
                             color = colors.onSurfaceVariant)
                     }
                 }
@@ -185,7 +171,7 @@ private fun TextScale.label(): Int = when (this) {
     TextScale.EXTRA_LARGE -> R.string.settings_text_extra_large
 }
 
-/** Figma segmented control: track #323443, selected segment in deep gold. */
+/** Segmented control: track surfaceContainerHighest, selected segment in gold; 40 dp segments in a 48 dp track. */
 @Composable
 private fun <T> Segmented(options: List<T>, selected: T, label: @Composable (T) -> String, onSelect: (T) -> Unit) {
     val colors = MaterialTheme.colorScheme
@@ -202,14 +188,15 @@ private fun <T> Segmented(options: List<T>, selected: T, label: @Composable (T) 
                 Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(if (isSelected) GoldDeep else colors.surfaceContainerHighest)
+                    .background(if (isSelected) colors.primary else colors.surfaceContainerHighest)
                     .clickable(role = Role.RadioButton) { onSelect(option) }
-                    .padding(horizontal = 2.dp, vertical = 8.dp),
+                    .heightIn(min = 40.dp)
+                    .padding(horizontal = 4.dp, vertical = 8.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(label(option), textAlign = TextAlign.Center,
-                    style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.1.sp),
-                    color = if (isSelected) OnGoldDeep else colors.onSurfaceVariant)
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isSelected) colors.onPrimary else colors.onSurfaceVariant)
             }
         }
     }
@@ -227,8 +214,8 @@ private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChang
             checked = checked,
             onCheckedChange = onChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = OnGoldDeep,
-                checkedTrackColor = GoldDeep,
+                checkedThumbColor = colors.onPrimary,
+                checkedTrackColor = colors.primary,
                 uncheckedThumbColor = colors.outline,
                 uncheckedTrackColor = colors.surfaceContainerHighest,
                 uncheckedBorderColor = colors.surfaceContainerHighest,
@@ -243,13 +230,10 @@ private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChang
 private fun DocumentsSection(documents: List<RulesDocumentInfo>) {
     val colors = MaterialTheme.colorScheme
     val uriHandler = LocalUriHandler.current
-    SettingsSection(
-        stringResource(R.string.settings_documents),
-        trailing = { Icon(Icons.Outlined.Description, null, tint = colors.primary, modifier = Modifier.size(18.dp)) },
-    ) {
+    SettingsSection(stringResource(R.string.settings_documents)) {
         SettingsPanel {
             if (documents.isEmpty()) {
-                PanelRow { Text(stringResource(R.string.reader_not_installed), style = BodyStyle, color = colors.onSurfaceVariant) }
+                PanelRow { Text(stringResource(R.string.reader_not_installed), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant) }
             }
             documents.forEachIndexed { i, doc ->
                 if (i > 0) PanelDivider()
@@ -266,7 +250,7 @@ private fun DocumentsSection(documents: List<RulesDocumentInfo>) {
                         Modifier.weight(1f),
                     )
                     Icon(Icons.AutoMirrored.Filled.OpenInNew, stringResource(R.string.settings_open_pdf),
-                        tint = colors.onSurfaceVariant.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+                        tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
                 }
             }
         }
@@ -283,7 +267,7 @@ private fun CardDatabaseSection(info: CardDataInfo?, state: CardUpdateState, rul
     SettingsSection(stringResource(R.string.settings_card_data)) {
         SettingsPanel {
             if (info == null) {
-                PanelRow { Text(stringResource(R.string.cards_preparing), style = BodyStyle, color = colors.onSurfaceVariant) }
+                PanelRow { Text(stringResource(R.string.cards_preparing), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant) }
             } else {
                 InfoRow(stringResource(R.string.settings_cards), NumberFormat.getIntegerInstance().format(info.cardCount))
                 PanelDivider()
@@ -297,25 +281,25 @@ private fun CardDatabaseSection(info: CardDataInfo?, state: CardUpdateState, rul
                 InfoRow(stringResource(R.string.settings_installed), formatInstant(info.importedAt))
             }
         }
-        // Figma "Full Width Update Button": deep gold, 48dp, 12dp corners, sync icon.
+        // Full-width update button: gold, 48 dp, 12 dp corners, sync icon.
         Row(
             Modifier
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(if (busy) GoldDeep.copy(alpha = 0.5f) else GoldDeep)
+                .background(if (busy) colors.primary.copy(alpha = 0.5f) else colors.primary)
                 .clickable(enabled = !busy, role = Role.Button, onClick = onCheck)
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Default.Sync, null, tint = OnGoldDeep, modifier = Modifier.size(16.dp))
+            Icon(Icons.Default.Sync, null, tint = colors.onPrimary, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.settings_check_updates),
-                style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.1.sp),
-                color = OnGoldDeep)
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.onPrimary)
         }
-        Column(Modifier.padding(horizontal = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(horizontal = 4.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (state is CardUpdateState.Idle && rulesState is RulesUpdateState.Idle) {
                 Text(stringResource(R.string.settings_update_hint), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
             } else {
@@ -335,7 +319,7 @@ private fun RulesUpdateStatus(state: RulesUpdateState) {
         when (state) {
             RulesUpdateState.Idle -> Unit
             RulesUpdateState.Checking, RulesUpdateState.Downloading, RulesUpdateState.Importing -> {
-                LinearProgressIndicator(Modifier.fillMaxWidth(), color = GoldDeep)
+                LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.primary)
                 Text(stringResource(R.string.settings_rules_checking), style = small, color = colors.onSurfaceVariant)
             }
             RulesUpdateState.UpToDate ->
@@ -368,16 +352,16 @@ private fun UpdateStatus(state: CardUpdateState, modifier: Modifier = Modifier) 
         when (state) {
             CardUpdateState.Idle -> Unit
             CardUpdateState.Checking -> {
-                LinearProgressIndicator(Modifier.fillMaxWidth(), color = GoldDeep)
+                LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.primary)
                 Text(stringResource(R.string.settings_checking), style = small, color = colors.onSurfaceVariant)
             }
             is CardUpdateState.Downloading -> {
                 val total = state.totalBytes
                 if (total != null && total > 0) {
                     LinearProgressIndicator(progress = { (state.bytes.toFloat() / total).coerceIn(0f, 1f) },
-                        modifier = Modifier.fillMaxWidth(), color = GoldDeep)
+                        modifier = Modifier.fillMaxWidth(), color = colors.primary)
                 } else {
-                    LinearProgressIndicator(Modifier.fillMaxWidth(), color = GoldDeep)
+                    LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.primary)
                 }
                 val amount = if (total != null) "${mb(state.bytes)} / ${mb(total)} MB" else "${mb(state.bytes)} MB"
                 val label = if (state.part == CardUpdateState.Downloading.Part.CARDS) R.string.settings_downloading_cards
@@ -385,7 +369,7 @@ private fun UpdateStatus(state: CardUpdateState, modifier: Modifier = Modifier) 
                 Text(stringResource(label, amount), style = small, color = colors.onSurfaceVariant)
             }
             CardUpdateState.Importing -> {
-                LinearProgressIndicator(Modifier.fillMaxWidth(), color = GoldDeep)
+                LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.primary)
                 Text(stringResource(R.string.settings_importing), style = small, color = colors.onSurfaceVariant)
             }
             is CardUpdateState.UpToDate ->
@@ -404,8 +388,8 @@ private fun UpdateStatus(state: CardUpdateState, modifier: Modifier = Modifier) 
 @Composable
 private fun InfoRow(label: String, value: String) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = BodyStyle, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-        Text(value, style = BodyStyle.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface)
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
+        Text(value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
@@ -426,7 +410,7 @@ private fun AboutSection() {
                         .size(40.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(colors.primary.copy(alpha = 0.1f))
-                        .border(1.dp, colors.primary.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
+                        .border(1.dp, colors.primary.softened(0.2f), RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(painterResource(R.drawable.ic_launcher_foreground), null, tint = colors.primary, modifier = Modifier.size(56.dp))
@@ -437,51 +421,39 @@ private fun AboutSection() {
             PanelDivider()
             PanelRow {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(stringResource(R.string.settings_credits), style = TitleStyle, color = colors.onSurface)
-                    Text(stringResource(R.string.settings_credits_text), style = BodyStyle, color = colors.onSurfaceVariant)
-                    Text(stringResource(R.string.settings_scryfall_credit), style = BodyStyle, color = colors.onSurfaceVariant)
+                    Text(stringResource(R.string.settings_credits), style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
+                    Text(stringResource(R.string.settings_credits_text), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                    Text(stringResource(R.string.settings_scryfall_credit), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                 }
             }
         }
         // Wording required by the Wizards of the Coast Fan Content Policy. Kept legible on purpose:
-        // the Figma's #4D4637 on navy is ~2:1 contrast, too faint for a notice that must be readable.
+        // no alpha (the Figma's #4D4637 on navy was ~2:1, and a 0.7 alpha undid the fix).
         Text(
             stringResource(R.string.settings_fan_content),
-            style = CaptionStyle.copy(lineHeight = 18.sp),
+            style = MaterialTheme.typography.bodySmall,
             color = colors.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, start = 8.dp, end = 8.dp).alpha(0.7f),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, start = 8.dp, end = 8.dp),
         )
     }
 }
 
 // ---------------------------------------------------------------- building blocks
 
-/** Figma section: 14sp gold uppercase heading, 16dp above its panel. */
+/** A section: its Label (like every group label in the app), then its content 16 dp apart. */
 @Composable
-private fun SettingsSection(title: String, trailing: (@Composable () -> Unit)? = null, content: @Composable () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(title.uppercase(),
-                style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.7.sp),
-                color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
-            trailing?.invoke()
-        }
-        content()
+private fun SettingsSection(title: String, content: @Composable () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Label(title, Modifier.padding(start = 4.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) { content() }
     }
 }
 
-/** Figma panel: #1D1F2D, 1dp border at 30% opacity, 12dp corners; rows split by dividers. */
+/** The settings panels are the app's Panel, on surfaceContainer. */
 @Composable
 private fun SettingsPanel(content: @Composable () -> Unit) {
-    val shape = RoundedCornerShape(12.dp)
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), shape)
-    ) { content() }
+    Panel(color = MaterialTheme.colorScheme.surfaceContainer) { content() }
 }
 
 @Composable
@@ -490,15 +462,13 @@ private fun PanelRow(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun PanelDivider() {
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-}
+private fun PanelDivider() = ListDivider()
 
 @Composable
 private fun TitleAndSubtitle(title: String, subtitle: String, modifier: Modifier = Modifier) {
     Column(modifier) {
-        Text(title, style = TitleStyle, color = MaterialTheme.colorScheme.onSurface)
-        Text(subtitle, style = CaptionStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+        Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

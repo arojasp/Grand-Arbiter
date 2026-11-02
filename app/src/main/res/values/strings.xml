@@ -265,7 +265,6 @@
     <string name="tools_release_notes">Release Notes</string>
     <string name="release_notes_caption">Official release notes for each set, available offline.</string>
     <string name="release_notes_latest">Latest</string>
-    <string name="release_notes_open">Open %1$s release notes</string>
     <string name="glossary_search_placeholder">Search a term</string>
     <string name="home_updated">Updated</string>
     <string name="home_release_notes_latest">Latest: %1$s</string>

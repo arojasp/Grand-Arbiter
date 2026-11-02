@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
@@ -272,7 +271,7 @@ private fun RoundsCard(rounds: RoundsTable, onOpenRules: (PageRef) -> Unit) {
             Text(stringResource(R.string.hj_rounds).uppercase(),
                 style = Body.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.1.sp), color = colors.primary, modifier = Modifier.weight(1f))
             Text(stringResource(R.string.hj_rounds_source), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
+            Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val onRef: (String) -> Unit = { id -> onOpenRules(PageRef(id)) }

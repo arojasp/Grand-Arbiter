@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.ui.tools.quickrefs
 
+import androidx.compose.foundation.layout.size
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -20,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
@@ -199,7 +199,7 @@ private fun ReferenceRow(ref: QuickReference, onClick: () -> Unit) {
                 ?: "${ref.documentId.shortLabel()} · ${stringResource(R.string.qr_no_rules)}"
             Text(subtitle, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
         }
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = colors.onSurfaceVariant)
+        Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
     }
 }
 

@@ -1,5 +1,7 @@
 package es.alejandro.grandarbiter.ui.tools.drafttimer
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,8 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -102,7 +102,7 @@ private fun FormatCard(format: DraftFormat, onClick: () -> Unit) {
             Text(stringResource(format.description()), style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp), color = colors.onSurfaceVariant)
             if (!enabled) DraftChip(stringResource(R.string.tools_coming_soon))
         }
-        if (enabled) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = colors.primary)
+        if (enabled) Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
     }
 }
 

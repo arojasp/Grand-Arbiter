@@ -127,7 +127,7 @@ private fun SetRow(set: ReleaseNoteSet, latest: Boolean, onClick: () -> Unit) {
             Tag(stringResource(R.string.release_notes_online))
             Spacer(Modifier.width(8.dp))
         }
-        Icon(painterResource(R.drawable.ic_chevron_right), stringResource(R.string.release_notes_open, set.name),
-            tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
+        Icon(painterResource(R.drawable.ic_chevron_right), null,   // the row's text names it
+            tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
     }
 }

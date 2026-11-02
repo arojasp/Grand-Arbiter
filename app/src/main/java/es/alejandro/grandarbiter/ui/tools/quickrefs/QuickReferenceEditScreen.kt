@@ -1,9 +1,9 @@
 package es.alejandro.grandarbiter.ui.tools.quickrefs
 
+import androidx.compose.ui.res.painterResource
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
@@ -288,7 +288,7 @@ private fun IndexRowView(row: IndexRow, onToggle: () -> Unit, onAdd: () -> Unit)
             when {
                 row.loading -> CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                 row.expandable -> Icon(
-                    if (row.expanded) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    painterResource(if (row.expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right),
                     stringResource(if (row.expanded) R.string.qr_collapse else R.string.qr_expand),
                     tint = colors.onSurfaceVariant,
                 )

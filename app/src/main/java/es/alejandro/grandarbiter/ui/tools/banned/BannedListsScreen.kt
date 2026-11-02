@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -228,7 +227,7 @@ private fun FormatItem(
                 style = Body.copy(fontWeight = if (expanded) FontWeight.Bold else FontWeight.Normal),
                 color = if (expanded) colors.primary else colors.onSurface, modifier = Modifier.weight(1f))
             if (view.list.entries.isNotEmpty()) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = colors.onSurfaceVariant,
+                Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant,
                     modifier = Modifier.size(20.dp).rotate(rotation))
                 Spacer(Modifier.width(8.dp))
             }
@@ -328,7 +327,7 @@ private fun CategoryBlock(
                 Text(BanCategory.entries.filter { it in groups }.map { categoryLabel(it) }.joinToString(" · "),
                     style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
             }
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = colors.onSurfaceVariant,
+            Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(20.dp).rotate(rotation))
         }
         AnimatedVisibility(expanded) {

@@ -111,7 +111,7 @@ fun ReleaseNoteCardScreen(onBack: () -> Unit, viewModel: ReleaseNoteCardViewMode
                 },
                 title = {
                     Column {
-                        Text(note?.setName.orEmpty(), style = MaterialTheme.typography.titleMedium,
+                        Text(note?.setName.orEmpty(), style = MaterialTheme.typography.titleLarge,
                             color = colors.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(note?.sectionTitle.orEmpty(), style = MaterialTheme.typography.labelMedium,
                             color = colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -152,7 +152,7 @@ private fun CardNote(note: ReleaseNoteCard) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Panel {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(card.name, style = MaterialTheme.typography.titleLarge,
                             color = colors.onSurface, modifier = Modifier.weight(1f))
@@ -165,7 +165,7 @@ private fun CardNote(note: ReleaseNoteCard) {
                 }
             }
             if (card.notes.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Label(stringResource(R.string.release_notes_notes), Modifier.padding(start = 4.dp))
                     card.notes.forEach { item ->
                         Row {

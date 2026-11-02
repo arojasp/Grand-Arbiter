@@ -103,7 +103,7 @@ fun ReleaseNoteViewerScreen(onBack: () -> Unit, viewModel: ReleaseNoteViewerView
                 },
                 title = {
                     Column {
-                        Text(set?.name.orEmpty(), style = MaterialTheme.typography.titleMedium,
+                        Text(set?.name.orEmpty(), style = MaterialTheme.typography.titleLarge,
                             color = colors.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(stringResource(R.string.tools_release_notes), style = MaterialTheme.typography.labelMedium,
                             color = colors.onSurfaceVariant)

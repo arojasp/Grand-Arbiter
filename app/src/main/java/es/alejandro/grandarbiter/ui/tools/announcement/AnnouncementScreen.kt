@@ -77,7 +77,6 @@ fun HeadJudgeAnnouncementScreen(
 ) {
     val checked by viewModel.checked.collectAsState()
     val rel by viewModel.rel.collectAsState()
-    val minutes by viewModel.roundMinutes.collectAsState()
     val rounds by viewModel.roundsTable.collectAsState()
     val venue by viewModel.venueNote.collectAsState()
     val colors = MaterialTheme.colorScheme
@@ -109,8 +108,10 @@ fun HeadJudgeAnnouncementScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item { TopicsCard(checked, viewModel::toggle) }
-            item { RelCard(rel?.let { Rel.valueOf(it) }, viewModel::setRel) }
-            item { TimeCard(rel?.let { Rel.valueOf(it) }, minutes, viewModel::setRoundMinutes) }
+            // A saved name from an older version (e.g. "PROFESSIONAL") just reads as no REL chosen.
+            val currentRel = rel?.let { name -> Rel.entries.firstOrNull { it.name == name } }
+            item { RelCard(currentRel, viewModel::setRel) }
+            item { TimeCard(currentRel) }
             rounds?.let { r -> item { RoundsCard(r, onOpenRules) } }
             item { Reminders() }
             item { PlayerInstruction() }
@@ -177,13 +178,12 @@ private fun RelCard(rel: Rel?, onSelect: (Rel) -> Unit) {
 
 private fun Rel.label(): Int = when (this) {
     Rel.REGULAR -> R.string.hj_rel_regular
-    Rel.COMPETITIVE -> R.string.hj_rel_competitive
-    Rel.PROFESSIONAL -> R.string.hj_rel_professional
+    Rel.COMPETITIVE_PROFESSIONAL -> R.string.hj_rel_competitive_professional
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+/** Round time (what the MTR asks for; the HJ announces it) and the tardiness rule of the chosen REL. */
 @Composable
-private fun TimeCard(rel: Rel?, minutes: Int, onMinutes: (Int) -> Unit) {
+private fun TimeCard(rel: Rel?) {
     val colors = MaterialTheme.colorScheme
     AnnouncementPanel {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -191,13 +191,7 @@ private fun TimeCard(rel: Rel?, minutes: Int, onMinutes: (Int) -> Unit) {
                 Icon(Icons.Outlined.Schedule, null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Label(stringResource(R.string.hj_round_time))
-                    Text(stringResource(R.string.hj_minutes, minutes),
-                        style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"), color = colors.onSurface)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        AnnouncementViewModel.ROUND_MINUTES.forEach { m ->
-                            SelectChip(stringResource(R.string.hj_minutes, m), selected = m == minutes) { onMinutes(m) }
-                        }
-                    }
+                    Text(stringResource(R.string.hj_round_time_rule), style = MaterialTheme.typography.bodyMedium, color = colors.onSurface)
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -210,7 +204,7 @@ private fun TimeCard(rel: Rel?, minutes: Int, onMinutes: (Int) -> Unit) {
                             when (rel) {
                                 null -> R.string.hj_tardiness_pick_rel
                                 Rel.REGULAR -> R.string.hj_tardiness_regular
-                                Rel.COMPETITIVE, Rel.PROFESSIONAL -> R.string.hj_tardiness_competitive
+                                Rel.COMPETITIVE_PROFESSIONAL -> R.string.hj_tardiness_competitive
                             }
                         ),
                         style = MaterialTheme.typography.bodyMedium, color = if (rel == null) colors.onSurfaceVariant else colors.onSurface,

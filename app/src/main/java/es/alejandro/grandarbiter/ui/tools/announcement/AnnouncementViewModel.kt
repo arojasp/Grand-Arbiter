@@ -14,7 +14,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-enum class Rel { REGULAR, COMPETITIVE, PROFESSIONAL }
+/**
+ * What the screen needs from the REL: which tardiness rule applies. Competitive and Professional
+ * share the IPG (3.1), so they are one option; Regular follows the JAR.
+ */
+enum class Rel { REGULAR, COMPETITIVE_PROFESSIONAL }
 
 /** The topics a Head Judge covers, in order. Ticked as they're announced; reset each round. */
 enum class AnnouncementTopic { WELCOME, JUDGES, CHECK_DECKLISTS, COLLECT_DECKLISTS, PLAYERS, ROUNDS }
@@ -31,7 +35,6 @@ class AnnouncementViewModel(
 
     val checked: StateFlow<Set<String>> = state.getStateFlow(KEY_CHECKED, emptySet<String>())
     val rel: StateFlow<String?> = state.getStateFlow(KEY_REL, null as String?)
-    val roundMinutes: StateFlow<Int> = state.getStateFlow(KEY_MINUTES, 50)
 
     /**
      * Read from the installed MTR, not hardcoded: it changes with the MTR (a rules update brings
@@ -58,14 +61,11 @@ class AnnouncementViewModel(
 
     fun resetChecklist() { state[KEY_CHECKED] = emptySet<String>() }
     fun setRel(value: Rel) { state[KEY_REL] = value.name }
-    fun setRoundMinutes(value: Int) { state[KEY_MINUTES] = value }
     fun setVenueNote(value: String) = viewModelScope.launch { settings.setVenueNote(value) }
 
     companion object {
         const val APPENDIX_E = "mtr/appendix-e"
-        val ROUND_MINUTES = listOf(40, 50, 60)   // MTR Appendix B: 40 minimum, 50 recommended
         private const val KEY_CHECKED = "checked"
         private const val KEY_REL = "rel"
-        private const val KEY_MINUTES = "minutes"
     }
 }

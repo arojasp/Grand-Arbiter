@@ -172,10 +172,9 @@
     <string name="hj_topic_rounds">Number of rounds</string>
     <string name="hj_rel">Enforcement level (REL)</string>
     <string name="hj_rel_regular">Regular</string>
-    <string name="hj_rel_competitive">Competitive</string>
-    <string name="hj_rel_professional">Professional</string>
+    <string name="hj_rel_competitive_professional">Competitive / Professional</string>
     <string name="hj_round_time">Round time</string>
-    <string name="hj_minutes">%1$d min</string>
+    <string name="hj_round_time_rule">50 min recommended, 40 min minimum. Quarterfinals and semifinals 90 min, final untimed. Announce any change. (MTR Appendix B)</string>
     <string name="hj_tardiness">Tardiness</string>
     <string name="hj_tardiness_pick_rel">Select the REL to see when the penalty applies.</string>
     <string name="hj_tardiness_competitive">Not seated when the round starts: Game Loss (Warning within the first minute). After 10 minutes: Match Loss, and dropped unless they report to the Head Judge or Scorekeeper before the round ends. (IPG 3.1)</string>

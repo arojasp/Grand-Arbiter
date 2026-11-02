@@ -136,7 +136,7 @@
     <string name="settings_scryfall_credit">Card data, rulings, mana symbols and card art come from Scryfall (scryfall.com). Grand Arbiter is not produced by or endorsed by Scryfall.</string>
 
     <!-- Tools -->
-    <string name="tools_active">Active tools</string>
+    <string name="tools_in_tournament">In tournament</string>
     <string name="tools_references">References</string>
     <string name="tools_coming_soon">Coming soon</string>
     <string name="tools_deck_counter">Deck Counter</string>

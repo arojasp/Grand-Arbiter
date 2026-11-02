@@ -90,6 +90,15 @@ fun Tag(
     }
 }
 
+/**
+ * Title above a group of blocks on a top-level screen ("Document Library", Tools' "In tournament").
+ * titleLarge at 20 sp: one step under the screen title, above the rows' titleMedium/Large.
+ */
+@Composable
+fun SectionTitle(text: String, modifier: Modifier = Modifier) {
+    Text(text, style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp), modifier = modifier)
+}
+
 /** Divider between the rows of a grouped list (Panel or [groupedItem]): inset 12 dp, softened. */
 @Composable
 fun ListDivider(modifier: Modifier = Modifier) {

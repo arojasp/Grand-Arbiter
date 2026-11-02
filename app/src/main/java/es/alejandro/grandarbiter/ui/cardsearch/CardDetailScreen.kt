@@ -226,7 +226,7 @@ private fun FaceText(face: CardFace) {
             face.manaCost?.let { ManaCostSymbols(it, Modifier.padding(start = 8.dp), size = 18.dp) }
         }
         face.typeLine?.let { Text(it, style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant) }
-        face.oracleText?.takeIf { it.isNotBlank() }?.let { OracleText(it, OracleStyle, colors.onSurface) }
+        face.oracleText?.takeIf { it.isNotBlank() }?.let { OracleText(it, MaterialTheme.typography.bodyLarge, colors.onSurface) }
         stats(face.power, face.toughness, face.loyalty, face.defense)?.let { (label, value) ->
             Text("$label: $value", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End)

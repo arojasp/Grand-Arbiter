@@ -52,8 +52,6 @@ import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Tag
 import es.alejandro.grandarbiter.ui.components.groupedItem
 import es.alejandro.grandarbiter.ui.reader.ReaderSearchField
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import org.koin.androidx.compose.koinViewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -183,7 +181,7 @@ private fun FormatItem(
         ) {
             Text(CardText.formatName(view.list.format), style = MaterialTheme.typography.titleMedium,
                 color = if (expanded) colors.primary else colors.onSurface, modifier = Modifier.weight(1f))
-            if (expanded) Tag(count.toString(), container = GoldDeep, content = OnGoldDeep) else Tag(count.toString())
+            if (expanded) Tag(count.toString(), container = colors.primary, content = colors.onPrimary) else Tag(count.toString())
             if (view.list.entries.isNotEmpty()) {
                 Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant,
                     modifier = Modifier.size(20.dp).rotate(rotation))
@@ -224,7 +222,7 @@ private fun EntryRow(entry: BanListEntry, format: String, highlighted: Boolean, 
             color = if (highlighted) colors.primary else colors.onSurface,
             maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
         if (entry.legality == Legality.RESTRICTED) {
-            Tag(stringResource(CardText.restrictedLabel(format)), container = GoldDeep, content = OnGoldDeep)
+            Tag(stringResource(CardText.restrictedLabel(format)), container = colors.primary, content = colors.onPrimary)
         } else {
             Tag(stringResource(R.string.legality_banned), container = colors.errorContainer, content = colors.onErrorContainer)
         }

@@ -38,8 +38,6 @@ import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftEstimate
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import org.koin.androidx.compose.koinViewModel
 
 /** Figma "Draft Timer - Setup": format values, alerts, estimated duration, Start. */
@@ -61,11 +59,11 @@ fun DraftSetupScreen(
         bottomBar = {
             Box(Modifier.fillMaxWidth().background(colors.background).padding(16.dp)) {
                 Box(
-                    Modifier.fillMaxWidth().height(52.dp).clip(CircleShape).background(GoldDeep)
+                    Modifier.fillMaxWidth().height(52.dp).clip(CircleShape).background(colors.primary)
                         .clickable(role = Role.Button) { viewModel.start(); onStarted() },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(stringResource(R.string.draft_start), style = MaterialTheme.typography.labelLarge, color = OnGoldDeep)
+                    Text(stringResource(R.string.draft_start), style = MaterialTheme.typography.labelLarge, color = colors.onPrimary)
                 }
             }
         },
@@ -96,7 +94,7 @@ fun DraftSetupScreen(
                     SettingRow(stringResource(R.string.draft_mixed_sizes), stringResource(R.string.draft_mixed_sizes_hint)) {
                         Switch(
                             checked = sizes != null, onCheckedChange = { viewModel.setMixedSizes(it) },
-                            colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                            colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                         )
                     }
                     HorizontalDivider(color = colors.outlineVariant)
@@ -118,7 +116,7 @@ fun DraftSetupScreen(
                 SettingRow(stringResource(R.string.draft_manual_start), stringResource(R.string.draft_manual_start_hint)) {
                     Switch(
                         checked = config.manualStart, onCheckedChange = { viewModel.setManualStart(it) },
-                        colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                        colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                     )
                 }
             }
@@ -127,14 +125,14 @@ fun DraftSetupScreen(
                 SettingRow(stringResource(R.string.draft_vibrate), stringResource(R.string.draft_vibrate_hint)) {
                     Switch(
                         checked = vibrate, onCheckedChange = { viewModel.setVibrate(it) },
-                        colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                        colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                     )
                 }
                 HorizontalDivider(color = colors.outlineVariant)
                 SettingRow(stringResource(R.string.draft_beep), stringResource(R.string.draft_beep_hint)) {
                     Switch(
                         checked = beep, onCheckedChange = { viewModel.setBeep(it) },
-                        colors = SwitchDefaults.colors(checkedTrackColor = GoldDeep, checkedThumbColor = OnGoldDeep),
+                        colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                     )
                 }
             }
@@ -184,12 +182,12 @@ private fun Choice(
             val on = value == selected
             Box(
                 Modifier.width(width.dp).height(36.dp).clip(CircleShape)
-                    .background(if (on) GoldDeep else colors.surfaceContainerHighest)
+                    .background(if (on) colors.primary else colors.surfaceContainerHighest)
                     .clickable(role = Role.RadioButton) { onSelect(value) },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(label(value), style = MaterialTheme.typography.labelLarge,
-                    color = if (on) OnGoldDeep else colors.onSurfaceVariant)
+                    color = if (on) colors.onPrimary else colors.onSurfaceVariant)
             }
         }
     }

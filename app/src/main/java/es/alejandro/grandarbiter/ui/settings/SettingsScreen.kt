@@ -56,8 +56,6 @@ import es.alejandro.grandarbiter.ui.cardsearch.CardText
 import es.alejandro.grandarbiter.ui.components.Label
 import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import es.alejandro.grandarbiter.ui.theme.softened
 import java.text.NumberFormat
 import java.time.Instant
@@ -93,12 +91,12 @@ fun SettingsScreen(
             CenterAlignedTopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.reader_back), tint = GoldDeep)
+                        Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.reader_back), tint = MaterialTheme.colorScheme.primary)
                     }
                 },
                 title = {
                     Text(stringResource(R.string.settings_title),
-                        style = MaterialTheme.typography.titleLarge, color = GoldDeep)
+                        style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
@@ -190,7 +188,7 @@ private fun <T> Segmented(options: List<T>, selected: T, label: @Composable (T) 
                 Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(if (isSelected) GoldDeep else colors.surfaceContainerHighest)
+                    .background(if (isSelected) colors.primary else colors.surfaceContainerHighest)
                     .clickable(role = Role.RadioButton) { onSelect(option) }
                     .heightIn(min = 40.dp)
                     .padding(horizontal = 4.dp, vertical = 8.dp),
@@ -198,7 +196,7 @@ private fun <T> Segmented(options: List<T>, selected: T, label: @Composable (T) 
             ) {
                 Text(label(option), textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (isSelected) OnGoldDeep else colors.onSurfaceVariant)
+                    color = if (isSelected) colors.onPrimary else colors.onSurfaceVariant)
             }
         }
     }
@@ -216,8 +214,8 @@ private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChang
             checked = checked,
             onCheckedChange = onChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = OnGoldDeep,
-                checkedTrackColor = GoldDeep,
+                checkedThumbColor = colors.onPrimary,
+                checkedTrackColor = colors.primary,
                 uncheckedThumbColor = colors.outline,
                 uncheckedTrackColor = colors.surfaceContainerHighest,
                 uncheckedBorderColor = colors.surfaceContainerHighest,
@@ -289,17 +287,17 @@ private fun CardDatabaseSection(info: CardDataInfo?, state: CardUpdateState, rul
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(if (busy) GoldDeep.copy(alpha = 0.5f) else GoldDeep)
+                .background(if (busy) colors.primary.copy(alpha = 0.5f) else colors.primary)
                 .clickable(enabled = !busy, role = Role.Button, onClick = onCheck)
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Default.Sync, null, tint = OnGoldDeep, modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.Sync, null, tint = colors.onPrimary, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.settings_check_updates),
                 style = MaterialTheme.typography.labelLarge,
-                color = OnGoldDeep)
+                color = colors.onPrimary)
         }
         Column(Modifier.padding(horizontal = 4.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (state is CardUpdateState.Idle && rulesState is RulesUpdateState.Idle) {
@@ -321,7 +319,7 @@ private fun RulesUpdateStatus(state: RulesUpdateState) {
         when (state) {
             RulesUpdateState.Idle -> Unit
             RulesUpdateState.Checking, RulesUpdateState.Downloading, RulesUpdateState.Importing -> {
-                LinearProgressIndicator(Modifier.fillMaxWidth(), color = GoldDeep)
+                LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.primary)
                 Text(stringResource(R.string.settings_rules_checking), style = small, color = colors.onSurfaceVariant)
             }
             RulesUpdateState.UpToDate ->
@@ -354,16 +352,16 @@ private fun UpdateStatus(state: CardUpdateState, modifier: Modifier = Modifier) 
         when (state) {
             CardUpdateState.Idle -> Unit
             CardUpdateState.Checking -> {
-                LinearProgressIndicator(Modifier.fillMaxWidth(), color = GoldDeep)
+                LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.primary)
                 Text(stringResource(R.string.settings_checking), style = small, color = colors.onSurfaceVariant)
             }
             is CardUpdateState.Downloading -> {
                 val total = state.totalBytes
                 if (total != null && total > 0) {
                     LinearProgressIndicator(progress = { (state.bytes.toFloat() / total).coerceIn(0f, 1f) },
-                        modifier = Modifier.fillMaxWidth(), color = GoldDeep)
+                        modifier = Modifier.fillMaxWidth(), color = colors.primary)
                 } else {
-                    LinearProgressIndicator(Modifier.fillMaxWidth(), color = GoldDeep)
+                    LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.primary)
                 }
                 val amount = if (total != null) "${mb(state.bytes)} / ${mb(total)} MB" else "${mb(state.bytes)} MB"
                 val label = if (state.part == CardUpdateState.Downloading.Part.CARDS) R.string.settings_downloading_cards
@@ -371,7 +369,7 @@ private fun UpdateStatus(state: CardUpdateState, modifier: Modifier = Modifier) 
                 Text(stringResource(label, amount), style = small, color = colors.onSurfaceVariant)
             }
             CardUpdateState.Importing -> {
-                LinearProgressIndicator(Modifier.fillMaxWidth(), color = GoldDeep)
+                LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.primary)
                 Text(stringResource(R.string.settings_importing), style = small, color = colors.onSurfaceVariant)
             }
             is CardUpdateState.UpToDate ->

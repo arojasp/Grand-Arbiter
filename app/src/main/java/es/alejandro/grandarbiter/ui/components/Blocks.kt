@@ -31,8 +31,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
@@ -51,7 +49,7 @@ fun Label(text: String, modifier: Modifier = Modifier, color: Color = MaterialTh
 
 /**
  * A choice among a few options (Deck Counter format, Announcement REL and round time): a pill with
- * labelLarge text, ~32 dp tall with a 48 dp touch target. Selected: gold (GoldDeep until batch H).
+ * labelLarge text, ~32 dp tall with a 48 dp touch target. Selected: primary / onPrimary.
  */
 @Composable
 fun SelectChip(text: String, selected: Boolean, onClick: () -> Unit) {
@@ -59,12 +57,12 @@ fun SelectChip(text: String, selected: Boolean, onClick: () -> Unit) {
     Box(
         Modifier.minimumInteractiveComponentSize()
             .clip(CircleShape)
-            .background(if (selected) GoldDeep else colors.surfaceContainerHighest)
-            .border(1.dp, if (selected) GoldDeep else colors.outlineVariant, CircleShape)
+            .background(if (selected) colors.primary else colors.surfaceContainerHighest)
+            .border(1.dp, if (selected) colors.primary else colors.outlineVariant, CircleShape)
             .clickable(role = Role.RadioButton, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 6.dp)
     ) {
-        Text(text, style = MaterialTheme.typography.labelLarge, color = if (selected) OnGoldDeep else colors.onSurfaceVariant)
+        Text(text, style = MaterialTheme.typography.labelLarge, color = if (selected) colors.onPrimary else colors.onSurfaceVariant)
     }
 }
 

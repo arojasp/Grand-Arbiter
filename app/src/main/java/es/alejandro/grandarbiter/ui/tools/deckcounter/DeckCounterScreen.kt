@@ -62,8 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.ui.components.SelectChip
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import es.alejandro.grandarbiter.ui.theme.legalColors
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -223,7 +221,7 @@ private fun PileTabs(pile: Pile, mainTotal: Int, sideTotal: Int, onSelect: (Pile
             val selected = p == pile
             Row(
                 Modifier.weight(1f).clip(RoundedCornerShape(6.dp))
-                    .background(if (selected) GoldDeep else Color.Transparent)
+                    .background(if (selected) colors.primary else Color.Transparent)
                     .clickable(role = Role.Tab) { onSelect(p) }
                     .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.Center,
@@ -231,10 +229,10 @@ private fun PileTabs(pile: Pile, mainTotal: Int, sideTotal: Int, onSelect: (Pile
             ) {
                 Text(stringResource(if (p == Pile.MAIN) R.string.deck_pile_main else R.string.deck_pile_side),
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (selected) OnGoldDeep else colors.onSurfaceVariant)
+                    color = if (selected) colors.onPrimary else colors.onSurfaceVariant)
                 Spacer(Modifier.width(8.dp))
                 Text(total.toString(), style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
-                    color = if (selected) OnGoldDeep else colors.onSurface)
+                    color = if (selected) colors.onPrimary else colors.onSurface)
             }
         }
     }
@@ -292,11 +290,11 @@ private fun History(groups: List<Int>) {
 private fun CountPad(n: Int, modifier: Modifier, onClick: () -> Unit) {
     val addLabel = stringResource(R.string.deck_add, n)
     Box(
-        modifier.clip(RoundedCornerShape(12.dp)).background(GoldDeep)
+        modifier.clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primary)
             .clickable(role = Role.Button, onClickLabel = addLabel, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(n.toString(), style = MaterialTheme.typography.displayLarge.copy(fontSize = 44.sp, lineHeight = 52.sp), color = OnGoldDeep)
+        Text(n.toString(), style = MaterialTheme.typography.displayLarge.copy(fontSize = 44.sp, lineHeight = 52.sp), color = MaterialTheme.colorScheme.onPrimary)
     }
 }
 

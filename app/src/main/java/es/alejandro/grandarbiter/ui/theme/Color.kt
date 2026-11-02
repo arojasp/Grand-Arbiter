@@ -45,10 +45,6 @@ val onSurfaceVariantLightHighContrast = Color(0xFF000000)
 val outlineLightHighContrast = Color(0xFF312C20)
 val outlineVariantLightHighContrast = Color(0xFF4F493B)
 
-// Figma accent for filled buttons, the selected segment and the Settings title (deeper than primary).
-val GoldDeep = Color(0xFFC9A84C)
-val OnGoldDeep = Color(0xFF3D2E00)
-
 // Dark scheme surfaces/background follow the Figma design (navy, Figma file f13STSp9O4W4SQW3Nz89hA).
 val primaryDark = Color(0xFFE6C364)
 val onPrimaryDark = Color(0xFF3D2E00)

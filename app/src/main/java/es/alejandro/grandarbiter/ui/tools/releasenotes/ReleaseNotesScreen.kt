@@ -38,8 +38,6 @@ import es.alejandro.grandarbiter.domain.updates.SectionUpdates
 import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
 import es.alejandro.grandarbiter.ui.components.Tag
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -119,7 +117,7 @@ private fun SetRow(set: ReleaseNoteSet, latest: Boolean, onClick: () -> Unit) {
         Spacer(Modifier.width(8.dp))
         Text(set.name, style = MaterialTheme.typography.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
         if (latest) {
-            Tag(stringResource(R.string.release_notes_latest), container = GoldDeep, content = OnGoldDeep)
+            Tag(stringResource(R.string.release_notes_latest), container = colors.primary, content = colors.onPrimary)
             Spacer(Modifier.width(8.dp))
         }
         if (set.sha == null) {   // not converted yet: opens the original page

@@ -59,9 +59,7 @@ import es.alejandro.grandarbiter.domain.model.quickrefs.QuickReference
 import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
 import es.alejandro.grandarbiter.ui.components.outlined
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import org.koin.androidx.compose.koinViewModel
 
 /*
@@ -156,8 +154,8 @@ fun QuickReferencesScreen(
             }
             FloatingActionButton(
                 onClick = { menuOpen = !menuOpen },
-                containerColor = GoldDeep,
-                contentColor = OnGoldDeep,
+                containerColor = colors.primary,
+                contentColor = colors.onPrimary,
                 shape = RoundedCornerShape(12.dp),
             ) {
                 Icon(if (menuOpen) Icons.Default.Close else Icons.Default.Add,

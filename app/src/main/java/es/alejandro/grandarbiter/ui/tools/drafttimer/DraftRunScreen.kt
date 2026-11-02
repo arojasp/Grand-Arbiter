@@ -61,8 +61,6 @@ import es.alejandro.grandarbiter.domain.draft.PassDirection
 import es.alejandro.grandarbiter.domain.draft.RochesterOrder
 import es.alejandro.grandarbiter.ui.components.HoldState
 import es.alejandro.grandarbiter.ui.components.HoldToConfirmButton
-import es.alejandro.grandarbiter.ui.theme.GoldDeep
-import es.alejandro.grandarbiter.ui.theme.OnGoldDeep
 import es.alejandro.grandarbiter.ui.theme.softened
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
@@ -564,11 +562,11 @@ internal fun startLabel(ended: DraftStep, next: DraftStep?): String = when (next
 @Composable
 private fun PrimaryButton(text: String, onClick: () -> Unit) {
     Box(
-        Modifier.fillMaxWidth().height(56.dp).clip(CircleShape).background(GoldDeep).clickable(role = Role.Button, onClick = onClick),
+        Modifier.fillMaxWidth().height(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary).clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         // The big full-width action at the table: titleMedium (16 sp) for distance; other buttons use labelLarge.
-        Text(text, style = MaterialTheme.typography.titleMedium, color = OnGoldDeep)
+        Text(text, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
     }
 }
 
@@ -587,13 +585,13 @@ private fun EndDraftLink(onEnd: () -> Unit) {
 @Composable
 private fun PauseButton(running: Boolean, onClick: () -> Unit, size: Int = 80) {
     Box(
-        Modifier.size(size.dp).clip(CircleShape).background(GoldDeep).clickable(role = Role.Button, onClick = onClick),
+        Modifier.size(size.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary).clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             if (running) Icons.Filled.Pause else Icons.Filled.PlayArrow,
             contentDescription = stringResource(if (running) R.string.draft_pause else R.string.draft_resume),
-            tint = OnGoldDeep,
+            tint = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.size((size * 0.45f).dp),
         )
     }

@@ -44,7 +44,7 @@ import es.alejandro.grandarbiter.ui.navigation.Screen
 
 /*
  * The tools hub: two grouped lists like the Home document library. The in-tournament tools are the
- * screen's main actions, so their icon sits on a tonal gold tile (primaryContainer); the references
+ * screen's main actions, so their icon sits on a tonal tile (primaryContainer); the references
  * keep a plain icon. Canvas "Lote F · Tools". (The Figma glows, gradients and icon-above-title cards
  * were removed: decoration without function, design-decisions §5.)
  */
@@ -121,7 +121,7 @@ private fun ToolRow(tool: Tool, primary: Boolean, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (primary) {
-            // Main actions of the screen: the tonal gold of the active navigation item.
+            // Main actions of the screen: the same tonal tile as the active navigation item.
             Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(colors.primaryContainer),
                 contentAlignment = Alignment.Center) {
                 Icon(tool.icon, null, tint = colors.onPrimaryContainer, modifier = Modifier.size(24.dp))

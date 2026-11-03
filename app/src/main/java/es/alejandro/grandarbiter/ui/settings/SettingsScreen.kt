@@ -171,7 +171,7 @@ private fun TextScale.label(): Int = when (this) {
     TextScale.EXTRA_LARGE -> R.string.settings_text_extra_large
 }
 
-/** Segmented control: track surfaceContainerHighest, selected segment in gold; 40 dp segments in a 48 dp track. */
+/** Segmented control: track surfaceContainerHighest, selected segment in primary; 40 dp segments in a 48 dp track. */
 @Composable
 private fun <T> Segmented(options: List<T>, selected: T, label: @Composable (T) -> String, onSelect: (T) -> Unit) {
     val colors = MaterialTheme.colorScheme
@@ -281,7 +281,7 @@ private fun CardDatabaseSection(info: CardDataInfo?, state: CardUpdateState, rul
                 InfoRow(stringResource(R.string.settings_installed), formatInstant(info.importedAt))
             }
         }
-        // Full-width update button: gold, 48 dp, 12 dp corners, sync icon.
+        // Full-width update button: primary, 48 dp, 12 dp corners, sync icon.
         Row(
             Modifier
                 .fillMaxWidth()
@@ -428,7 +428,7 @@ private fun AboutSection() {
             }
         }
         // Wording required by the Wizards of the Coast Fan Content Policy. Kept legible on purpose:
-        // no alpha (the Figma's #4D4637 on navy was ~2:1, and a 0.7 alpha undid the fix).
+        // no alpha (the Figma's #4D4637 on the old navy was ~2:1, and a 0.7 alpha undid the fix).
         Text(
             stringResource(R.string.settings_fan_content),
             style = MaterialTheme.typography.bodySmall,

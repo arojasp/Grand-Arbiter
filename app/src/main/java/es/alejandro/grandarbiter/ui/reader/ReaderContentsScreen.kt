@@ -188,7 +188,7 @@ private fun TocChildRow(number: String?, title: String, penalty: Penalty?, onCli
     }
 }
 
-/** Section number column: rule numbers are gold (design-decisions §9); empty keeps titles aligned. */
+/** Section number column: rule numbers in primary (design-decisions §9); empty keeps titles aligned. */
 @Composable
 private fun SectionNumber(number: String?) {
     Text(

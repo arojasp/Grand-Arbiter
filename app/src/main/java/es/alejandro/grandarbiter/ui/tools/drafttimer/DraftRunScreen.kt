@@ -447,7 +447,7 @@ private fun NextCard(next: DraftStep?) {
 private fun SummaryRow(label: String, value: String, emphasis: Boolean = false) {
     val colors = MaterialTheme.colorScheme
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        // Same as the setup estimate: the total stands out by role and gold, not Bold.
+        // Same as the setup estimate: the total stands out by role and primary, not Bold.
         Text(label, style = if (emphasis) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyMedium,
             color = if (emphasis) colors.onSurface else colors.onSurfaceVariant)
         Text(value, style = (if (emphasis) MaterialTheme.typography.titleSmall else MaterialTheme.typography.labelLarge).copy(fontFeatureSettings = "tnum"),

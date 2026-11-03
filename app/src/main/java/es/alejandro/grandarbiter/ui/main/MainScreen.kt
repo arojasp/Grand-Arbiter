@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,6 +25,7 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -80,6 +84,9 @@ fun MainScreenContent(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },   // app-wide: rules updated, app update ready
+        // No top inset here: each screen's TopAppBar pads for the status bar itself (and draws behind it).
+        // Taking it here too put the status bar height twice above every title.
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
         bottomBar = {
             if (showNavigation && !landscape) {
                 NavigationBar {
@@ -101,7 +108,8 @@ fun MainScreenContent(
             }
         }
     ) { innerPadding ->
-        Row(Modifier.padding(innerPadding).fillMaxSize()) {
+        // consumeWindowInsets: the screens' own Scaffolds don't add the bottom/side insets a second time.
+        Row(Modifier.padding(innerPadding).consumeWindowInsets(innerPadding).fillMaxSize()) {
             if (showNavigation && landscape) {
                 NavigationRail(windowInsets = WindowInsets(0, 0, 0, 0)) {   // the Scaffold already applied the insets
                     Spacer(Modifier.weight(1f))

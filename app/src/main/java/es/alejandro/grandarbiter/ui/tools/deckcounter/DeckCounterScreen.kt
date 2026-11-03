@@ -290,11 +290,12 @@ private fun History(groups: List<Int>) {
 private fun CountPad(n: Int, modifier: Modifier, onClick: () -> Unit) {
     val addLabel = stringResource(R.string.deck_add, n)
     Box(
-        modifier.clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primary)
+        // Tonal, not solid: four big solid blocks in black/white weigh too much (Alejandro).
+        modifier.clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primaryContainer)
             .clickable(role = Role.Button, onClickLabel = addLabel, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(n.toString(), style = MaterialTheme.typography.displayLarge.copy(fontSize = 44.sp, lineHeight = 52.sp), color = MaterialTheme.colorScheme.onPrimary)
+        Text(n.toString(), style = MaterialTheme.typography.displayLarge.copy(fontSize = 44.sp, lineHeight = 52.sp), color = MaterialTheme.colorScheme.onPrimaryContainer)
     }
 }
 

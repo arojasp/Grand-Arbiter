@@ -237,7 +237,7 @@ private fun RoundsCard(rounds: RoundsTable, onOpenRules: (PageRef) -> Unit) {
 
 // ---------------------------------------------------------------- general information
 
-/** The four reminders: one list with gold bullets (they were cards with a checkbox that couldn't be ticked). */
+/** The four reminders: one list with bullets in primary (they were cards with a checkbox that couldn't be ticked). */
 @Composable
 private fun Reminders() {
     val colors = MaterialTheme.colorScheme

@@ -1,70 +1,103 @@
 #!/usr/bin/env python3
 """
-Grand Arbiter app icon: ONE geometry, every output generated from it.
+Grand Arbiter app icon (H2 "tapped ruling"): ONE geometry, every output generated from it.
 
-  app/src/main/res/drawable/ic_launcher_foreground.xml   gold gavel + ring (also the splash icon)
-  app/src/main/res/drawable/ic_launcher_background.xml   navy radial gradient
-  app/src/main/res/drawable/ic_launcher_monochrome.xml   single-color layer for themed icons (Android 13+)
-  branding/play-store-icon-512.png                       Google Play listing icon   (--png, needs cairosvg)
+The mark is a card caught mid-tap (rotated 20 degrees clockwise) with a gavel cut out of it.
+The gavel is a real hole in the card, not painted on top: Android 13 themed icons and the
+splash screen use only the shape, so the cut-out has to exist in the geometry itself.
+
+  app/src/main/res/drawable/ic_launcher_foreground.xml   card with the gavel cut out (INK)
+  app/src/main/res/drawable/ic_launcher_background.xml   flat BG
+  app/src/main/res/drawable/ic_launcher_monochrome.xml   the same single path (themed icons, Android 13+)
+  app/src/main/res/drawable/ic_splash.xml                the same path in @color/splash_icon (dark/light)
+  branding/play-store-icon-512.png                       Google Play listing icon   (--png)
   branding/icon-preview.png                              masks + small sizes check   (--png)
 
 Adaptive icon rules: 108dp canvas, the launcher shows the centre 72dp and masks it; everything
-important stays inside the 66dp safe circle (radius 33). The ring is r=30 (+1.3 stroke) -> inside.
+important stays inside the 66dp safe circle (radius 33). The rotated card's corners reach r~31.
 
-Original artwork: no Wizards of the Coast symbols or art (Fan Content Policy forbids their logos).
+Original artwork: no Wizards of the Coast characters, symbols or art (Fan Content Policy).
+Requires: shapely (geometry). --png also needs cairosvg + pillow.
 Usage: python tools/branding/build_icons.py [--png]
 """
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
+
+from shapely import affinity
+from shapely.geometry import MultiPolygon, Polygon, box
+from shapely.ops import unary_union
 
 ROOT = Path(__file__).resolve().parents[2]
 RES = ROOT / "app" / "src" / "main" / "res" / "drawable"
 BRAND = ROOT / "branding"
 
-NAVY, GLOW = "#101220", "#262A42"                       # theme background / lighter centre
-GOLD, GOLD_DARK, GOLD_LIGHT = "#E6C364", "#A8842E", "#F5DE9A"
+# Launcher colours (Tinta softened, dark). Launchers don't follow the app theme, so the icon picks one.
+BG, INK = "#1C1B19", "#D9D6CF"
 
 # ---- geometry (108 x 108 viewport) -------------------------------------------------------
-RING = dict(cx=54, cy=54, r=30, stroke=2.6)
-GAVEL_TRANSFORM = dict(tx=52.8, ty=54.9, rotation=45, scale=0.70)  # nudged down-left: the head carries the visual weight
+CENTRE = (54, 54)
+TAP_ROTATION = 20                                   # clockwise, like a tapped card
+CARD = (36, 28.5, 36, 51, 4.8)                        # x, y, w, h, corner radius (before the tap)
+GAVEL_TRANSFORM = dict(tx=53.6, ty=55, rotation=25, scale=0.52)   # inside the card, before the tap
 
-# (x, y, w, h, rx, color key, alpha); color keys: fill / dark / light
-GAVEL = [
-    (-3.2, -6, 6.4, 36, 3.2, "fill", 1),        # handle
-    (-4.8, 25.5, 9.6, 7, 3.5, "fill", 1),       # pommel
-    (-19, -22.5, 38, 17, 3, "fill", 1),         # head
-    (-19, -22.5, 38, 4.2, 2, "light", 0.55),    # head highlight
-    (-23, -25, 6, 22, 2.6, "dark", 1),          # left cap
-    (17, -25, 6, 22, 2.6, "dark", 1),           # right cap
-    (-11.5, -22.5, 2.6, 17, 0, "dark", 1),      # band
-    (8.9, -22.5, 2.6, 17, 0, "dark", 1),        # band
+# Gavel parts in their own coordinates (x, y, w, h, corner radius).
+GAVEL_CUT = [
+    (-3.2, -6, 6.4, 36, 3.2),     # handle
+    (-4.8, 25.5, 9.6, 7, 3.5),    # pommel
+    (-19, -22.5, 38, 17, 3),      # head
+    (-23, -25, 6, 22, 2.6),       # left cap
+    (17, -25, 6, 22, 2.6),        # right cap
 ]
+GAVEL_BANDS = [                    # left as card islands inside the cut-out head
+    (-11.5, -22.5, 2.6, 17, 0),
+    (8.9, -22.5, 2.6, 17, 0),
+]
+SEGMENTS = 12                      # arc smoothness: points per quarter circle
+
+
+def rounded_box(x, y, w, h, r) -> Polygon:
+    if r <= 0:
+        return box(x, y, x + w, y + h)
+    return box(x + r, y + r, x + w - r, y + h - r).buffer(r, quad_segs=SEGMENTS)
+
+
+def to_gavel_space(shape):
+    t = GAVEL_TRANSFORM
+    shape = affinity.scale(shape, t["scale"], t["scale"], origin=(0, 0))
+    shape = affinity.rotate(shape, t["rotation"], origin=(0, 0))
+    return affinity.translate(shape, t["tx"], t["ty"])
+
+
+def mark():
+    """Card minus the gavel, plus the bands; rotated by the tap. Returns a (Multi)Polygon."""
+    card = rounded_box(*CARD)
+    cut = to_gavel_space(unary_union([rounded_box(*p) for p in GAVEL_CUT]))
+    bands = to_gavel_space(unary_union([rounded_box(*p) for p in GAVEL_BANDS])).intersection(cut)
+    shape = unary_union([card.difference(cut), bands])
+    return affinity.rotate(shape, TAP_ROTATION, origin=CENTRE)
 
 
 def n(v: float) -> str:
-    return f"{v:.3f}".rstrip("0").rstrip(".")
+    return f"{v:.2f}".rstrip("0").rstrip(".")
 
 
-def rounded_rect(x, y, w, h, r) -> str:
-    """SVG/VectorDrawable path for a rounded rectangle (separated arc flags: Android-safe)."""
-    r = min(r, w / 2, h / 2)
-    if r <= 0:
-        return f"M{n(x)},{n(y)}h{n(w)}v{n(h)}h{n(-w)}Z"
-    return (f"M{n(x + r)},{n(y)}h{n(w - 2 * r)}a{n(r)},{n(r)} 0 0 1 {n(r)},{n(r)}"
-            f"v{n(h - 2 * r)}a{n(r)},{n(r)} 0 0 1 {n(-r)},{n(r)}h{n(-(w - 2 * r))}"
-            f"a{n(r)},{n(r)} 0 0 1 {n(-r)},{n(-r)}v{n(-(h - 2 * r))}a{n(r)},{n(r)} 0 0 1 {n(r)},{n(-r)}Z")
+def path_data(shape) -> str:
+    """Every ring as its own subpath. Draw with the even-odd rule: hole = empty, island = filled."""
+    polys = shape.geoms if isinstance(shape, MultiPolygon) else [shape]
+    out = []
+    for p in polys:
+        for ring in [p.exterior, *p.interiors]:
+            pts = list(ring.coords)[:-1]
+            out.append("M" + "L".join(f"{n(x)},{n(y)}" for x, y in pts) + "Z")
+    return "".join(out)
 
 
-def circle(cx, cy, r) -> str:
-    return f"M{n(cx - r)},{n(cy)}a{n(r)},{n(r)} 0 1 0 {n(2 * r)},0a{n(r)},{n(r)} 0 1 0 {n(-2 * r)},0Z"
-
-
-def colors(mono: bool) -> dict:
-    if mono:   # themed icons use only the alpha: one solid color, no highlight
-        return {"fill": "#FFFFFFFF", "dark": "#FFFFFFFF", "light": None}
-    return {"fill": GOLD, "dark": GOLD_DARK, "light": GOLD_LIGHT}
+def max_radius(shape) -> float:
+    cx, cy = CENTRE
+    return max(math.hypot(x - cx, y - cy) for x, y in shape.convex_hull.exterior.coords)
 
 
 # ---- Android vector drawables ------------------------------------------------------------
@@ -73,65 +106,34 @@ HEADER = ('<?xml version="1.0" encoding="utf-8"?>\n'
           "<!-- Generated by tools/branding/build_icons.py. Do not edit: change the script. -->\n")
 
 
-def vector_foreground(mono: bool) -> str:
-    c = colors(mono)
-    t = GAVEL_TRANSFORM
-    ring_color = c["fill"]
-    out = [HEADER + '<vector xmlns:android="http://schemas.android.com/apk/res/android"',
-           '    android:width="108dp" android:height="108dp"',
-           '    android:viewportWidth="108" android:viewportHeight="108">',
-           f'    <path android:pathData="{circle(RING["cx"], RING["cy"], RING["r"])}"',
-           f'        android:strokeColor="{ring_color}" android:strokeWidth="{n(RING["stroke"])}" />',
-           f'    <group android:translateX="{n(t["tx"])}" android:translateY="{n(t["ty"])}"',
-           f'        android:rotation="{n(t["rotation"])}" android:scaleX="{n(t["scale"])}" android:scaleY="{n(t["scale"])}">']
-    for x, y, w, h, r, key, alpha in GAVEL:
-        color = c[key]
-        if color is None:
-            continue
-        a = f' android:fillAlpha="{n(alpha)}"' if alpha != 1 else ""
-        out.append(f'        <path android:pathData="{rounded_rect(x, y, w, h, r)}" android:fillColor="{color}"{a} />')
-    out += ["    </group>", "</vector>", ""]
-    return "\n".join(out)
+def vector(fill: str, d: str) -> str:
+    return HEADER + f'''<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="{fill}" android:fillType="evenOdd"
+        android:pathData="{d}" />
+</vector>
+'''
 
 
 def vector_background() -> str:
     return HEADER + f'''<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:pathData="M0,0h108v108h-108Z">
-        <aapt:attr name="android:fillColor">
-            <gradient android:type="radial" android:centerX="54" android:centerY="50"
-                android:gradientRadius="54" android:startColor="{GLOW}" android:endColor="{NAVY}" />
-        </aapt:attr>
-    </path>
+    <path android:fillColor="{BG}" android:pathData="M0,0h108v108h-108Z" />
 </vector>
 '''
 
 
 # ---- SVG (previews and the Play Store PNG) -----------------------------------------------
 
-def svg(mono: bool = False, with_background: bool = True) -> str:
-    c = colors(mono)
-    if mono:
-        c = {k: ("#000000" if v else None) for k, v in c.items()}
-    t = GAVEL_TRANSFORM
-    parts = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">']
-    if with_background:
-        parts.append(f'<defs><radialGradient id="g" cx="54" cy="50" r="54" gradientUnits="userSpaceOnUse">'
-                     f'<stop offset="0" stop-color="{GLOW}"/><stop offset="1" stop-color="{NAVY}"/></radialGradient></defs>'
-                     '<rect width="108" height="108" fill="url(#g)"/>')
-    parts.append(f'<path d="{circle(RING["cx"], RING["cy"], RING["r"])}" fill="none" stroke="{c["fill"]}" stroke-width="{RING["stroke"]}"/>')
-    parts.append(f'<g transform="translate({t["tx"]} {t["ty"]}) rotate({t["rotation"]}) scale({t["scale"]})">')
-    for x, y, w, h, r, key, alpha in GAVEL:
-        if c[key] is None:
-            continue
-        parts.append(f'<path d="{rounded_rect(x, y, w, h, r)}" fill="{c[key]}" fill-opacity="{alpha}"/>')
-    parts.append("</g></svg>")
-    return "".join(parts)
+def svg(d: str, fill: str = INK, background: str | None = BG) -> str:
+    bg = f'<rect width="108" height="108" fill="{background}"/>' if background else ""
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">{bg}'
+            f'<path d="{d}" fill="{fill}" fill-rule="evenodd"/></svg>')
 
 
-def write_png() -> None:
+def write_png(d: str) -> None:
     import io
     import cairosvg
     from PIL import Image, ImageDraw
@@ -141,17 +143,12 @@ def write_png() -> None:
 
     BRAND.mkdir(parents=True, exist_ok=True)
     # Play Store: 512x512, full square (Google applies its own mask). Visible area = centre 72/108.
-    big = render(svg(), 768)
+    big = render(svg(d), 768)
     big.crop((128, 128, 640, 640)).convert("RGB").save(BRAND / "play-store-icon-512.png", optimize=True)
 
-    def launcher(px: int, radius: float, mono: bool = False) -> Image.Image:
+    def launcher(px: int, radius: float, markup: str) -> Image.Image:
         full = int(px * 108 / 72)
-        if mono:
-            fg = render(svg(mono=True, with_background=False), full)
-            img = Image.new("RGBA", (full, full), "#E8DEF8")
-            img.paste(Image.new("RGBA", (full, full), "#4A4458"), (0, 0), fg.split()[3])
-        else:
-            img = render(svg(), full)
+        img = render(markup, full)
         off = (full - px) // 2
         img = img.crop((off, off, off + px, off + px))
         mask = Image.new("L", (px * 4, px * 4), 0)
@@ -160,24 +157,33 @@ def write_png() -> None:
         out.paste(img, (0, 0), mask.resize((px, px), Image.LANCZOS))
         return out
 
-    sheet = Image.new("RGBA", (960, 260), "#F4F1EA")
+    themed = svg(d, fill="#4A4458", background="#E8DEF8")           # Material You sample tint
+    splash_light = svg(d, fill="#2B2926", background="#F6F1E7")
+    sheet = Image.new("RGBA", (1180, 260), "#F4F1EA")
     x = 20
     for radius in (0.5, 0.38, 0.22):
-        sheet.alpha_composite(launcher(192, radius), (x, 34)); x += 212
-    sheet.alpha_composite(launcher(48, 0.5), (x + 10, 60))
-    sheet.alpha_composite(launcher(36, 0.5), (x + 18, 130))
-    sheet.alpha_composite(launcher(96, 0.5, mono=True), (x + 90, 82))
+        sheet.alpha_composite(launcher(192, radius, svg(d)), (x, 34)); x += 212
+    sheet.alpha_composite(launcher(48, 0.5, svg(d)), (x + 10, 60))
+    sheet.alpha_composite(launcher(36, 0.5, svg(d)), (x + 18, 130))
+    sheet.alpha_composite(launcher(24, 0.5, svg(d)), (x + 24, 190))
+    sheet.alpha_composite(launcher(96, 0.5, themed), (x + 90, 82))
+    sheet.alpha_composite(launcher(96, 0.5, splash_light), (x + 210, 82))
     sheet.save(BRAND / "icon-preview.png")
 
 
 def main() -> int:
+    shape = mark()
+    r = max_radius(shape)
+    assert r <= 33, f"mark reaches r={r:.1f}, outside the 33dp safe circle"
+    d = path_data(shape)
     RES.mkdir(parents=True, exist_ok=True)
-    (RES / "ic_launcher_foreground.xml").write_text(vector_foreground(False), encoding="utf-8", newline="\n")
-    (RES / "ic_launcher_monochrome.xml").write_text(vector_foreground(True), encoding="utf-8", newline="\n")
+    (RES / "ic_launcher_foreground.xml").write_text(vector(INK, d), encoding="utf-8", newline="\n")
+    (RES / "ic_launcher_monochrome.xml").write_text(vector("#FFFFFFFF", d), encoding="utf-8", newline="\n")
     (RES / "ic_launcher_background.xml").write_text(vector_background(), encoding="utf-8", newline="\n")
-    print("wrote ic_launcher_{foreground,background,monochrome}.xml")
+    (RES / "ic_splash.xml").write_text(vector("@color/splash_icon", d), encoding="utf-8", newline="\n")
+    print(f"wrote ic_launcher_{{foreground,background,monochrome}}.xml, ic_splash.xml (mark radius {r:.1f}/33)")
     if "--png" in sys.argv:
-        write_png()
+        write_png(d)
         print("wrote branding/play-store-icon-512.png, branding/icon-preview.png")
     return 0
 

@@ -169,7 +169,7 @@ private fun TermRow(
             Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Gold while open: a real state (design-decisions §1).
+            // primary while open: a real state (design-decisions §1).
             Text(entry.term, style = MaterialTheme.typography.titleMedium,
                 color = if (expanded) colors.primary else colors.onSurface, modifier = Modifier.weight(1f))
             Icon(painterResource(if (expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right), null,

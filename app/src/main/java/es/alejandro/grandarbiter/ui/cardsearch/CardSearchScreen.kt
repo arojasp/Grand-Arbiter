@@ -1,5 +1,7 @@
 package es.alejandro.grandarbiter.ui.cardsearch
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -232,16 +234,22 @@ private fun ResultsMeta(count: Int, inText: Boolean, onInTextChange: (Boolean) -
         Text(
             label.uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.55.sp),
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f).alpha(0.6f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,   // was onSurface at 0.6 alpha (no alpha on text)
+            modifier = Modifier.weight(1f),
         )
         Box {
-            IconButton(onClick = { menu = true }) {
+            IconButton(
+                onClick = { menu = true },
+                // A filled tonal circle when a filter is on, so it's never applied without the judge
+                // noticing (it was gold; with a neutral palette a tint alone isn't enough).
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = if (inText) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                ),
+            ) {
                 Icon(
                     Icons.Default.FilterList,
                     contentDescription = stringResource(R.string.cards_filter),
-                    // Gold when a filter is on, so it's never applied without the judge noticing.
-                    tint = if (inText) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (inText) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp),
                 )
             }

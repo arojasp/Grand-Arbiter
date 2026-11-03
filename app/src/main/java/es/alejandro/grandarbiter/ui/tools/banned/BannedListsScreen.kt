@@ -62,7 +62,7 @@ import java.time.format.FormatStyle
  * points list (Scryfall has no such data).
  * Layout (canvas "Lote F · Banned"): the formats are one grouped list, like the rules contents and
  * Release Notes; an open format's cards are indented rows inside it. Search matches: tinted row,
- * gold bold name (no side stripe).
+ * bold name in primary (no side stripe).
  */
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -202,7 +202,7 @@ private fun FormatItem(
     }
 }
 
-/** A banned/restricted card. A search match gets a tinted row and a gold bold name. */
+/** A banned/restricted card. A search match gets a tinted row and a bold name in primary. */
 @Composable
 private fun EntryRow(entry: BanListEntry, format: String, highlighted: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme

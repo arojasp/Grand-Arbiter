@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.ui.settings
 
+import es.alejandro.grandarbiter.domain.model.ThemeMode
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -107,7 +108,7 @@ fun SettingsScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
-            item { AccessibilitySection(display, viewModel::setTextScale, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
+            item { AccessibilitySection(display, viewModel::setTextScale, viewModel::setThemeMode, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
             item { DocumentsSection(documents) }
             item { CardDatabaseSection(cardData, updateState, rulesUpdateState, viewModel::checkForUpdates) }
             item { AboutSection() }
@@ -121,6 +122,7 @@ fun SettingsScreen(
 private fun AccessibilitySection(
     display: DisplaySettings,
     onTextScale: (TextScale) -> Unit,
+    onThemeMode: (ThemeMode) -> Unit,
     onHighContrast: (Boolean) -> Unit,
     onKeepScreenOn: (Boolean) -> Unit,
 ) {
@@ -155,6 +157,19 @@ private fun AccessibilitySection(
                 }
             }
             PanelDivider()
+            // Dark, light, or follow the system setting (ThemeMode, stored in SettingsDataStore).
+            PanelRow {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(stringResource(R.string.settings_theme), style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
+                    Segmented(
+                        options = THEME_OPTIONS,
+                        selected = display.themeMode,
+                        label = { stringResource(it.label()) },
+                        onSelect = onThemeMode,
+                    )
+                }
+            }
+            PanelDivider()
             SwitchRow(stringResource(R.string.settings_high_contrast), stringResource(R.string.settings_high_contrast_hint),
                 display.highContrast, onHighContrast)
             PanelDivider()
@@ -162,6 +177,15 @@ private fun AccessibilitySection(
                 display.keepScreenOn, onKeepScreenOn)
         }
     }
+}
+
+/** Order shown: Dark (the default), Light, System. */
+private val THEME_OPTIONS = listOf(ThemeMode.DARK, ThemeMode.LIGHT, ThemeMode.SYSTEM)
+
+private fun ThemeMode.label(): Int = when (this) {
+    ThemeMode.DARK -> R.string.settings_theme_dark
+    ThemeMode.LIGHT -> R.string.settings_theme_light
+    ThemeMode.SYSTEM -> R.string.settings_theme_system
 }
 
 private fun TextScale.label(): Int = when (this) {

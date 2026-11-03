@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.ui.settings
 
+import es.alejandro.grandarbiter.domain.model.ThemeMode
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
@@ -50,6 +51,7 @@ class SettingsViewModel(
         updater.checkForUpdates()
     }
     fun setTextScale(scale: TextScale) = viewModelScope.launch { settings.setTextScale(scale) }
+    fun setThemeMode(mode: ThemeMode) = viewModelScope.launch { settings.setThemeMode(mode) }
     fun setHighContrast(enabled: Boolean) = viewModelScope.launch { settings.setHighContrast(enabled) }
     fun setKeepScreenOn(enabled: Boolean) = viewModelScope.launch { settings.setKeepScreenOn(enabled) }
 

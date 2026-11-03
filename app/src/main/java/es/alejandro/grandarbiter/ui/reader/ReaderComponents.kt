@@ -37,17 +37,23 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -118,13 +124,53 @@ fun MarkupText(
             }
         }
     }
-    Text(text = text, modifier = modifier, style = style.copy(lineHeight = 21.sp), color = color)
+    // Glossary terms get a dotted underline, drawn by hand: TextDecoration only has a solid one,
+    // and solid is what rule references use.
+    val glossaryRanges = remember(text) {
+        text.getLinkAnnotations(0, text.length)
+            .filter { (it.item as? LinkAnnotation.Clickable)?.tag?.startsWith(GLOSSARY_TAG) == true }
+            .map { it.start until it.end }
+    }
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    Text(
+        text = text,
+        modifier = if (glossaryRanges.isEmpty()) modifier else modifier.drawBehind {
+            val result = layout ?: return@drawBehind
+            if (result.layoutInput.text != text) return@drawBehind   // stale layout after a text change
+            val stroke = 1.5.dp.toPx()
+            val dots = PathEffect.dashPathEffect(floatArrayOf(stroke, stroke))
+            val below = 2.5.dp.toPx()
+            for (range in glossaryRanges) {
+                var start = range.first
+                while (start <= range.last) {
+                    val line = result.getLineForOffset(start)
+                    val end = minOf(range.last, result.getLineEnd(line, visibleEnd = true) - 1)
+                    if (end >= start) {   // a line break inside a term: one segment per line
+                        val y = result.getLineBaseline(line) + below
+                        drawLine(
+                            color = linkColor,
+                            start = Offset(result.getBoundingBox(start).left, y),
+                            end = Offset(result.getBoundingBox(end).right, y),
+                            strokeWidth = stroke,
+                            pathEffect = dots,
+                        )
+                    }
+                    start = result.getLineEnd(line)
+                }
+            }
+        },
+        style = style.copy(lineHeight = 21.sp),
+        color = color,
+        onTextLayout = { layout = it },
+    )
 }
 
+private const val GLOSSARY_TAG = "glossary:"
+
 /**
- * Glossary terms as quiet links: Medium weight, not underlined (rule references are Medium +
- * underlined), so the two kinds of link read differently and both stand out from Regular body
- * text even when the link color is the text color (palette Tinta). Tapping one shows its definition.
+ * Glossary terms: Medium weight + a dotted underline (drawn in [MarkupText]); rule references are
+ * Medium + a solid underline. With palette Tinta the link color is the text color, so the line is
+ * what tells a term apart (Medium alone was too subtle). Tapping one shows its definition.
  */
 private fun AnnotatedString.Builder.appendWithGlossary(
     text: String,
@@ -136,7 +182,7 @@ private fun AnnotatedString.Builder.appendWithGlossary(
     for (match in glossary.linker.find(text, linked)) {
         append(text.substring(at, match.start))
         val entry = match.entry
-        withLink(LinkAnnotation.Clickable(tag = "glossary:${entry.term}", styles = TextLinkStyles(SpanStyle(color = color, fontWeight = FontWeight.Medium))) {
+        withLink(LinkAnnotation.Clickable(tag = "$GLOSSARY_TAG${entry.term}", styles = TextLinkStyles(SpanStyle(color = color, fontWeight = FontWeight.Medium))) {
             glossary.onTermClick(entry)
         }) { append(text.substring(match.start, match.end)) }
         at = match.end

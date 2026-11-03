@@ -70,6 +70,16 @@ Rediseño de toda la app. El lector de reglas, las Release Notes, Banned & Restr
 
 ### Phase 4 — Palette "Tinta" (branch `feature/palette-tinta`)
 
+Released in **1.3.0 (versionCode 10)**. Play text, copied to `whatsnew/`:
+
+**en-US** (431 characters)
+
+A new look made for reading: black and white with softer contrast and warm paper tones, larger rule text, and a dotted underline on glossary terms. New app icon. In Settings you can now pick a light or dark theme or follow the phone, which is the default. Color stays only where it means something, such as penalties, legality and mana. Fixes: less empty space above screen titles, and no dark flash at launch with the light theme.
+
+**es-ES** (478 characters)
+
+Un aspecto nuevo pensado para leer: blanco y negro con un contraste más suave y tonos cálidos de papel, texto de reglas más grande y subrayado punteado en los términos del glosario. Icono nuevo. En Ajustes ya puedes elegir tema claro u oscuro, o seguir al móvil, que es la opción por defecto. El color queda solo donde significa algo, como penalizaciones, legalidad y maná. Correcciones: menos espacio vacío sobre los títulos y ningún destello oscuro al abrir con el tema claro.
+
 | Commit | English | Español |
 |---|---|---|
 | Penalties: own severity scale; Palette Tinta; Tinta: cues that relied on gold; Glossary terms: dotted underline | New black-and-white look: the interface is neutral grey, and color is kept for what means something in Magic — penalties (now a clear scale from No Penalty to Disqualification), legality and mana. Glossary terms now have a dotted underline (rule links keep the solid one), an active Card Search filter is easier to spot, and the «Updated» label stands out. | Nuevo aspecto en blanco y negro: la interfaz es gris neutro y el color se reserva para lo que significa algo en Magic — penalizaciones (ahora una escala clara de No Penalty a Disqualification), legalidad y maná. Los términos del glosario llevan ahora subrayado punteado (los enlaces a reglas mantienen el continuo), un filtro activo en Card Search se ve mejor y la etiqueta «Updated» destaca. |

@@ -27,7 +27,7 @@ class SettingsDataStore(private val context: Context) {
 
     val displaySettings: Flow<DisplaySettings> = context.dataStore.data.map { p ->
         DisplaySettings(
-            themeMode = enumOr(p[THEME_MODE], ThemeMode.DARK),
+            themeMode = enumOr(p[THEME_MODE], ThemeMode.SYSTEM),   // not chosen yet: follow the system, like the first splash
             textScale = enumOr(p[TEXT_SCALE], TextScale.DEFAULT),
             highContrast = p[HIGH_CONTRAST] ?: false,
             keepScreenOn = p[KEEP_SCREEN_ON] ?: false,

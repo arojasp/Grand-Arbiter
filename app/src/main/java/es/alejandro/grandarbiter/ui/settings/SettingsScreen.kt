@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.ui.settings
 
+import es.alejandro.grandarbiter.domain.model.ThemeMode
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -107,7 +108,7 @@ fun SettingsScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
-            item { AccessibilitySection(display, viewModel::setTextScale, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
+            item { AccessibilitySection(display, viewModel::setTextScale, viewModel::setThemeMode, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
             item { DocumentsSection(documents) }
             item { CardDatabaseSection(cardData, updateState, rulesUpdateState, viewModel::checkForUpdates) }
             item { AboutSection() }
@@ -121,6 +122,7 @@ fun SettingsScreen(
 private fun AccessibilitySection(
     display: DisplaySettings,
     onTextScale: (TextScale) -> Unit,
+    onThemeMode: (ThemeMode) -> Unit,
     onHighContrast: (Boolean) -> Unit,
     onKeepScreenOn: (Boolean) -> Unit,
 ) {
@@ -155,6 +157,19 @@ private fun AccessibilitySection(
                 }
             }
             PanelDivider()
+            // Dark, light, or follow the system setting (ThemeMode, stored in SettingsDataStore).
+            PanelRow {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(stringResource(R.string.settings_theme), style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
+                    Segmented(
+                        options = THEME_OPTIONS,
+                        selected = display.themeMode,
+                        label = { stringResource(it.label()) },
+                        onSelect = onThemeMode,
+                    )
+                }
+            }
+            PanelDivider()
             SwitchRow(stringResource(R.string.settings_high_contrast), stringResource(R.string.settings_high_contrast_hint),
                 display.highContrast, onHighContrast)
             PanelDivider()
@@ -164,6 +179,15 @@ private fun AccessibilitySection(
     }
 }
 
+/** Order shown: Dark (the default), Light, System. */
+private val THEME_OPTIONS = listOf(ThemeMode.DARK, ThemeMode.LIGHT, ThemeMode.SYSTEM)
+
+private fun ThemeMode.label(): Int = when (this) {
+    ThemeMode.DARK -> R.string.settings_theme_dark
+    ThemeMode.LIGHT -> R.string.settings_theme_light
+    ThemeMode.SYSTEM -> R.string.settings_theme_system
+}
+
 private fun TextScale.label(): Int = when (this) {
     TextScale.SMALL -> R.string.settings_text_small
     TextScale.DEFAULT -> R.string.settings_text_default
@@ -171,7 +195,7 @@ private fun TextScale.label(): Int = when (this) {
     TextScale.EXTRA_LARGE -> R.string.settings_text_extra_large
 }
 
-/** Segmented control: track surfaceContainerHighest, selected segment in gold; 40 dp segments in a 48 dp track. */
+/** Segmented control: track surfaceContainerHighest, selected segment in primary; 40 dp segments in a 48 dp track. */
 @Composable
 private fun <T> Segmented(options: List<T>, selected: T, label: @Composable (T) -> String, onSelect: (T) -> Unit) {
     val colors = MaterialTheme.colorScheme
@@ -281,7 +305,7 @@ private fun CardDatabaseSection(info: CardDataInfo?, state: CardUpdateState, rul
                 InfoRow(stringResource(R.string.settings_installed), formatInstant(info.importedAt))
             }
         }
-        // Full-width update button: gold, 48 dp, 12 dp corners, sync icon.
+        // Full-width update button: primary, 48 dp, 12 dp corners, sync icon.
         Row(
             Modifier
                 .fillMaxWidth()
@@ -428,7 +452,7 @@ private fun AboutSection() {
             }
         }
         // Wording required by the Wizards of the Coast Fan Content Policy. Kept legible on purpose:
-        // no alpha (the Figma's #4D4637 on navy was ~2:1, and a 0.7 alpha undid the fix).
+        // no alpha (the Figma's #4D4637 on the old navy was ~2:1, and a 0.7 alpha undid the fix).
         Text(
             stringResource(R.string.settings_fan_content),
             style = MaterialTheme.typography.bodySmall,

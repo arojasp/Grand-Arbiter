@@ -8,11 +8,9 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Density
 import androidx.core.view.WindowCompat
 import es.alejandro.grandarbiter.domain.model.TextScale
 import es.alejandro.grandarbiter.domain.model.ThemeMode
@@ -93,15 +91,12 @@ private val DarkColorScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
 
-/**
- * High contrast: same navy surfaces, but near-white text, brighter gold and strong borders.
- * Only the high-contrast colors these schemes use are kept in Color.kt (the generated palettes had the old brown background).
- */
+/** High contrast: the same greys, with pure white/black text and actions and strong borders. */
 private val DarkHighContrastScheme = DarkColorScheme.copy(
-    primary = Color(0xFFFFD978),
+    primary = primaryDarkHighContrast,
     onSurface = onSurfaceDarkHighContrast,
     onBackground = onSurfaceDarkHighContrast,
-    onSurfaceVariant = Color(0xFFF1E8D8),
+    onSurfaceVariant = onSurfaceVariantDarkHighContrast,
     outline = outlineDarkHighContrast,
     outlineVariant = outlineVariantDarkHighContrast,
     error = errorDarkHighContrast,
@@ -119,7 +114,7 @@ private val LightHighContrastScheme = LightColorScheme.copy(
 
 @Composable
 fun GrandArbiterTheme(
-    themeMode: ThemeMode = ThemeMode.DARK,
+    themeMode: ThemeMode,
     textScale: TextScale = TextScale.DEFAULT,
     highContrast: Boolean = false,
     content: @Composable () -> Unit

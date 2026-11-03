@@ -10,7 +10,7 @@ enum class TextScale(val factor: Float) {
 
 /** Everything that changes how the whole app looks or behaves, read once at the root. */
 data class DisplaySettings(
-    val themeMode: ThemeMode = ThemeMode.DARK,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val textScale: TextScale = TextScale.DEFAULT,
     val highContrast: Boolean = false,
     val keepScreenOn: Boolean = false,

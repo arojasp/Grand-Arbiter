@@ -68,7 +68,7 @@ fun HoldToConfirmButton(
     onStateChange: (HoldState) -> Unit = {},
 ) {
     val colors = MaterialTheme.colorScheme
-    val gold = colors.primary
+    val accent = colors.primary
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val progress = remember { Animatable(0f) }
@@ -79,15 +79,15 @@ fun HoldToConfirmButton(
         modifier
             .heightIn(min = 48.dp)
             .clip(CircleShape)
-            .drawBehind { drawRect(gold.copy(alpha = 0.35f), size = Size(size.width * progress.value, size.height)) }
-            .border(1.dp, gold.softened(0.6f), CircleShape)
+            .drawBehind { drawRect(accent.copy(alpha = 0.35f), size = Size(size.width * progress.value, size.height)) }
+            .border(1.dp, accent.softened(0.6f), CircleShape)
             .holdToConfirm(text, progress, holdMillis, scope, haptics, onConfirm = { confirm() }, onStateChange = { stateChange(it) })
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (!ringAtEnd) HoldRing(progress.value)
-        Text(text, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium), color = gold, maxLines = 1)
+        Text(text, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium), color = accent, maxLines = 1)
         if (ringAtEnd) HoldRing(progress.value)
     }
 }
@@ -106,7 +106,7 @@ fun HoldToConfirmIconButton(
     onStateChange: (HoldState) -> Unit = {},
 ) {
     val colors = MaterialTheme.colorScheme
-    val gold = colors.primary
+    val accent = colors.primary
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val progress = remember { Animatable(0f) }
@@ -118,13 +118,13 @@ fun HoldToConfirmIconButton(
         modifier
             .size(48.dp)
             .clip(shape)
-            .drawBehind { drawRect(gold.copy(alpha = 0.35f), size = Size(size.width * progress.value, size.height)) }
+            .drawBehind { drawRect(accent.copy(alpha = 0.35f), size = Size(size.width * progress.value, size.height)) }
             .border(1.dp, colors.outline, shape)
             .semantics { this.contentDescription = contentDescription }
             .holdToConfirm(contentDescription, progress, holdMillis, scope, haptics, onConfirm = { confirm() }, onStateChange = { stateChange(it) }),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, contentDescription = null, tint = gold)
+        Icon(icon, contentDescription = null, tint = accent)
     }
 }
 
@@ -172,11 +172,11 @@ private fun Modifier.holdToConfirm(
 /** Faint full ring + the part already held: says "hold me" at rest, shows progress while held. */
 @Composable
 private fun HoldRing(progress: Float) {
-    val gold = MaterialTheme.colorScheme.primary
+    val accent = MaterialTheme.colorScheme.primary
     Canvas(Modifier.size(14.dp)) {
         val stroke = Stroke(width = 1.5.dp.toPx())
-        drawCircle(gold.copy(alpha = 0.35f), style = stroke)
-        drawArc(gold, startAngle = -90f, sweepAngle = 360f * progress, useCenter = false, style = stroke)
+        drawCircle(accent.copy(alpha = 0.35f), style = stroke)
+        drawArc(accent, startAngle = -90f, sweepAngle = 360f * progress, useCenter = false, style = stroke)
     }
 }
 

@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.GrandArbiter" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- windowBackground: what shows before Compose draws, matching the splash (no white/navy flash). -->
+    <style name="Theme.GrandArbiter" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/splash_background</item>
+    </style>
 
-    <!-- Splash: the icon's foreground (gavel + ring) alone on the app's navy. The ring fits the
-         splash's visible circle (2/3 of the icon), so no icon background is needed. -->
+    <!-- Splash: the gavel + ring alone, in one color, on the palette background; both follow the
+         app theme on Android 12+ (MainActivity sets the app night mode), the system mode before. The ring fits the splash's visible circle (2/3 of the icon). -->
     <style name="SplashTheme" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
-        <item name="windowSplashScreenBackground">@color/brand_navy</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="postSplashScreenTheme">@style/Theme.GrandArbiter</item>
     </style>
 </resources>

@@ -55,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.data.rules.bundle.DocumentId
+import es.alejandro.grandarbiter.domain.model.ThemeMode
 import es.alejandro.grandarbiter.domain.model.quickrefs.QuickReference
 import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
@@ -235,7 +236,7 @@ fun DocumentId.titleRes(): Int = when (this) {
 @Preview(showBackground = true)
 @Composable
 private fun ReferenceListPreview() {
-    GrandArbiterTheme(highContrast = true) {
+    GrandArbiterTheme(highContrast = true, themeMode = ThemeMode.DARK) {
         Box(Modifier.padding(16.dp)) { Panel {
             listOf(
                 QuickReference(1, "Triggers", DocumentId.CR, isPreset = true, firstRuleNumber = "603.2", ruleCount = 3),

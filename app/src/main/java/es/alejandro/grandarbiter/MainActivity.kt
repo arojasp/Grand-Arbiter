@@ -1,5 +1,7 @@
 package es.alejandro.grandarbiter
 
+import android.app.UiModeManager
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -23,6 +25,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import es.alejandro.grandarbiter.domain.model.ThemeMode
 import es.alejandro.grandarbiter.domain.model.rules.RulesDocumentInfo
 import es.alejandro.grandarbiter.ui.main.MainScreen
 import es.alejandro.grandarbiter.ui.main.MainViewModel
@@ -40,7 +43,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var appUpdates: AppUpdateController
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        // Splash stays until the stored display settings are read (theme: no dark-then-light flash).
+        installSplashScreen().setKeepOnScreenCondition { viewModel.displaySettings.value == null }
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -48,8 +52,25 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) { viewModel.appUpdateRequired.collect(appUpdates::setRequired) }
         }
+        // Android 12+: tell the system the in-app theme. It keeps it for the app, so the next
+        // launch's splash is drawn dark or light to match (the splash shows before any app code).
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val uiModes = getSystemService(UiModeManager::class.java)
+            lifecycleScope.launch {
+                viewModel.themeMode.collect { mode ->
+                    val night = when (mode) {
+                        ThemeMode.DARK -> UiModeManager.MODE_NIGHT_YES
+                        ThemeMode.LIGHT -> UiModeManager.MODE_NIGHT_NO
+                        ThemeMode.SYSTEM -> UiModeManager.MODE_NIGHT_AUTO
+                    }
+                    // No "already set?" check: getNightMode() may report the system mode, not the app's.
+                    uiModes.setApplicationNightMode(night)
+                }
+            }
+        }
         setContent {
-            val settings by viewModel.displaySettings.collectAsState()
+            val loaded by viewModel.displaySettings.collectAsState()
+            val settings = loaded ?: return@setContent   // the splash is still up (see above)
             // Only while the app is in the foreground: the flag goes with the window.
             LaunchedEffect(settings.keepScreenOn) {
                 if (settings.keepScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

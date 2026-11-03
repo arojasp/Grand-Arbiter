@@ -19,7 +19,7 @@
         android:theme="@style/Theme.GrandArbiter">
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode"
             android:exported="true"
             android:theme="@style/SplashTheme">
             <intent-filter>

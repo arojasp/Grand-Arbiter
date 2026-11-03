@@ -7,7 +7,7 @@
     </style>
 
     <!-- Splash: the gavel + ring alone, in one color, on the palette background; both follow the
-         system dark/light mode. The ring fits the splash's visible circle (2/3 of the icon). -->
+         app theme on Android 12+ (MainActivity sets the app night mode), the system mode before. The ring fits the splash's visible circle (2/3 of the icon). -->
     <style name="SplashTheme" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>

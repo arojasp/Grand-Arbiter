@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.domain.model.DisplaySettings
+import es.alejandro.grandarbiter.domain.model.ThemeMode
 import es.alejandro.grandarbiter.domain.model.rules.RulesDocumentInfo
 import es.alejandro.grandarbiter.domain.model.rules.RulesUpdateState
 import es.alejandro.grandarbiter.data.releasenotes.ReleaseNotesRepository
@@ -24,6 +25,9 @@ class MainViewModel(
     releaseNotes: ReleaseNotesRepository,
 ) : ViewModel() {
     /** Theme, text size, contrast and keep-screen-on, applied at the app root. */
+    /** Stored theme only (no stateIn default): MainActivity hands it to the system for the splash. */
+    val themeMode: Flow<ThemeMode> = settingsDataStore.themeMode
+
     val displaySettings: StateFlow<DisplaySettings> = settingsDataStore.displaySettings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DisplaySettings())
 

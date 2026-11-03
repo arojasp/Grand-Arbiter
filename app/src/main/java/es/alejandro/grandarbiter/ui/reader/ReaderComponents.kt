@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.ui.reader
 
+import es.alejandro.grandarbiter.ui.theme.penaltyColors
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -299,14 +300,7 @@ fun penaltyLabel(penalty: Penalty): Int = when (penalty) {
 
 @Composable
 fun PenaltyBadge(penalty: Penalty, modifier: Modifier = Modifier, compact: Boolean = false) {
-    val colors = MaterialTheme.colorScheme
-    val (background, content) = when (penalty) {
-        Penalty.NONE -> colors.secondaryContainer to colors.onSecondaryContainer
-        Penalty.WARNING -> colors.tertiaryContainer to colors.onTertiaryContainer
-        Penalty.GAME_LOSS -> colors.errorContainer to colors.onErrorContainer
-        Penalty.MATCH_LOSS -> colors.error to colors.onError
-        Penalty.DISQUALIFICATION -> Color(0xFF5C0000) to Color.White
-    }
+    val (background, content) = penaltyColors(penalty)   // severity scale, independent of the palette
     Surface(color = background, shape = RoundedCornerShape(4.dp), modifier = modifier) {
         Text(
             text = stringResource(penaltyLabel(penalty)).uppercase(),

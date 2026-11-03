@@ -136,7 +136,9 @@ fun MarkupText(
         text = text,
         modifier = if (glossaryRanges.isEmpty()) modifier else modifier.drawBehind {
             val result = layout ?: return@drawBehind
-            if (result.layoutInput.text != text) return@drawBehind   // stale layout after a text change
+            // Stale layout after a text change? Compare the characters only: Text applies the link
+            // styles before layout, so the laid-out AnnotatedString is never equal to `text`.
+            if (result.layoutInput.text.text != text.text) return@drawBehind
             val stroke = 1.5.dp.toPx()
             val dots = PathEffect.dashPathEffect(floatArrayOf(stroke, stroke))
             val below = 2.5.dp.toPx()

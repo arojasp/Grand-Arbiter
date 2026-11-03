@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Same navy as the dark theme background (ui/theme/Color.kt backgroundDark). -->
-    <color name="brand_navy">#FF101220</color>
+    <!-- Splash and window background before Compose draws: the Tinta palette (ui/theme/Color.kt).
+         The splash shows before the app reads its own theme setting, so it follows the system mode
+         (values-night/). Light: backgroundLight / onSurfaceLight. -->
+    <color name="splash_background">#FFFAFAF7</color>
+    <color name="splash_icon">#FF171717</color>
 </resources>

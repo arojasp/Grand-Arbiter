@@ -122,8 +122,9 @@ fun MarkupText(
 }
 
 /**
- * Glossary terms as quiet links: gold, not underlined (rule references are underlined), so
- * the two kinds of link read differently. Tapping one shows its definition.
+ * Glossary terms as quiet links: Medium weight, not underlined (rule references are Medium +
+ * underlined), so the two kinds of link read differently and both stand out from Regular body
+ * text even when the link color is the text color (palette Tinta). Tapping one shows its definition.
  */
 private fun AnnotatedString.Builder.appendWithGlossary(
     text: String,
@@ -135,7 +136,7 @@ private fun AnnotatedString.Builder.appendWithGlossary(
     for (match in glossary.linker.find(text, linked)) {
         append(text.substring(at, match.start))
         val entry = match.entry
-        withLink(LinkAnnotation.Clickable(tag = "glossary:${entry.term}", styles = TextLinkStyles(SpanStyle(color = color))) {
+        withLink(LinkAnnotation.Clickable(tag = "glossary:${entry.term}", styles = TextLinkStyles(SpanStyle(color = color, fontWeight = FontWeight.Medium))) {
             glossary.onTermClick(entry)
         }) { append(text.substring(match.start, match.end)) }
         at = match.end

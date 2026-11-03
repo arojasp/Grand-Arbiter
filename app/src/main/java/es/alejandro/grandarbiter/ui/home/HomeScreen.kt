@@ -209,7 +209,7 @@ fun JudgeCallTimerCard(
                     text = formatTime(elapsedTime),
                     // Tabular figures: the digits keep their width, so the time doesn't jiggle while counting.
                     style = MaterialTheme.typography.displayMedium.copy(fontFeatureSettings = "tnum"),
-                    color = if (isRunning) colors.primary else colors.onSurface,   // running is a real state
+                    color = colors.onSurface,   // running is told by the Start/Pause button, not by color (Alejandro)
                     maxLines = 1,
                     modifier = Modifier.weight(1f)
                 )
@@ -225,8 +225,8 @@ fun JudgeCallTimerCard(
                         modifier = Modifier.height(48.dp).widthIn(min = 112.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isRunning) colors.secondary else colors.primary,
-                            contentColor = if (isRunning) colors.onSecondary else colors.onPrimary
+                            containerColor = colors.primary,
+                            contentColor = colors.onPrimary
                         )
                     ) {
                         Icon(if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -307,8 +307,9 @@ private fun DocumentRow(item: DocumentLibraryItem, onClick: () -> Unit) {
 private fun UpdatedLabel() {
     Surface(
         shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        // Inverted (light on dark / dark on light): the one label on Home that has to stand out.
+        color = MaterialTheme.colorScheme.inverseSurface,
+        contentColor = MaterialTheme.colorScheme.inverseOnSurface
     ) {
         Text(
             text = stringResource(R.string.home_updated),

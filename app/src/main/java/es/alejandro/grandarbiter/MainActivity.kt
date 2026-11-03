@@ -43,7 +43,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var appUpdates: AppUpdateController
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        // Splash stays until the stored display settings are read (theme: no dark-then-light flash).
+        installSplashScreen().setKeepOnScreenCondition { viewModel.displaySettings.value == null }
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -68,7 +69,8 @@ class MainActivity : ComponentActivity() {
             }
         }
         setContent {
-            val settings by viewModel.displaySettings.collectAsState()
+            val loaded by viewModel.displaySettings.collectAsState()
+            val settings = loaded ?: return@setContent   // the splash is still up (see above)
             // Only while the app is in the foreground: the flag goes with the window.
             LaunchedEffect(settings.keepScreenOn) {
                 if (settings.keepScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

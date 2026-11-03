@@ -24,12 +24,17 @@ class MainViewModel(
     rulesUpdater: RulesDataUpdater,
     releaseNotes: ReleaseNotesRepository,
 ) : ViewModel() {
-    /** Theme, text size, contrast and keep-screen-on, applied at the app root. */
     /** Stored theme only (no stateIn default): MainActivity hands it to the system for the splash. */
     val themeMode: Flow<ThemeMode> = settingsDataStore.themeMode
 
-    val displaySettings: StateFlow<DisplaySettings> = settingsDataStore.displaySettings
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DisplaySettings())
+    /**
+     * Theme, text size, contrast and keep-screen-on, applied at the app root. null until DataStore
+     * has been read: MainActivity keeps the splash up until then, so the first frame never uses a
+     * default theme (it used to: dark for a moment, then the stored light theme). Eagerly, so the read
+     * starts with the ViewModel, before setContent.
+     */
+    val displaySettings: StateFlow<DisplaySettings?> = settingsDataStore.displaySettings
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /** The published manifest says this app version must be updated (drives the Play update). */
     val appUpdateRequired: StateFlow<Boolean> = rulesUpdater.appUpdateRequired

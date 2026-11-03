@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Density
 import androidx.core.view.WindowCompat
 import es.alejandro.grandarbiter.domain.model.TextScale
 import es.alejandro.grandarbiter.domain.model.ThemeMode
@@ -114,7 +114,7 @@ private val LightHighContrastScheme = LightColorScheme.copy(
 
 @Composable
 fun GrandArbiterTheme(
-    themeMode: ThemeMode = ThemeMode.DARK,
+    themeMode: ThemeMode,
     textScale: TextScale = TextScale.DEFAULT,
     highContrast: Boolean = false,
     content: @Composable () -> Unit

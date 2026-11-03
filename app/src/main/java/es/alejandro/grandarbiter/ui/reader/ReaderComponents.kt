@@ -83,7 +83,7 @@ fun MarkupText(
     markup: String,
     onRefClick: (String) -> Unit,
     modifier: Modifier = Modifier,
-    style: TextStyle = MaterialTheme.typography.bodyMedium,
+    style: TextStyle = MaterialTheme.typography.bodyLarge,   // 16/24 sp: reading text (bodyMedium 14 sp was too dense)
     color: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     val linkColor = MaterialTheme.colorScheme.primary
@@ -161,7 +161,7 @@ fun MarkupText(
                 }
             }
         },
-        style = style.copy(lineHeight = 21.sp),
+        style = style,
         color = color,
         onTextLayout = { layout = it },
     )
@@ -269,7 +269,7 @@ private fun ExampleView(block: Block.Example, onRefClick: (String) -> Unit, modi
             )
             MarkupText(
                 block.text, onRefClick,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -284,7 +284,7 @@ private fun ListView(block: Block.BulletList, onRefClick: (String) -> Unit, modi
                 Text(
                     text = if (block.ordered) "${index + 1}." else "•",
                     modifier = Modifier.width(24.dp),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 MarkupText(item, onRefClick, Modifier.weight(1f))
@@ -329,7 +329,7 @@ private fun TableRow(cells: List<String>, header: Boolean, fixedWidth: androidx.
                 MarkupText(
                     cell, onRefClick,
                     style = if (header) MaterialTheme.typography.labelLarge
-                    else MaterialTheme.typography.bodySmall,
+                    else MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),   // tables stay compact
                 )
             }
         }

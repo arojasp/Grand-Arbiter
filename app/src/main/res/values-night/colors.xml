@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Dark: backgroundDark / onSurfaceDark (ui/theme/Color.kt). -->
-    <color name="splash_background">#FF121212</color>
-    <color name="splash_icon">#FFEDEDED</color>
+    <color name="splash_background">#FF1C1B19</color>
+    <color name="splash_icon">#FFD9D6CF</color>
 </resources>

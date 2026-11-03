@@ -3,6 +3,6 @@
     <!-- Splash and window background before Compose draws: the Tinta palette (ui/theme/Color.kt).
          The splash shows before the app reads its own theme setting, so it follows the system mode
          (values-night/). Light: backgroundLight / onSurfaceLight. -->
-    <color name="splash_background">#FFFAFAF7</color>
-    <color name="splash_icon">#FF171717</color>
+    <color name="splash_background">#FFF6F1E7</color>
+    <color name="splash_icon">#FF2B2926</color>
 </resources>

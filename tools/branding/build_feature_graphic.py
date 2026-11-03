@@ -25,8 +25,8 @@ TAGLINE = "The judge's companion at the table"
 DOCS = "\u2002·\u2002".join(["CR", "MTR", "IPG", "JAR", "Oracle"])
 
 THEMES = {
-    "dark": dict(bg="#121212", ink="#EDEDED", text="#EDEDED", tagline="#A3A3A3", docs="#8C8C8C"),
-    "light": dict(bg="#FAFAF7", ink="#171717", text="#171717", tagline="#5E5E58", docs="#8A8A84"),
+    "dark": dict(bg="#1C1B19", ink="#D9D6CF", text="#D9D6CF", tagline="#A8A39A", docs="#8E897F"),
+    "light": dict(bg="#F6F1E7", ink="#2B2926", text="#2B2926", tagline="#625C53", docs="#8E877B"),
 }
 
 # The mark: 108-unit icon space, centred on (54, 54); placed left of centre.

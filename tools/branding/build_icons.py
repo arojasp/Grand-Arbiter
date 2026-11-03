@@ -34,8 +34,8 @@ ROOT = Path(__file__).resolve().parents[2]
 RES = ROOT / "app" / "src" / "main" / "res" / "drawable"
 BRAND = ROOT / "branding"
 
-# Launcher colours (Tinta dark). Launchers don't follow the app theme, so the icon picks one.
-BG, INK = "#121212", "#EDEDED"
+# Launcher colours (Tinta softened, dark). Launchers don't follow the app theme, so the icon picks one.
+BG, INK = "#1C1B19", "#D9D6CF"
 
 # ---- geometry (108 x 108 viewport) -------------------------------------------------------
 CENTRE = (54, 54)
@@ -158,7 +158,7 @@ def write_png(d: str) -> None:
         return out
 
     themed = svg(d, fill="#4A4458", background="#E8DEF8")           # Material You sample tint
-    splash_light = svg(d, fill="#171717", background="#FAFAF7")
+    splash_light = svg(d, fill="#2B2926", background="#F6F1E7")
     sheet = Image.new("RGBA", (1180, 260), "#F4F1EA")
     x = 20
     for radius in (0.5, 0.38, 0.22):

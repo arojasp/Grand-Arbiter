@@ -35,7 +35,7 @@ class DraftTimesViewModel(
     private val packSizes: List<Int> = state.get<String>(ARG_SIZES)?.split(",")?.mapNotNull { it.trim().toIntOrNull() }
         ?.takeIf { it.isNotEmpty() } ?: List(DraftConfig.DEFAULT_PACKS) { DraftConfig.defaultsFor(format).cardsPerPack }
 
-    private val lastMinutes: Int? = sessions.lastConfig.takeIf { it.format == format }?.constructionMinutes
+    private val lastMinutes: Int? = (sessions.setup(format) ?: sessions.lastConfig.takeIf { it.format == format })?.constructionMinutes
 
     private val stored = store.times(format)
 

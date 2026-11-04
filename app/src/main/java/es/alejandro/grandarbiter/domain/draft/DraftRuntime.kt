@@ -10,6 +10,11 @@ interface DraftSessionStore {
     /** The config of the last draft started, to prefill the setup (e.g. a 15-card cube). */
     val lastConfig: DraftConfig
 
+    /** [format]'s setup as the judge left it, saved on every change; null if never changed. */
+    fun setup(format: DraftFormat): DraftConfig?
+
+    fun saveSetup(config: DraftConfig)
+
     /** Null ends the draft. A non-null session also becomes [lastConfig]. */
     fun save(session: DraftSession?)
 }

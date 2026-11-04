@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import es.alejandro.grandarbiter.data.draft.DraftSessionCodec.Stored
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
+import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftSession
 import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +24,14 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
 
     override val lastConfig: DraftConfig
         get() = readStored(LAST)?.let { DraftSessionCodec.decodeConfig(it) } ?: DraftConfig()
+
+    override fun setup(format: DraftFormat): DraftConfig? =
+        readStored(SETUP + format.name + "_")?.let { DraftSessionCodec.decodeConfig(it) }?.takeIf { it.format == format }
+
+    @Synchronized
+    override fun saveSetup(config: DraftConfig) {
+        prefs.edit { write(SETUP + config.format.name + "_", DraftSessionCodec.encodeConfig(config)) }
+    }
 
     @Synchronized
     override fun save(session: DraftSession?) {
@@ -75,6 +84,7 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
     private companion object {
         const val SESSION = "session_"
         const val LAST = "last_"
+        const val SETUP = "setup_"
         const val FORMAT = "format"
         const val PACKS = "packs"
         const val CARDS = "cards_per_pack"

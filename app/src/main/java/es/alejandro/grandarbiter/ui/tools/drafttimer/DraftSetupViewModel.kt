@@ -18,6 +18,7 @@ import es.alejandro.grandarbiter.domain.draft.FormatTimes
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -36,8 +37,12 @@ class DraftSetupViewModel(
 
     val format: DraftFormat = DraftFormat.entries.firstOrNull { it.name == state.get<String>(ARG_FORMAT) } ?: DraftFormat.BOOSTER
 
-    /** The last draft's values if it was this format; otherwise the format's own defaults ("Manual start" carries over). */
-    private val last = store.lastConfig.let { if (it.format == format) it else DraftConfig.defaultsFor(format, it.manualStart) }
+    /**
+     * This format's setup as the judge left it (saved on every change, started or not); before that,
+     * the last draft's values if it was this format, else the format's defaults ("Manual start" carries over).
+     */
+    private val last = store.setup(format)
+        ?: store.lastConfig.let { if (it.format == format) it else DraftConfig.defaultsFor(format, it.manualStart) }
     private val packs = state.getStateFlow(KEY_PACKS, last.packs)
     private val cardsPerPack = state.getStateFlow(KEY_CARDS, last.cardsPerPack)
     private val constructionMinutes = state.getStateFlow(KEY_MINUTES, last.constructionMinutes)
@@ -109,6 +114,11 @@ class DraftSetupViewModel(
     fun setPackSize(pack: Int, value: Int) {
         state[KEY_PACK_SIZES] = packSizes.value.copyOf().also { it[pack - 1] = value.coerceIn(cardsRange) }
     }
+    init {
+        // Every change is kept at once: going back and opening the setup again shows it.
+        viewModelScope.launch { baseConfig.drop(1).collect(store::saveSetup) }
+    }
+
     /** "Reset to MTR" in the Times section: picks, reviews and construction. */
     fun resetTimes() {
         val t = times.value ?: return

@@ -89,3 +89,23 @@ Un aspecto nuevo pensado para leer: blanco y negro con un contraste más suave y
 | Status bar space counted once | Less empty space between the status bar and screen titles (it was added twice), and at the bottom of screens without the navigation bar. | Menos espacio vacío entre la barra de estado y el título de las pantallas (se sumaba dos veces), y abajo en las pantallas sin barra de navegación. |
 | No dark flash at launch | The app opens directly in the chosen theme: no more dark screen for a moment when the light theme is selected. | La app se abre directamente con el tema elegido: ya no aparece un instante en oscuro con el tema claro seleccionado. |
 | Theme follows the system by default | Until you pick a theme in Settings, the app follows the phone's dark or light mode (it used to always start dark), so the first launch screen and the app match. | Hasta que elijas un tema en Ajustes, la app sigue el modo oscuro o claro del móvil (antes arrancaba siempre en oscuro), así que la pantalla de inicio y la app coinciden desde el primer arranque. |
+
+### Draft times (develop)
+
+Judge feedback from casual store drafts. Plan: `claude/draft-times-plan.md` in the Claude project.
+Released in **1.4.0 (versionCode 11)**. Play text, copied to `whatsnew/`:
+
+**en-US** (425 characters)
+
+Draft Timer: your own times. For casual drafts, the new Times screen lets you change every pick time (one list per pack size), the reviews and deck construction, all at once by ±5 s or one by one, up to 999. Or turn timed picks off: picks and reviews count up and you move on with one tap. "Reset to MTR" brings back Appendix B. Each format remembers its times, and the setup keeps your changes even before you start a draft.
+
+**es-ES** (445 characters)
+
+Draft Timer: tus propios tiempos. Para drafts casuales, la nueva pantalla Times permite cambiar cada pick (una lista por tamaño de sobre), las revisiones y la construcción, todo a la vez con ±5 s o uno a uno, hasta 999. O quita el tiempo de los picks: picks y revisiones cuentan hacia arriba y avanzas con un toque. "Reset to MTR" vuelve al Apéndice B. Cada formato recuerda sus tiempos y el setup guarda tus cambios aunque no empieces el draft.
+
+| Commit | English | Español |
+|---|---|---|
+| Shared setting controls; type a value | Deck construction shows its unit ("25 min") and goes up to 999; tap the value to type it. | La construcción muestra su unidad («25 min») y llega hasta 999; toca el valor para escribirlo. |
+| Times screen; Times section in the setup; tappable edge to edge; "Duration" | Booster and Two-Headed Giant: a Times section in the setup says whether the draft uses the MTR's times, custom ones or untimed picks, and opens the new Times screen: timed picks on or off, all picks ±5 s, one list per pack size with every pick editable, reviews and deck construction, and "Reset to MTR". | Booster y Two-Headed Giant: una sección Times en el setup indica si el draft usa los tiempos del MTR, unos propios o picks sin tiempo, y abre la nueva pantalla Times: picks con o sin tiempo, todos los picks ±5 s, una lista por tamaño de sobre con cada pick editable, revisiones, construcción y «Reset to MTR». |
+| Running an untimed draft | Untimed picks and reviews show the time spent and move on with one tap ("Next pick", "Start pack 2", "Start deck construction"); going back still needs a hold. Deck construction keeps its countdown. | Los picks y revisiones sin tiempo muestran el tiempo que llevan y avanzan con un toque («Next pick», «Start pack 2», «Start deck construction»); volver atrás sigue pidiendo mantener pulsado. La construcción mantiene su cuenta atrás. |
+| The setup keeps its changes without starting a draft | The setup remembers each format's packs and cards per pack as soon as you change them, even if you go back without starting a draft. | El setup recuerda los sobres y las cartas por sobre de cada formato en cuanto los cambias, aunque vuelvas atrás sin empezar el draft. |

@@ -304,9 +304,12 @@
     <string name="draft_mixed_sizes">Different size per pack</string>
     <string name="draft_mixed_sizes_hint">For drafts mixing sets, e.g. one 15-card pack and two of 14</string>
     <string name="draft_construction">Deck construction</string>
-    <string name="draft_minutes">Minutes</string>
     <string name="draft_decrease">Decrease %1$s</string>
     <string name="draft_increase">Increase %1$s</string>
+    <string name="draft_type_value">Type %1$s</string>
+    <string name="draft_value_range">From %1$d to %2$d %3$s</string>
+    <string name="draft_set">Set</string>
+    <string name="draft_unit_minutes">min</string>
     <string name="draft_section_alerts">Alerts</string>
     <string name="draft_vibrate">Vibrate at 0:00</string>
     <string name="draft_vibrate_hint">One vibration per step</string>

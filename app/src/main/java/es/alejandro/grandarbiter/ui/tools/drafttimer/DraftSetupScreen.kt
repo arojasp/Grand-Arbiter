@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,12 +26,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
@@ -108,8 +105,9 @@ fun DraftSetupScreen(
                         config.cardsPerPack, viewModel.cardsRange, viewModel::setCardsPerPack)
                 }
                 HorizontalDivider(color = colors.outlineVariant)
-                Stepper(stringResource(R.string.draft_construction), stringResource(R.string.draft_minutes),
-                    config.constructionMinutes, DraftConfig.CONSTRUCTION_MINUTES, viewModel::setConstructionMinutes)
+                Stepper(stringResource(R.string.draft_construction), null,
+                    config.constructionMinutes, DraftConfig.CONSTRUCTION_MINUTES, viewModel::setConstructionMinutes,
+                    unit = stringResource(R.string.draft_unit_minutes))
             }
             DraftCard {
                 DraftLabel(stringResource(R.string.draft_section_timer))
@@ -141,81 +139,11 @@ fun DraftSetupScreen(
     }
 }
 
-@Composable
-private fun Stepper(label: String, hint: String?, value: Int, range: IntRange, onChange: (Int) -> Unit) {
-    SettingRow(label, hint) {
-        val colors = MaterialTheme.colorScheme
-        Row(
-            Modifier.clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            StepButton("−", stringResource(R.string.draft_decrease, label), enabled = value > range.first) { onChange(value - 1) }
-            Text(value.toString(), Modifier.width(56.dp), textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleSmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurface)
-            StepButton("+", stringResource(R.string.draft_increase, label), enabled = value < range.last) { onChange(value + 1) }
-        }
-    }
-}
-
 /** A pack size: a stepper, or 14 | 15 in Two-Headed Giant (the only sizes the MTR has times for). */
 @Composable
 private fun PackSize(label: String, hint: String?, value: Int, range: IntRange, onChange: (Int) -> Unit) {
     if (range.count() <= 2) SettingRow(label, hint) { Choice(range.toList(), value, onChange) }
     else Stepper(label, hint, value, range, onChange)
-}
-
-/** Pick one of a few values (Two-Headed Giant booster size: 14 | 15; Rochester: Team 1 | Team 2). */
-@Composable
-private fun Choice(
-    values: List<Int>,
-    selected: Int,
-    onSelect: (Int) -> Unit,
-    width: Int = 56,
-    label: @Composable (Int) -> String = { it.toString() },
-) {
-    val colors = MaterialTheme.colorScheme
-    Row(
-        Modifier.clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        values.forEach { value ->
-            val on = value == selected
-            Box(
-                Modifier.width(width.dp).height(36.dp).clip(CircleShape)
-                    .background(if (on) colors.primary else colors.surfaceContainerHighest)
-                    .clickable(role = Role.RadioButton) { onSelect(value) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(label(value), style = MaterialTheme.typography.labelLarge,
-                    color = if (on) colors.onPrimary else colors.onSurfaceVariant)
-            }
-        }
-    }
-}
-
-@Composable
-private fun StepButton(symbol: String, description: String, enabled: Boolean, onClick: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Box(
-        Modifier.size(36.dp).alpha(if (enabled) 1f else 0.4f).clip(CircleShape).background(colors.surfaceContainerHigh)
-            .clickable(enabled = enabled, role = Role.Button, onClickLabel = description, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(symbol, style = MaterialTheme.typography.titleMedium, color = colors.primary)
-    }
-}
-
-@Composable
-private fun SettingRow(label: String, hint: String?, trailing: @Composable () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(label, style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
-            if (hint != null) Text(hint, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-        }
-        Spacer(Modifier.width(12.dp))
-        trailing()
-    }
 }
 
 @Composable

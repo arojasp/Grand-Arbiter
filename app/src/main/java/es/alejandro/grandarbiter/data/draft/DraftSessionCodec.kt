@@ -2,7 +2,9 @@ package es.alejandro.grandarbiter.data.draft
 
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
+import es.alejandro.grandarbiter.domain.draft.DraftPlans
 import es.alejandro.grandarbiter.domain.draft.DraftSession
+import es.alejandro.grandarbiter.domain.draft.DraftTimings
 import es.alejandro.grandarbiter.domain.timer.TimerState
 
 /**
@@ -26,12 +28,20 @@ object DraftSessionCodec {
         val firstTeam: Int = 1,
         /** "15,14,14": each pack round's size; null = all [cardsPerPack] (or stored before this existed). */
         val packSizes: String? = null,
+        /**
+         * What [accumulatedMs] counts from: [TIME_BASE_STEP] = the start of [step].
+         * Null: an older version, counted from the start of the draft.
+         */
+        val timeBase: String? = null,
     )
+
+    const val TIME_BASE_STEP = "step"
 
     fun encode(session: DraftSession): Stored = encodeConfig(session.config).copy(
         accumulatedMs = session.timer.accumulatedMs,
         runningSince = session.timer.runningSince,
         step = session.step,
+        timeBase = TIME_BASE_STEP,
     )
 
     fun encodeConfig(config: DraftConfig): Stored =
@@ -42,8 +52,20 @@ object DraftSessionCodec {
     fun decode(stored: Stored): DraftSession? {
         val config = decodeConfig(stored, manualStartIfMissing = false) ?: return null
         if (stored.accumulatedMs < 0 || stored.step < 0) return null
-        return DraftSession(config, TimerState(stored.accumulatedMs, stored.runningSince), stored.step)
+        val accumulated = if (stored.timeBase == TIME_BASE_STEP) stored.accumulatedMs
+            else fromDraftStart(config, stored.accumulatedMs, stored.step) ?: return null
+        return DraftSession(config, TimerState(accumulated, stored.runningSince), stored.step)
     }
+
+    /**
+     * A draft saved by an older version counted its time from the start of the draft: the time into
+     * [step] is that minus the step's start. Its plan is rebuilt with the built-in MTR times (the
+     * same the rules bundle has; the timings repository isn't loaded yet when the store reads).
+     */
+    private fun fromDraftStart(config: DraftConfig, accumulatedMs: Long, step: Int): Long? = runCatching {
+        val plan = DraftPlans.create(config, DraftTimings.FALLBACK)
+        (accumulatedMs - plan.startOf(step)).coerceAtLeast(0)
+    }.getOrNull()
 
     /** For the setup's last config: missing "Manual start" -> the first-time default (on). */
     fun decodeConfig(stored: Stored, manualStartIfMissing: Boolean = DraftConfig.DEFAULT_MANUAL_START): DraftConfig? {

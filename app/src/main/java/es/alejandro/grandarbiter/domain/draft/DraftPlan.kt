@@ -79,6 +79,12 @@ class DraftPlan(val steps: List<DraftStep>) {
 
     fun startOf(index: Int): Long = starts[index.coerceIn(0, steps.size)]
 
+    /** When each step from [index] on runs out, counted from the start of step [index] (a session's timer). */
+    fun endsFrom(index: Int): List<Long> {
+        val from = index.coerceIn(0, steps.size)
+        return (from + 1..steps.size).map { starts[it] - starts[from] }
+    }
+
     fun positionAt(elapsedMs: Long): DraftPosition {
         val t = elapsedMs.coerceAtLeast(0)
         if (t >= totalMs) return DraftPosition.Finished

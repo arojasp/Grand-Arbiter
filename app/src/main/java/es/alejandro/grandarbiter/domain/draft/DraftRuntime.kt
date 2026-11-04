@@ -85,7 +85,8 @@ data class DraftSnapshot(
         private const val UPCOMING = 6
 
         fun of(session: DraftSession, plan: DraftPlan, now: Long): DraftSnapshot {
-            val elapsed = session.elapsedAt(plan, now)
+            // The session counts from the start of its step; the snapshot shows draft time.
+            val elapsed = plan.startOf(session.step) + session.elapsedAt(plan, now)
             val position = session.positionAt(plan, now)
             val index = when (position) {
                 is DraftPosition.Running -> position.index

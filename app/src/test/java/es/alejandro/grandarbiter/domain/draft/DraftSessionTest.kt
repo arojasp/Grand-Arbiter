@@ -85,4 +85,26 @@ class DraftSessionTest {
     }
 
     @Test fun clockMovedBack_neverBeforeTheStart() = assertEquals(0, started.index(0))
+
+    // ---- The timer counts from the start of the session's step, not of the draft.
+
+    @Test fun jump_restartsTheTimerAtTheNewStep() {
+        val s = started.next(plan, now = 4_000)
+        assertEquals(1, s.step)
+        assertEquals(0L, s.timer.accumulatedMs)
+        assertEquals(0L, s.elapsedAt(plan, 4_000))
+        assertEquals(3_000L, s.elapsedAt(plan, 7_000))
+    }
+
+    @Test fun fromAStepAfterTheFirst_followsTheClockOnItsOwn() {
+        // Started at the review (step 1) 6 s ago: the 5 s review ran out, 1 s into construction.
+        val s = DraftSession(started.config, TimerState(6_000, null), step = 1)
+        val p = s.positionAt(plan, 0) as Running
+        assertEquals(2, p.index)
+        assertEquals(1_000, p.elapsedInStepMs)
+        assertEquals(59_000, p.remainingMs)
+    }
+
+    @Test fun fromAStepAfterTheFirst_finishesAtTheEnd() =
+        assertEquals(Finished, DraftSession(started.config, TimerState(65_000, null), step = 1).positionAt(plan, 0))
 }

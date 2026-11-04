@@ -70,4 +70,19 @@ class DraftSessionCodecTest {
     }
 
     @Test fun missingFormat_null() = assertNull(DraftSessionCodec.decode(Stored(null, 3, 14, 25)))
+
+    // ---- Since the per-step timer, the time counts from the start of the session's step.
+
+    @Test fun storesItsTimeBase() = assertEquals(DraftSessionCodec.TIME_BASE_STEP, DraftSessionCodec.encode(session).timeBase)
+
+    @Test fun draftFromAnOlderVersion_timeBecomesTimeIntoItsStep() {
+        // 14-card Booster, MTR: pick 1 40 s, pick 2 35 s. Old time = from the draft start, 3 s into pick 3.
+        val old = Stored("BOOSTER", 3, 14, 25, manualStart = true, accumulatedMs = 78_000, runningSince = 1_000, step = 2)
+        val s = DraftSessionCodec.decode(old)!!
+        assertEquals(TimerState(3_000, 1_000), s.timer)
+        assertEquals(2, s.step)
+    }
+
+    @Test fun draftFromAnOlderVersion_neverNegative() =
+        assertEquals(0L, DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, accumulatedMs = 10_000, step = 2))!!.timer.accumulatedMs)
 }

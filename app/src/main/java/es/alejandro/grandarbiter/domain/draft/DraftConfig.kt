@@ -17,6 +17,8 @@ data class DraftConfig(
      * the size of each pack round, in order. Null: every pack has [cardsPerPack].
      */
     val packSizes: List<Int>? = null,
+    /** The judge's own pick and review times (Booster, Two-Headed Giant); [DraftTimes.MTR] by default. */
+    val times: DraftTimes = DraftTimes.MTR,
 ) {
     /** Packs at the table: Rochester counts [packs] per player, six players. */
     val totalPacks: Int get() = if (format == DraftFormat.ROCHESTER) packs * RochesterOrder.PLAYERS else packs
@@ -34,6 +36,7 @@ data class DraftConfig(
             require(packSizes.size == packs) { "packSizes $packSizes: need $packs" }
             require(packSizes.all { it in cardsRange(format) }) { "packSizes $packSizes not in ${cardsRange(format)} for $format" }
         }
+        require(times.isMtr || format in CUSTOM_TIMES_FORMATS) { "custom times not supported for $format" }
     }
 
     companion object {
@@ -44,9 +47,12 @@ data class DraftConfig(
         const val DEFAULT_MANUAL_START = true
         val PACKS = 1..6
         val CARDS_PER_PACK = 5..15
-        val CONSTRUCTION_MINUTES = 1..90
+        /** Any time the judge wants, up to three digits (like [DraftTimes.SECONDS]). */
+        val CONSTRUCTION_MINUTES = 1..999
         /** Formats where each pack round can have its own size. Not Rochester (packs per player, 18 at the table). */
         val MIXED_SIZE_FORMATS = setOf(DraftFormat.BOOSTER, DraftFormat.TWO_HEADED_GIANT)
+        /** Formats with a Times screen. Not Rochester (no time settings besides construction). */
+        val CUSTOM_TIMES_FORMATS = setOf(DraftFormat.BOOSTER, DraftFormat.TWO_HEADED_GIANT)
 
         /** Two-Headed Giant: only the booster sizes Appendix B has times for. */
         fun cardsRange(format: DraftFormat): IntRange = when (format) {

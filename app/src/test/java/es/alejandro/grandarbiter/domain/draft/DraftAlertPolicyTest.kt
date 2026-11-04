@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.domain.draft
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -43,5 +44,18 @@ class DraftAlertPolicyTest {
     @Test fun windowEdge() {
         assertTrue(alert(9_000, 10_000 + DraftAlertPolicy.WINDOW_MS))
         assertFalse(alert(9_000, 10_000 + DraftAlertPolicy.WINDOW_MS + 1))
+    }
+
+    // ---- The session's time counts from the start of its step.
+
+    @Test fun endsFrom_countFromThatStep() {
+        assertEquals(listOf(10_000L, 15_000L, 75_000L), plan.endsFrom(0))
+        assertEquals(listOf(5_000L, 65_000L), plan.endsFrom(1))
+        assertEquals(emptyList<Long>(), plan.endsFrom(3))
+    }
+
+    @Test fun fromAStep_alertsAtThatStepsEnds() {
+        assertTrue(DraftAlertPolicy.shouldAlert(plan, 4_900, 5_100, fromStep = 1))      // review ran out
+        assertFalse(DraftAlertPolicy.shouldAlert(plan, 9_900, 10_100, fromStep = 1))    // not a step end from there
     }
 }

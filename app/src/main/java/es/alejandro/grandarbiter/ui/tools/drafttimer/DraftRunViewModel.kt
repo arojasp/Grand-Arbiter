@@ -74,13 +74,13 @@ class DraftRunViewModel(
         while (true) {
             val now = System.currentTimeMillis()
             val elapsed = session.elapsedAt(plan, now)
-            if (DraftAlertPolicy.shouldAlert(plan, previousElapsed, elapsed)) alerts.stepEnded(vibrate = vibrate.value, beep = beep.value)
+            if (DraftAlertPolicy.shouldAlert(plan, previousElapsed, elapsed, session.step)) alerts.stepEnded(vibrate = vibrate.value, beep = beep.value)
             previousElapsed = elapsed
             val snapshot = DraftSnapshot.of(session, plan, now)
             emit(DraftRunState.Active(snapshot))
             // Nothing changes while paused, waiting for "Start…" (manual start) or after the end.
             if (!session.isRunning || snapshot.position !is DraftPosition.Running) break
-            delay(1_000 - elapsed % 1_000)   // next whole second: steps last whole seconds
+            delay(1_000 - elapsed % 1_000)   // next whole second: steps last whole seconds (elapsed counts from a step start)
         }
     }
 

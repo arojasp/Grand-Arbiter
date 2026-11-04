@@ -10,6 +10,11 @@ interface DraftSessionStore {
     /** The config of the last draft started, to prefill the setup (e.g. a 15-card cube). */
     val lastConfig: DraftConfig
 
+    /** [format]'s setup as the judge left it, saved on every change; null if never changed. */
+    fun setup(format: DraftFormat): DraftConfig?
+
+    fun saveSetup(config: DraftConfig)
+
     /** Null ends the draft. A non-null session also becomes [lastConfig]. */
     fun save(session: DraftSession?)
 }
@@ -46,7 +51,10 @@ data class DraftEstimate(
     val atMost: Boolean,
     val pickSeconds: Int,
     val constructionMs: Long,
+    /** The timed steps' total; with [untimedPicks], deck construction (and Rochester's lay-outs) only. */
     val totalMs: Long,
+    /** Picks and reviews have no timer: [picksMs] is 0 and [reviewSeconds] empty. */
+    val untimedPicks: Boolean = false,
 ) {
     companion object {
         fun of(plan: DraftPlan): DraftEstimate {
@@ -57,13 +65,14 @@ data class DraftEstimate(
                 timedPicksPerPack = picks.count { it.pack == 1 },
                 timedPicksByPack = (1..packs).map { pack -> picks.count { it.pack == pack } },
                 cardsPerPick = picks.firstOrNull()?.cardsTaken ?: 1,
-                picksMs = picks.sumOf { it.durationMs },
-                reviewSeconds = plan.steps.filterIsInstance<DraftStep.Review>().map { (it.durationMs / 1000).toInt() },
+                picksMs = picks.sumOf { it.durationMs ?: 0L },
+                reviewSeconds = plan.steps.filterIsInstance<DraftStep.Review>().mapNotNull { r -> r.durationMs?.let { (it / 1000).toInt() } },
                 layOutSeconds = plan.steps.filterIsInstance<DraftStep.LayOut>().map { (it.durationMs / 1000).toInt() },
                 atMost = picks.any { it.waitsForPicked },
-                pickSeconds = picks.firstOrNull()?.let { (it.durationMs / 1000).toInt() } ?: 0,
+                pickSeconds = picks.firstOrNull()?.durationMs?.let { (it / 1000).toInt() } ?: 0,
                 constructionMs = plan.steps.filterIsInstance<DraftStep.Construction>().sumOf { it.durationMs },
                 totalMs = plan.totalMs,
+                untimedPicks = picks.any { !it.isTimed },
             )
         }
     }
@@ -85,7 +94,8 @@ data class DraftSnapshot(
         private const val UPCOMING = 6
 
         fun of(session: DraftSession, plan: DraftPlan, now: Long): DraftSnapshot {
-            val elapsed = session.elapsedAt(plan, now)
+            // The session counts from the start of its step; the snapshot shows draft time.
+            val elapsed = plan.startOf(session.step) + session.elapsedAt(plan, now)
             val position = session.positionAt(plan, now)
             val index = when (position) {
                 is DraftPosition.Running -> position.index

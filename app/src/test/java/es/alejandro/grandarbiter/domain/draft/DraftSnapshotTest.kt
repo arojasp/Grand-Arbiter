@@ -2,6 +2,7 @@ package es.alejandro.grandarbiter.domain.draft
 
 import es.alejandro.grandarbiter.domain.draft.DraftPosition.Finished
 import es.alejandro.grandarbiter.domain.draft.DraftPosition.Running
+import es.alejandro.grandarbiter.domain.timer.TimerState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -63,4 +64,9 @@ class DraftSnapshotTest {
 
     @Test fun everyFormatIsAvailable() =
         assertEquals(DraftFormat.entries, DraftFormat.entries.filter { it.available })
+
+    @Test fun elapsedIsDraftTime_evenFromALaterStep() {
+        val atReview = DraftSession(config, TimerState(2_000, null), step = 13)
+        assertEquals(plan.startOf(13) + 2_000, DraftSnapshot.of(atReview, plan, 0).elapsedMs)
+    }
 }

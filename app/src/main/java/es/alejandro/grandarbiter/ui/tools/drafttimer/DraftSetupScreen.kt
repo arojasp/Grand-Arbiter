@@ -1,12 +1,12 @@
 package es.alejandro.grandarbiter.ui.tools.drafttimer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,24 +15,26 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
@@ -45,11 +47,14 @@ import org.koin.androidx.compose.koinViewModel
 fun DraftSetupScreen(
     onBack: () -> Unit,
     onStarted: () -> Unit,
+    /** The Times screen of this format, with each pack's size (15, 14, 14). */
+    onOpenTimes: (DraftFormat, List<Int>) -> Unit,
     viewModel: DraftSetupViewModel = koinViewModel(),
 ) {
     val colors = MaterialTheme.colorScheme
     val config by viewModel.config.collectAsState()
     val estimate by viewModel.estimate.collectAsState()
+    val times by viewModel.times.collectAsState()
     val beep by viewModel.beep.collectAsState()
     val vibrate by viewModel.vibrate.collectAsState()
 
@@ -107,17 +112,27 @@ fun DraftSetupScreen(
                     PackSize(stringResource(R.string.draft_cards_per_pack), if (rochester) null else stringResource(R.string.draft_cards_per_pack_hint),
                         config.cardsPerPack, viewModel.cardsRange, viewModel::setCardsPerPack)
                 }
-                HorizontalDivider(color = colors.outlineVariant)
-                Stepper(stringResource(R.string.draft_construction), stringResource(R.string.draft_minutes),
-                    config.constructionMinutes, DraftConfig.CONSTRUCTION_MINUTES, viewModel::setConstructionMinutes)
+                if (!viewModel.hasTimes) {
+                    // Rochester: no Times screen; its construction minutes stay here.
+                    HorizontalDivider(color = colors.outlineVariant)
+                    Stepper(stringResource(R.string.draft_construction), null,
+                        config.constructionMinutes, DraftConfig.CONSTRUCTION_MINUTES, viewModel::setConstructionMinutes,
+                        unit = stringResource(R.string.draft_unit_minutes))
+                }
             }
-            DraftCard {
-                DraftLabel(stringResource(R.string.draft_section_timer))
-                SettingRow(stringResource(R.string.draft_manual_start), stringResource(R.string.draft_manual_start_hint)) {
-                    Switch(
-                        checked = config.manualStart, onCheckedChange = { viewModel.setManualStart(it) },
-                        colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
-                    )
+            times?.let { t ->
+                TimesCard(t, onOpen = { onOpenTimes(viewModel.format, (1..config.packs).map(config::cardsInPack)) }, onReset = viewModel::resetTimes)
+            }
+            // Untimed picks: "Manual start" would only affect the end of deck construction, the last step.
+            if (times?.timedPicks != false) {
+                DraftCard {
+                    DraftLabel(stringResource(R.string.draft_section_timer))
+                    SettingRow(stringResource(R.string.draft_manual_start), stringResource(R.string.draft_manual_start_hint)) {
+                        Switch(
+                            checked = config.manualStart, onCheckedChange = { viewModel.setManualStart(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
+                        )
+                    }
                 }
             }
             DraftCard {
@@ -141,18 +156,51 @@ fun DraftSetupScreen(
     }
 }
 
+/**
+ * Canvas "Tiempos · Setup": the times this draft uses (MTR / custom / untimed) and what differs;
+ * the whole card above the reset opens the Times screen (the ripple fills it, edge to edge).
+ * "Reset to MTR" only when something differs.
+ */
 @Composable
-private fun Stepper(label: String, hint: String?, value: Int, range: IntRange, onChange: (Int) -> Unit) {
-    SettingRow(label, hint) {
-        val colors = MaterialTheme.colorScheme
-        Row(
-            Modifier.clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
+private fun TimesCard(t: DraftTimesModel, onOpen: () -> Unit, onReset: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(12.dp)
+    // Like DraftCard, but the padding is inside the clickable area.
+    Column(Modifier.fillMaxWidth().clip(shape).background(colors.surfaceContainer).border(1.dp, colors.outlineVariant, shape)) {
+        val title = stringResource(when {
+            !t.timedPicks -> R.string.draft_times_untimed_title
+            t.differsInUse -> R.string.draft_times_custom_title
+            else -> R.string.draft_times_mtr_title
+        })
+        val parts = buildList {
+            when {
+                !t.timedPicks -> add(stringResource(R.string.draft_times_summary_untimed))
+                !t.differsInUse -> add(stringResource(R.string.draft_times_summary_mtr))
+                else -> {
+                    if (t.changedPicksInUse > 0) add(pluralStringResource(R.plurals.draft_times_summary_picks, t.changedPicksInUse, t.changedPicksInUse))
+                    if (t.changedReviews > 0) add(pluralStringResource(R.plurals.draft_times_summary_reviews, t.changedReviews, t.changedReviews))
+                }
+            }
+            add(stringResource(R.string.draft_times_summary_construction, t.constructionMinutes))
+        }
+        Column(
+            Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onOpen).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            StepButton("−", stringResource(R.string.draft_decrease, label), enabled = value > range.first) { onChange(value - 1) }
-            Text(value.toString(), Modifier.width(56.dp), textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleSmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurface)
-            StepButton("+", stringResource(R.string.draft_increase, label), enabled = value < range.last) { onChange(value + 1) }
+            DraftLabel(stringResource(R.string.draft_section_times))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(title, style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
+                    Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                }
+                Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant)
+            }
+        }
+        if (t.differsInUse) {
+            HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = colors.outlineVariant)
+            TextButton(onClick = onReset, modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)) {
+                Text(stringResource(R.string.draft_times_reset), style = MaterialTheme.typography.labelLarge, color = colors.primary)
+            }
         }
     }
 }
@@ -162,60 +210,6 @@ private fun Stepper(label: String, hint: String?, value: Int, range: IntRange, o
 private fun PackSize(label: String, hint: String?, value: Int, range: IntRange, onChange: (Int) -> Unit) {
     if (range.count() <= 2) SettingRow(label, hint) { Choice(range.toList(), value, onChange) }
     else Stepper(label, hint, value, range, onChange)
-}
-
-/** Pick one of a few values (Two-Headed Giant booster size: 14 | 15; Rochester: Team 1 | Team 2). */
-@Composable
-private fun Choice(
-    values: List<Int>,
-    selected: Int,
-    onSelect: (Int) -> Unit,
-    width: Int = 56,
-    label: @Composable (Int) -> String = { it.toString() },
-) {
-    val colors = MaterialTheme.colorScheme
-    Row(
-        Modifier.clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        values.forEach { value ->
-            val on = value == selected
-            Box(
-                Modifier.width(width.dp).height(36.dp).clip(CircleShape)
-                    .background(if (on) colors.primary else colors.surfaceContainerHighest)
-                    .clickable(role = Role.RadioButton) { onSelect(value) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(label(value), style = MaterialTheme.typography.labelLarge,
-                    color = if (on) colors.onPrimary else colors.onSurfaceVariant)
-            }
-        }
-    }
-}
-
-@Composable
-private fun StepButton(symbol: String, description: String, enabled: Boolean, onClick: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Box(
-        Modifier.size(36.dp).alpha(if (enabled) 1f else 0.4f).clip(CircleShape).background(colors.surfaceContainerHigh)
-            .clickable(enabled = enabled, role = Role.Button, onClickLabel = description, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(symbol, style = MaterialTheme.typography.titleMedium, color = colors.primary)
-    }
-}
-
-@Composable
-private fun SettingRow(label: String, hint: String?, trailing: @Composable () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(label, style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
-            if (hint != null) Text(hint, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-        }
-        Spacer(Modifier.width(12.dp))
-        trailing()
-    }
 }
 
 @Composable
@@ -235,8 +229,11 @@ private fun EstimateCard(e: DraftEstimate) {
             else if (byPack != null) stringResource(R.string.draft_estimate_picks_by_pack, byPack)
             else if (e.cardsPerPick > 1) pluralStringResource(R.plurals.draft_estimate_picks_multi, e.packs, e.packs, e.timedPicksPerPack, e.cardsPerPick)
             else pluralStringResource(R.plurals.draft_estimate_picks, e.packs, e.packs, e.timedPicksPerPack)
-        EstimateRow(picksLabel, formatClock(e.picksMs))
-        if (e.reviewSeconds.isNotEmpty()) {
+        val untimed = stringResource(R.string.draft_estimate_untimed)
+        EstimateRow(picksLabel, if (e.untimedPicks) untimed else formatClock(e.picksMs))
+        if (e.untimedPicks && e.packs > 1) {
+            EstimateRow(stringResource(R.string.draft_estimate_review_untimed), untimed)
+        } else if (e.reviewSeconds.isNotEmpty()) {
             // "60 s + 90 s"; the same every time (2HG): "5 × 60 s".
             val reviews = if (e.reviewSeconds.size > 2 && e.reviewSeconds.distinct().size == 1) "${e.reviewSeconds.size} × ${e.reviewSeconds[0]} s"
                 else e.reviewSeconds.joinToString(" + ") { "$it s" }
@@ -244,7 +241,9 @@ private fun EstimateCard(e: DraftEstimate) {
         }
         EstimateRow(stringResource(R.string.draft_construction), formatClock(e.constructionMs))
         HorizontalDivider(color = colors.outlineVariant)
-        EstimateRow(stringResource(R.string.draft_total), (if (e.atMost) "≤ " else "≈ ") + formatClock(e.totalMs), emphasis = true)
+        EstimateRow(stringResource(R.string.draft_total),
+            if (e.untimedPicks) stringResource(R.string.draft_estimate_total_untimed, formatClock(e.totalMs))
+            else (if (e.atMost) "≤ " else "≈ ") + formatClock(e.totalMs), emphasis = true)
         if (e.atMost) {
             Text(stringResource(R.string.draft_estimate_at_most_note, e.pickSeconds),
                 style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)

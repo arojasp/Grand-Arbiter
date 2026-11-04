@@ -90,7 +90,7 @@ class RochesterTest {
     @Test fun layOut_runsIntoTheFirstPick_byItself() {
         val pos = started.positionAt(p, 22_000) as Running
         assertEquals(1, pos.index)
-        assertEquals(3_000, pos.remainingMs)
+        assertEquals(3_000L, pos.remainingMs)
     }
 
     @Test fun pick_atZero_waits_doesNotRunIntoTheNext() {
@@ -103,7 +103,7 @@ class RochesterTest {
         val s = started.startNext(p, now = 21_500)          // 1B took the card after 1.5 s
         val pos = s.positionAt(p, 21_500) as Running
         assertEquals(2, pos.index)
-        assertEquals(5_000, pos.remainingMs)
+        assertEquals(5_000L, pos.remainingMs)
     }
 
     @Test fun picked_atZero_movesOn() {

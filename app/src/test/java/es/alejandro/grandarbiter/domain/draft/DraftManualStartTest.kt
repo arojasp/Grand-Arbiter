@@ -24,7 +24,7 @@ class DraftManualStartTest {
     @Test fun stepRunsNormally() {
         val p = started.positionAt(plan, 4_000) as Running
         assertEquals(0, p.index)
-        assertEquals(6_000, p.remainingMs)
+        assertEquals(6_000L, p.remainingMs)
     }
 
     @Test fun atZero_waits_andStaysThere() {
@@ -37,8 +37,8 @@ class DraftManualStartTest {
         val s = started.startNext(plan, now = 30_000)          // judge starts 20 s after 0:00
         val p = s.positionAt(plan, 30_000) as Running
         assertEquals(1, p.index)
-        assertEquals(5_000, p.remainingMs)
-        assertEquals(2_000, (s.positionAt(plan, 33_000) as Running).remainingMs)
+        assertEquals(5_000L, p.remainingMs)
+        assertEquals(2_000L, (s.positionAt(plan, 33_000) as Running).remainingMs)
         assertEquals(Waiting(1, plan.steps[1]), s.positionAt(plan, 35_000))
     }
 
@@ -60,14 +60,14 @@ class DraftManualStartTest {
         assertEquals(1, (next.positionAt(plan, 3_000) as Running).index)
         assertEquals(Waiting(1, plan.steps[1]), next.positionAt(plan, 8_000))
         val back = next.previous(plan, 4_000)
-        assertEquals(10_000, (back.positionAt(plan, 4_000) as Running).remainingMs)
+        assertEquals(10_000L, (back.positionAt(plan, 4_000) as Running).remainingMs)
     }
 
     @Test fun previousWhileWaiting_restartsTheStepThatRanOut() {
         val s = started.previous(plan, 20_000)
         val p = s.positionAt(plan, 20_000) as Running
         assertEquals(0, p.index)
-        assertEquals(10_000, p.remainingMs)
+        assertEquals(10_000L, p.remainingMs)
     }
 
     @Test fun alert_onceWhenTheClockStops() {

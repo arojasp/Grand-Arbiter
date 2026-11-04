@@ -56,11 +56,14 @@ import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferencesViewModel
 import es.alejandro.grandarbiter.data.draft.AndroidDraftAlerts
 import es.alejandro.grandarbiter.data.draft.DraftTimingsRepository
 import es.alejandro.grandarbiter.data.draft.PrefsDraftSessionStore
+import es.alejandro.grandarbiter.data.draft.PrefsDraftTimesStore
 import es.alejandro.grandarbiter.domain.draft.DraftAlerts
 import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
+import es.alejandro.grandarbiter.domain.draft.DraftTimesStore
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftFormatViewModel
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftRunViewModel
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftSetupViewModel
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftTimesViewModel
 
 val networkModule = module {
     single {
@@ -136,6 +139,7 @@ val repositoryModule = module {
 val appModule = module {
     single<TimerManager> { TimerManagerImpl(androidContext()) }
     single<DraftSessionStore> { PrefsDraftSessionStore(androidContext()) }
+    single<DraftTimesStore> { PrefsDraftTimesStore(androidContext()) }
     single<DraftAlerts> { AndroidDraftAlerts(androidContext()) }
     single { DraftTimingsRepository(get()) }
     single { SectionVersions(get(), get(), get()) }
@@ -162,5 +166,6 @@ val viewModelModule = module {
     viewModelOf(::QuickReferenceEditViewModel)
     viewModelOf(::DraftFormatViewModel)
     viewModelOf(::DraftSetupViewModel)
+    viewModelOf(::DraftTimesViewModel)
     viewModelOf(::DraftRunViewModel)
 }

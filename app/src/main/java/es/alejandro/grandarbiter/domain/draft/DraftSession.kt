@@ -3,8 +3,10 @@ package es.alejandro.grandarbiter.domain.draft
 import es.alejandro.grandarbiter.domain.timer.TimerState
 
 /**
- * A draft in progress: its config and ONE timer for the whole timeline (the same TimerState as
- * the judge call timer). Persisted as is; on return the right step comes from the clock.
+ * A draft in progress: its config, the step started last ([step]) and ONE timer (the same
+ * TimerState as the judge call timer) counting from the START OF THAT STEP. Steps that move on by
+ * themselves are walked from there with the clock. Persisted as is; on return the right step comes
+ * from the clock.
  *
  * Some step ends wait: time never runs past them, the draft waits at 0:00
  * ([DraftPosition.Waiting]) until [startNext]. With manual start ([DraftConfig.manualStart]) every
@@ -21,7 +23,7 @@ data class DraftSession(
 
     val isRunning: Boolean get() = timer.isRunning
 
-    /** Elapsed draft time, stopped at the first waiting step end it reached. */
+    /** Time since the start of [step], stopped at the first waiting step end it reached. */
     fun elapsedAt(plan: DraftPlan, now: Long): Long = walk(plan, now).second
 
     fun positionAt(plan: DraftPlan, now: Long): DraftPosition = walk(plan, now).first
@@ -35,15 +37,20 @@ data class DraftSession(
      * by themselves; stop at the first one that ran out and waits, or where the time is now.
      */
     private fun walk(plan: DraftPlan, now: Long): Pair<DraftPosition, Long> {
-        val elapsed = timer.elapsedAt(now)
+        val elapsed = timer.elapsedAt(now).coerceAtLeast(0)
         var i = step.coerceAtMost(plan.steps.size)
+        var start = 0L   // start of step i, counted from the start of [step]
         while (i < plan.steps.size) {
-            val end = plan.startOf(i + 1)
-            if (elapsed < end) return plan.positionAt(elapsed) to elapsed
+            val s = plan.steps[i]
+            // Untimed: it never runs out; the judge moves on ("Next pick", "Start pack 2").
+            val duration = s.durationMs ?: return DraftPosition.Running(i, s, elapsedInStepMs = elapsed - start, remainingMs = null) to elapsed
+            val end = start + duration
+            if (elapsed < end) return DraftPosition.Running(i, s, elapsedInStepMs = elapsed - start, remainingMs = end - elapsed) to elapsed
             if (waitsAfter(plan, i)) {
-                val position = if (i == plan.steps.lastIndex) DraftPosition.Finished else DraftPosition.Waiting(i, plan.steps[i])
+                val position = if (i == plan.steps.lastIndex) DraftPosition.Finished else DraftPosition.Waiting(i, s)
                 return position to end
             }
+            start = end
             i++
         }
         return DraftPosition.Finished to elapsed
@@ -69,9 +76,9 @@ data class DraftSession(
     /** Manual start: the judge starts the next step (always running, even if it was paused). */
     fun startNext(plan: DraftPlan, now: Long): DraftSession = next(plan, now).started(now)
 
-    /** Time set to the start of step [index] (or the end, past the last); keeps running or paused. */
+    /** Step [index] (or the end, past the last) from its start; keeps running or paused. */
     private fun seek(plan: DraftPlan, index: Int, now: Long): DraftSession = copy(
-        timer = TimerState(accumulatedMs = plan.startOf(index), runningSince = if (timer.isRunning) now else null),
+        timer = TimerState(accumulatedMs = 0, runningSince = if (timer.isRunning) now else null),
         step = index.coerceAtMost(plan.steps.size),
     )
 }
@@ -80,13 +87,14 @@ data class DraftSession(
  * When to vibrate (and beep): once each time a step runs out. Only for a step end crossed in the
  * last [WINDOW_MS]: coming back to the app after minutes away gives no burst of alerts.
  * The caller passes [previousElapsedMs] = null after a manual jump (next/previous/start), so a
- * jump never alerts.
+ * jump never alerts. Elapsed times are the session's ([DraftSession.elapsedAt]): counted from the
+ * start of step [fromStep] (the session's [DraftSession.step]).
  */
 object DraftAlertPolicy {
     const val WINDOW_MS = 2_000L
 
-    fun shouldAlert(plan: DraftPlan, previousElapsedMs: Long?, elapsedMs: Long): Boolean {
+    fun shouldAlert(plan: DraftPlan, previousElapsedMs: Long?, elapsedMs: Long, fromStep: Int = 0): Boolean {
         if (previousElapsedMs == null || elapsedMs <= previousElapsedMs) return false
-        return plan.stepEnds.any { end -> end in (previousElapsedMs + 1)..elapsedMs && elapsedMs - end <= WINDOW_MS }
+        return plan.endsFrom(fromStep).any { end -> end in (previousElapsedMs + 1)..elapsedMs && elapsedMs - end <= WINDOW_MS }
     }
 }

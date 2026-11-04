@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import es.alejandro.grandarbiter.data.draft.DraftSessionCodec.Stored
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
+import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftSession
 import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +24,14 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
 
     override val lastConfig: DraftConfig
         get() = readStored(LAST)?.let { DraftSessionCodec.decodeConfig(it) } ?: DraftConfig()
+
+    override fun setup(format: DraftFormat): DraftConfig? =
+        readStored(SETUP + format.name + "_")?.let { DraftSessionCodec.decodeConfig(it) }?.takeIf { it.format == format }
+
+    @Synchronized
+    override fun saveSetup(config: DraftConfig) {
+        prefs.edit { write(SETUP + config.format.name + "_", DraftSessionCodec.encodeConfig(config)) }
+    }
 
     @Synchronized
     override fun save(session: DraftSession?) {
@@ -52,6 +61,8 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
             step = prefs.getInt(prefix + STEP, 0),
             firstTeam = prefs.getInt(prefix + FIRST_TEAM, 1),
             packSizes = prefs.getString(prefix + PACK_SIZES, null),
+            timeBase = prefs.getString(prefix + TIME_BASE, null),
+            times = prefs.getString(prefix + TIMES, null),
         )
     }
 
@@ -64,6 +75,8 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
         putInt(prefix + STEP, s.step)
         putInt(prefix + FIRST_TEAM, s.firstTeam)
         if (s.packSizes != null) putString(prefix + PACK_SIZES, s.packSizes) else remove(prefix + PACK_SIZES)
+        if (s.timeBase != null) putString(prefix + TIME_BASE, s.timeBase) else remove(prefix + TIME_BASE)
+        if (s.times != null) putString(prefix + TIMES, s.times) else remove(prefix + TIMES)
         putLong(prefix + ACCUMULATED, s.accumulatedMs)
         if (s.runningSince != null) putLong(prefix + SINCE, s.runningSince) else remove(prefix + SINCE)
     }
@@ -71,6 +84,7 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
     private companion object {
         const val SESSION = "session_"
         const val LAST = "last_"
+        const val SETUP = "setup_"
         const val FORMAT = "format"
         const val PACKS = "packs"
         const val CARDS = "cards_per_pack"
@@ -81,6 +95,8 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
         const val STEP = "step"
         const val FIRST_TEAM = "first_team"
         const val PACK_SIZES = "pack_sizes"
-        val KEYS = listOf(FORMAT, PACKS, CARDS, MINUTES, MANUAL, ACCUMULATED, SINCE, STEP, FIRST_TEAM, PACK_SIZES)
+        const val TIME_BASE = "time_base"
+        const val TIMES = "times"
+        val KEYS = listOf(FORMAT, PACKS, CARDS, MINUTES, MANUAL, ACCUMULATED, SINCE, STEP, FIRST_TEAM, PACK_SIZES, TIME_BASE, TIMES)
     }
 }

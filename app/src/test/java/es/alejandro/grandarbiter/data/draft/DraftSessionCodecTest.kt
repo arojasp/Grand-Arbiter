@@ -4,6 +4,7 @@ import es.alejandro.grandarbiter.data.draft.DraftSessionCodec.Stored
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftSession
+import es.alejandro.grandarbiter.domain.draft.DraftTimes
 import es.alejandro.grandarbiter.domain.timer.TimerState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -70,4 +71,33 @@ class DraftSessionCodecTest {
     }
 
     @Test fun missingFormat_null() = assertNull(DraftSessionCodec.decode(Stored(null, 3, 14, 25)))
+
+    // ---- Since the per-step timer, the time counts from the start of the session's step.
+
+    @Test fun storesItsTimeBase() = assertEquals(DraftSessionCodec.TIME_BASE_STEP, DraftSessionCodec.encode(session).timeBase)
+
+    @Test fun draftFromAnOlderVersion_timeBecomesTimeIntoItsStep() {
+        // 14-card Booster, MTR: pick 1 40 s, pick 2 35 s. Old time = from the draft start, 3 s into pick 3.
+        val old = Stored("BOOSTER", 3, 14, 25, manualStart = true, accumulatedMs = 78_000, runningSince = 1_000, step = 2)
+        val s = DraftSessionCodec.decode(old)!!
+        assertEquals(TimerState(3_000, 1_000), s.timer)
+        assertEquals(2, s.step)
+    }
+
+    @Test fun draftFromAnOlderVersion_neverNegative() =
+        assertEquals(0L, DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, accumulatedMs = 10_000, step = 2))!!.timer.accumulatedMs)
+
+    // ---- The judge's own times travel with the draft
+
+    @Test fun customTimes_roundTrip() {
+        val times = DraftTimes.MTR.withTimedPicks(false)
+        val s = DraftSession(DraftConfig(constructionMinutes = 300, times = times), TimerState(5_000, null), step = 1)
+        assertEquals(s, DraftSessionCodec.decode(DraftSessionCodec.encode(s)))
+    }
+
+    @Test fun mtrTimes_storedAsNull() = assertNull(DraftSessionCodec.encode(session).times)
+
+    @Test fun badTimes_draftKeepsTheMtrs() =
+        assertEquals(DraftTimes.MTR,
+            DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, timeBase = DraftSessionCodec.TIME_BASE_STEP, times = "x"))!!.config.times)
 }

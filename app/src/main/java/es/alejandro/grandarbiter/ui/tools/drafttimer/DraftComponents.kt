@@ -56,12 +56,13 @@ internal fun DraftCard(
     modifier: Modifier = Modifier,
     borderColor: Color = MaterialTheme.colorScheme.outlineVariant,
     background: Color = MaterialTheme.colorScheme.surfaceContainer,
+    verticalSpacing: Int = 12,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(12.dp)
     Column(
         modifier.fillMaxWidth().clip(shape).background(background).border(1.dp, borderColor, shape).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(verticalSpacing.dp),
         content = content,
     )
 }
@@ -97,6 +98,12 @@ internal fun DraftProgress(fraction: Float, modifier: Modifier = Modifier, color
 /** "0:24", "24:13": remaining time rounded UP, so it never shows 0:00 before the step ends. */
 internal fun formatClock(ms: Long): String {
     val totalSeconds = ceil(ms.coerceAtLeast(0) / 1000.0).toLong()
+    return String.format(Locale.ROOT, "%d:%02d", totalSeconds / 60, totalSeconds % 60)
+}
+
+/** Time spent: "0:47", "12:05", rounded DOWN (it counts up). */
+internal fun formatElapsed(ms: Long): String {
+    val totalSeconds = ms.coerceAtLeast(0) / 1000
     return String.format(Locale.ROOT, "%d:%02d", totalSeconds / 60, totalSeconds % 60)
 }
 

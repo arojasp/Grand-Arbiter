@@ -56,12 +56,13 @@ internal fun DraftCard(
     modifier: Modifier = Modifier,
     borderColor: Color = MaterialTheme.colorScheme.outlineVariant,
     background: Color = MaterialTheme.colorScheme.surfaceContainer,
+    verticalSpacing: Int = 12,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(12.dp)
     Column(
         modifier.fillMaxWidth().clip(shape).background(background).border(1.dp, borderColor, shape).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(verticalSpacing.dp),
         content = content,
     )
 }

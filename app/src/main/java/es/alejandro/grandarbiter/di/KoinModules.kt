@@ -63,6 +63,7 @@ import es.alejandro.grandarbiter.domain.draft.DraftTimesStore
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftFormatViewModel
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftRunViewModel
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftSetupViewModel
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftTimesViewModel
 
 val networkModule = module {
     single {
@@ -165,5 +166,6 @@ val viewModelModule = module {
     viewModelOf(::QuickReferenceEditViewModel)
     viewModelOf(::DraftFormatViewModel)
     viewModelOf(::DraftSetupViewModel)
+    viewModelOf(::DraftTimesViewModel)
     viewModelOf(::DraftRunViewModel)
 }

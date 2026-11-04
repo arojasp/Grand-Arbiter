@@ -24,6 +24,8 @@ import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftFormatScreen
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftRunScreen
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftSetupScreen
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftSetupViewModel
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftTimesScreen
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftTimesViewModel
 import es.alejandro.grandarbiter.ui.tools.announcement.HeadJudgeAnnouncementScreen
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceDetailScreen
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceEditScreen
@@ -58,6 +60,10 @@ sealed class Screen(val route: String) {
     object DraftTimer : Screen("draft_timer")
     object DraftSetup : Screen("draft_timer/{${DraftSetupViewModel.ARG_FORMAT}}/setup") {
         fun createRoute(format: DraftFormat) = "draft_timer/${format.name}/setup"
+    }
+    object DraftTimes : Screen("draft_timer/{${DraftTimesViewModel.ARG_FORMAT}}/times?${DraftTimesViewModel.ARG_SIZES}={${DraftTimesViewModel.ARG_SIZES}}") {
+        /** [sizes]: each pack's size in the setup ("15,14,14"): the lists the screen shows. */
+        fun createRoute(format: DraftFormat, sizes: List<Int>) = "draft_timer/${format.name}/times?${DraftTimesViewModel.ARG_SIZES}=${sizes.joinToString(",")}"
     }
     object DraftRun : Screen("draft_timer/run")
     object HeadJudgeAnnouncement : Screen("head_judge_announcement")
@@ -161,6 +167,12 @@ fun AppNavGraph(
                     navController.navigate(Screen.DraftRun.route) { popUpTo(Screen.DraftTimer.route) { inclusive = true } }
                 },
             )
+        }
+        composable(
+            Screen.DraftTimes.route,
+            arguments = listOf(navArgument(DraftTimesViewModel.ARG_SIZES) { type = NavType.StringType; nullable = true; defaultValue = null }),
+        ) {
+            DraftTimesScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.DraftRun.route) {
             DraftRunScreen(

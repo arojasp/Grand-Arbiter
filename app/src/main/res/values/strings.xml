@@ -308,6 +308,27 @@
     <string name="draft_value_range">From %1$d to %2$d %3$s</string>
     <string name="draft_set">Set</string>
     <string name="draft_unit_minutes">min</string>
+    <string name="draft_unit_seconds">s</string>
+    <string name="draft_times_title">Times</string>
+    <string name="draft_times_section_picks">Picks</string>
+    <string name="draft_times_timed">Timed picks</string>
+    <string name="draft_times_timed_hint">Off: no countdown. You move on to each pick and review yourself.</string>
+    <string name="draft_times_all_picks">All picks</string>
+    <string name="draft_times_all_picks_hint">Adds or removes 5 s on every pick below</string>
+    <string name="draft_times_minus">−5 s</string>
+    <string name="draft_times_plus">+5 s</string>
+    <string name="draft_times_lists_hint">Each pack uses the list for its size.</string>
+    <string name="draft_times_list">Picks · %1$d-card packs</string>
+    <string name="draft_times_pick">Pick %1$d</string>
+    <string name="draft_times_row_cards" tools:ignore="PluralsCandidate">%1$d cards</string>
+    <string name="draft_times_row_cards_take" tools:ignore="PluralsCandidate">%1$d cards · take 2</string>
+    <string name="draft_times_mtr">MTR %1$s</string>
+    <string name="draft_times_section_review">Review between packs</string>
+    <string name="draft_times_review_after">After pack %1$d</string>
+    <string name="draft_times_review_every">Every review</string>
+    <string name="draft_times_construction_minutes">Minutes</string>
+    <string name="draft_times_construction_untimed_hint">Still timed when picks aren\'t</string>
+    <string name="draft_times_reset">Reset to MTR</string>
     <string name="draft_section_alerts">Alerts</string>
     <string name="draft_vibrate">Vibrate at 0:00</string>
     <string name="draft_vibrate_hint">One vibration per step</string>

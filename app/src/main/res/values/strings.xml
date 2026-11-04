@@ -51,8 +51,6 @@
     </plurals>
     <string name="cards_found_many">%1$d+ cards found</string>
     <string name="cards_end">End of results</string>
-    <string name="cards_label_name">Card name</string>
-    <string name="cards_label_mana">Mana cost</string>
     <string name="cards_label_type">Type</string>
     <string name="cards_label_pt">Power / Toughness</string>
     <string name="cards_label_loyalty">Loyalty</string>

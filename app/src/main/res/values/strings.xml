@@ -329,6 +329,24 @@
     <string name="draft_times_construction_minutes">Minutes</string>
     <string name="draft_times_construction_untimed_hint">Still timed when picks aren\'t</string>
     <string name="draft_times_reset">Reset to MTR</string>
+    <string name="draft_section_times">Times</string>
+    <string name="draft_times_mtr_title">MTR (Appendix B)</string>
+    <string name="draft_times_custom_title">Custom times</string>
+    <string name="draft_times_untimed_title">Untimed picks</string>
+    <string name="draft_times_summary_mtr">Picks and reviews as in the MTR</string>
+    <string name="draft_times_summary_untimed">You move on to each pick yourself</string>
+    <string name="draft_times_summary_construction">Construction %1$d min</string>
+    <plurals name="draft_times_summary_picks">
+        <item quantity="one">%1$d pick changed</item>
+        <item quantity="other">%1$d picks changed</item>
+    </plurals>
+    <plurals name="draft_times_summary_reviews">
+        <item quantity="one">%1$d review changed</item>
+        <item quantity="other">%1$d reviews changed</item>
+    </plurals>
+    <string name="draft_estimate_untimed">Untimed</string>
+    <string name="draft_estimate_review_untimed">Review</string>
+    <string name="draft_estimate_total_untimed">%1$s + picks</string>
     <string name="draft_section_alerts">Alerts</string>
     <string name="draft_vibrate">Vibrate at 0:00</string>
     <string name="draft_vibrate_hint">One vibration per step</string>

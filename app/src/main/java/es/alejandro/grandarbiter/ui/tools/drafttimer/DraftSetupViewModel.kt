@@ -12,6 +12,9 @@ import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftPlans
 import es.alejandro.grandarbiter.domain.draft.DraftSession
 import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
+import es.alejandro.grandarbiter.domain.draft.DraftTimes
+import es.alejandro.grandarbiter.domain.draft.DraftTimesStore
+import es.alejandro.grandarbiter.domain.draft.FormatTimes
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -19,14 +22,16 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Setup of one format: packs, cards per pack, construction minutes, beep; Rochester: who picks first. Prefilled with the
- * last draft's config; the edits survive rotation and process death (SavedStateHandle).
+ * Setup of one format: packs, cards per pack, beep; Rochester: who picks first and construction minutes. Prefilled with
+ * the last draft's config; the edits survive rotation and process death (SavedStateHandle). Booster and Two-Headed
+ * Giant take their pick, review and construction times from the Times screen ([DraftTimesStore]).
  */
 class DraftSetupViewModel(
     private val state: SavedStateHandle,
     private val store: DraftSessionStore,
     timingsRepository: DraftTimingsRepository,
     private val settings: SettingsDataStore,
+    private val timesStore: DraftTimesStore,
 ) : ViewModel() {
 
     val format: DraftFormat = DraftFormat.entries.firstOrNull { it.name == state.get<String>(ARG_FORMAT) } ?: DraftFormat.BOOSTER
@@ -48,8 +53,14 @@ class DraftSetupViewModel(
     /** Booster and Two-Headed Giant only. */
     val canMixSizes: Boolean = format in DraftConfig.MIXED_SIZE_FORMATS
 
-    /** Starting a draft stores this as the last config: that is how "Manual start" is remembered. */
-    val config: StateFlow<DraftConfig> = combine(
+    private val timings: StateFlow<DraftTimings> = timingsRepository.timings
+        .stateIn(viewModelScope, SharingStarted.Eagerly, DraftTimings.FALLBACK)
+
+    /** Booster and Two-Headed Giant: a Times section instead of the construction stepper. */
+    val hasTimes: Boolean = format in DraftConfig.CUSTOM_TIMES_FORMATS
+    private val storedTimes: StateFlow<FormatTimes> = timesStore.times(format)
+
+    private val baseConfig: StateFlow<DraftConfig> = combine(
         combine(packs, cardsPerPack, constructionMinutes, manualStart, firstTeam) { p, c, m, manual, team ->
             DraftConfig(format, p, c, m, manual, team)
         },
@@ -59,8 +70,15 @@ class DraftSetupViewModel(
         if (mixed && canMixSizes) c.copy(packSizes = sizes.take(c.packs)) else c
     }.stateIn(viewModelScope, SharingStarted.Eagerly, last)
 
-    private val timings: StateFlow<DraftTimings> = timingsRepository.timings
-        .stateIn(viewModelScope, SharingStarted.Eagerly, DraftTimings.FALLBACK)
+    /** The Times section: what the Times screen shows for these packs ([DraftTimesModel]). Null in Rochester. */
+    val times: StateFlow<DraftTimesModel?> = combine(baseConfig, storedTimes, timings) { c, stored, t ->
+        if (hasTimes) DraftTimesModel.of(format, (1..c.packs).map(c::cardsInPack), stored, t, last.constructionMinutes) else null
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** Starting a draft stores this as the last config: that is how "Manual start" is remembered. */
+    val config: StateFlow<DraftConfig> = combine(baseConfig, times) { c, t ->
+        if (t == null) c else c.copy(times = t.times, constructionMinutes = t.constructionMinutes)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, last)
 
     /** Allowed cards per pack: Two-Headed Giant only 14 or 15 (the sizes the MTR has times for). */
     val cardsRange: IntRange = DraftConfig.cardsRange(format)
@@ -91,6 +109,12 @@ class DraftSetupViewModel(
     fun setPackSize(pack: Int, value: Int) {
         state[KEY_PACK_SIZES] = packSizes.value.copyOf().also { it[pack - 1] = value.coerceIn(cardsRange) }
     }
+    /** "Reset to MTR" in the Times section: picks, reviews and construction. */
+    fun resetTimes() {
+        val t = times.value ?: return
+        timesStore.save(format, FormatTimes(DraftTimes.MTR, t.mtrConstructionMinutes))
+    }
+
     fun setBeep(enabled: Boolean) = viewModelScope.launch { settings.setDraftBeep(enabled) }
     fun setVibrate(enabled: Boolean) = viewModelScope.launch { settings.setDraftVibrate(enabled) }
 

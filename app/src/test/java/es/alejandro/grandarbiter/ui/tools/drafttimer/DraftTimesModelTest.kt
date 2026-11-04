@@ -1,6 +1,7 @@
 package es.alejandro.grandarbiter.ui.tools.drafttimer
 
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
+import es.alejandro.grandarbiter.domain.draft.DraftTimeRows
 import es.alejandro.grandarbiter.domain.draft.DraftTimes
 import es.alejandro.grandarbiter.domain.draft.DraftTimings
 import es.alejandro.grandarbiter.domain.draft.FormatTimes
@@ -52,5 +53,16 @@ class DraftTimesModelTest {
         val review = booster(listOf(14, 14), FormatTimes(DraftTimes.MTR.withReview(1, 70, 60)))
         assertFalse(review.isMtr)
         assertTrue(review.reviews.single().isChanged)
+    }
+
+    @Test fun differsInUse_onlyCountsWhatThisDraftUses() {
+        val rows15 = DraftTimeRows.booster(15, DraftTimings.FALLBACK.booster)
+        val only15 = FormatTimes(DraftTimes.MTR.withPick(rows15.first(), 50))
+        assertFalse(booster(listOf(14, 14, 14), only15).differsInUse)          // no 15-card pack: MTR in use
+        assertFalse(booster(listOf(14, 14, 14), only15).isMtr)                  // but there is something to reset
+        val mixed = booster(listOf(15, 14, 14), only15)
+        assertTrue(mixed.differsInUse)
+        assertEquals(1, mixed.changedPicksInUse)
+        assertTrue(booster(listOf(14), FormatTimes(DraftTimes.MTR.withTimedPicks(false))).differsInUse)
     }
 }

@@ -31,6 +31,10 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Icon
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.PaddingValues
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftEstimate
@@ -42,11 +46,14 @@ import org.koin.androidx.compose.koinViewModel
 fun DraftSetupScreen(
     onBack: () -> Unit,
     onStarted: () -> Unit,
+    /** The Times screen of this format, with each pack's size (15, 14, 14). */
+    onOpenTimes: (DraftFormat, List<Int>) -> Unit,
     viewModel: DraftSetupViewModel = koinViewModel(),
 ) {
     val colors = MaterialTheme.colorScheme
     val config by viewModel.config.collectAsState()
     val estimate by viewModel.estimate.collectAsState()
+    val times by viewModel.times.collectAsState()
     val beep by viewModel.beep.collectAsState()
     val vibrate by viewModel.vibrate.collectAsState()
 
@@ -104,18 +111,27 @@ fun DraftSetupScreen(
                     PackSize(stringResource(R.string.draft_cards_per_pack), if (rochester) null else stringResource(R.string.draft_cards_per_pack_hint),
                         config.cardsPerPack, viewModel.cardsRange, viewModel::setCardsPerPack)
                 }
-                HorizontalDivider(color = colors.outlineVariant)
-                Stepper(stringResource(R.string.draft_construction), null,
-                    config.constructionMinutes, DraftConfig.CONSTRUCTION_MINUTES, viewModel::setConstructionMinutes,
-                    unit = stringResource(R.string.draft_unit_minutes))
+                if (!viewModel.hasTimes) {
+                    // Rochester: no Times screen; its construction minutes stay here.
+                    HorizontalDivider(color = colors.outlineVariant)
+                    Stepper(stringResource(R.string.draft_construction), null,
+                        config.constructionMinutes, DraftConfig.CONSTRUCTION_MINUTES, viewModel::setConstructionMinutes,
+                        unit = stringResource(R.string.draft_unit_minutes))
+                }
             }
-            DraftCard {
-                DraftLabel(stringResource(R.string.draft_section_timer))
-                SettingRow(stringResource(R.string.draft_manual_start), stringResource(R.string.draft_manual_start_hint)) {
-                    Switch(
-                        checked = config.manualStart, onCheckedChange = { viewModel.setManualStart(it) },
-                        colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
-                    )
+            times?.let { t ->
+                TimesCard(t, onOpen = { onOpenTimes(viewModel.format, (1..config.packs).map(config::cardsInPack)) }, onReset = viewModel::resetTimes)
+            }
+            // Untimed picks: "Manual start" would only affect the end of deck construction, the last step.
+            if (times?.timedPicks != false) {
+                DraftCard {
+                    DraftLabel(stringResource(R.string.draft_section_timer))
+                    SettingRow(stringResource(R.string.draft_manual_start), stringResource(R.string.draft_manual_start_hint)) {
+                        Switch(
+                            checked = config.manualStart, onCheckedChange = { viewModel.setManualStart(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
+                        )
+                    }
                 }
             }
             DraftCard {
@@ -135,6 +151,50 @@ fun DraftSetupScreen(
                 }
             }
             estimate?.let { EstimateCard(it) }
+        }
+    }
+}
+
+/**
+ * Canvas "Tiempos · Setup": the times this draft uses (MTR / custom / untimed) and what differs;
+ * the whole row opens the Times screen. "Reset to MTR" only when something differs.
+ */
+@Composable
+private fun TimesCard(t: DraftTimesModel, onOpen: () -> Unit, onReset: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    DraftCard {
+        DraftLabel(stringResource(R.string.draft_section_times))
+        val title = stringResource(when {
+            !t.timedPicks -> R.string.draft_times_untimed_title
+            t.differsInUse -> R.string.draft_times_custom_title
+            else -> R.string.draft_times_mtr_title
+        })
+        val parts = buildList {
+            when {
+                !t.timedPicks -> add(stringResource(R.string.draft_times_summary_untimed))
+                !t.differsInUse -> add(stringResource(R.string.draft_times_summary_mtr))
+                else -> {
+                    if (t.changedPicksInUse > 0) add(pluralStringResource(R.plurals.draft_times_summary_picks, t.changedPicksInUse, t.changedPicksInUse))
+                    if (t.changedReviews > 0) add(pluralStringResource(R.plurals.draft_times_summary_reviews, t.changedReviews, t.changedReviews))
+                }
+            }
+            add(stringResource(R.string.draft_times_summary_construction, t.constructionMinutes))
+        }
+        Row(
+            Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onOpen),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(title, style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
+                Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+            }
+            Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant)
+        }
+        if (t.differsInUse) {
+            HorizontalDivider(color = colors.outlineVariant)
+            TextButton(onClick = onReset, contentPadding = PaddingValues(horizontal = 0.dp)) {
+                Text(stringResource(R.string.draft_times_reset), style = MaterialTheme.typography.labelLarge, color = colors.primary)
+            }
         }
     }
 }
@@ -163,8 +223,11 @@ private fun EstimateCard(e: DraftEstimate) {
             else if (byPack != null) stringResource(R.string.draft_estimate_picks_by_pack, byPack)
             else if (e.cardsPerPick > 1) pluralStringResource(R.plurals.draft_estimate_picks_multi, e.packs, e.packs, e.timedPicksPerPack, e.cardsPerPick)
             else pluralStringResource(R.plurals.draft_estimate_picks, e.packs, e.packs, e.timedPicksPerPack)
-        EstimateRow(picksLabel, formatClock(e.picksMs))
-        if (e.reviewSeconds.isNotEmpty()) {
+        val untimed = stringResource(R.string.draft_estimate_untimed)
+        EstimateRow(picksLabel, if (e.untimedPicks) untimed else formatClock(e.picksMs))
+        if (e.untimedPicks && e.packs > 1) {
+            EstimateRow(stringResource(R.string.draft_estimate_review_untimed), untimed)
+        } else if (e.reviewSeconds.isNotEmpty()) {
             // "60 s + 90 s"; the same every time (2HG): "5 × 60 s".
             val reviews = if (e.reviewSeconds.size > 2 && e.reviewSeconds.distinct().size == 1) "${e.reviewSeconds.size} × ${e.reviewSeconds[0]} s"
                 else e.reviewSeconds.joinToString(" + ") { "$it s" }
@@ -172,7 +235,9 @@ private fun EstimateCard(e: DraftEstimate) {
         }
         EstimateRow(stringResource(R.string.draft_construction), formatClock(e.constructionMs))
         HorizontalDivider(color = colors.outlineVariant)
-        EstimateRow(stringResource(R.string.draft_total), (if (e.atMost) "≤ " else "≈ ") + formatClock(e.totalMs), emphasis = true)
+        EstimateRow(stringResource(R.string.draft_total),
+            if (e.untimedPicks) stringResource(R.string.draft_estimate_total_untimed, formatClock(e.totalMs))
+            else (if (e.atMost) "≤ " else "≈ ") + formatClock(e.totalMs), emphasis = true)
         if (e.atMost) {
             Text(stringResource(R.string.draft_estimate_at_most_note, e.pickSeconds),
                 style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)

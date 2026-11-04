@@ -33,6 +33,12 @@ data class DraftTimesModel(
     /** Everything as the MTR has it: "Reset to MTR" has nothing to do. */
     val isMtr: Boolean get() = times.isMtr && !constructionChanged
 
+    val changedPicksInUse: Int get() = rowsOnScreen.count(times::isChanged)
+    val changedReviews: Int get() = reviews.count { it.isChanged }
+
+    /** This draft runs with other times than the MTR's (changes to pack sizes not in use don't count). */
+    val differsInUse: Boolean get() = !timedPicks || changedPicksInUse > 0 || changedReviews > 0 || constructionChanged
+
     /** The rows on screen: what "All picks −5 s / +5 s" changes. */
     val rowsOnScreen: List<PickRow> get() = lists.flatMap { it.rows }
 

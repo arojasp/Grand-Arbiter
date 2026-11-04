@@ -163,6 +163,7 @@ fun AppNavGraph(
         composable(Screen.DraftSetup.route) {
             DraftSetupScreen(
                 onBack = { navController.popBackStack() },
+                onOpenTimes = { format, sizes -> navController.navigate(Screen.DraftTimes.createRoute(format, sizes)) },
                 onStarted = {
                     navController.navigate(Screen.DraftRun.route) { popUpTo(Screen.DraftTimer.route) { inclusive = true } }
                 },

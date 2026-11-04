@@ -95,7 +95,7 @@ fun DraftRunScreen(
                 DraftPosition.Finished -> TimeUpContent(s)
                 is DraftPosition.Running -> StepContent(s, p, waiting = false)
                 // Manual start: the step that ran out, at 0:00, until "Start…".
-                is DraftPosition.Waiting -> StepContent(s, DraftPosition.Running(p.index, p.step, p.step.durationMs, 0), waiting = true)
+                is DraftPosition.Waiting -> StepContent(s, DraftPosition.Running(p.index, p.step, p.step.durationMs ?: 0L, 0), waiting = true)
             }
         }
         val window = LocalWindowInfo.current.containerSize
@@ -216,7 +216,7 @@ private fun RochesterPickContent(s: DraftSnapshot, p: DraftPosition.Running, ste
     Countdown(
         label = stringResource(if (waiting) R.string.draft_time else R.string.draft_pick_short),
         p = p, running = s.isRunning, waiting = waiting,
-        sub = stringResource(R.string.draft_of, formatDuration(step.durationMs)),
+        sub = stringResource(R.string.draft_of, formatDuration(step.durationMs ?: 0L)),
         size = 56,
         waitingSub = stringResource(R.string.draft_official_picks, actor),
         verticalPadding = 16,
@@ -250,7 +250,7 @@ private fun PickContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftS
     val label = if (step.cardsTaken > 1) stringResource(R.string.draft_pick_take_label, step.pick, step.cardsTaken, step.cardsLeft)
         else stringResource(R.string.draft_pick_label, step.pick, step.cardsLeft)
     Countdown(label, p, s.isRunning, waiting,
-        stringResource(R.string.draft_of, formatDuration(step.durationMs)))
+        stringResource(R.string.draft_of, formatDuration(step.durationMs ?: 0L)))
     DraftCard {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             DraftLabel(stringResource(R.string.draft_pack_progress))
@@ -269,14 +269,14 @@ private fun ReviewContent(s: DraftSnapshot, p: DraftPosition.Running, step: Draf
         left = { DraftChip(stringResource(R.string.draft_pack_complete, step.afterPack), colors.primary, outlined = true) },
         right = { DraftChip(stringResource(R.string.draft_review)) },
     )
-    Countdown(stringResource(R.string.draft_review_label), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatDuration(step.durationMs)))
+    Countdown(stringResource(R.string.draft_review_label), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatDuration(step.durationMs ?: 0L)))
     DraftCard {
         DraftLabel(stringResource(R.string.draft_up_next))
         Text(stringResource(R.string.draft_pack_n, step.nextPack), style = MaterialTheme.typography.titleLarge,
             color = colors.onSurface)
         Text(directionText(step.nextDirection), style = MaterialTheme.typography.titleSmall, color = colors.primary)
         (s.nextStep as? DraftStep.Pick)?.let { first ->
-            Text(stringResource(R.string.draft_first_pick, first.cardsLeft, first.durationMs / 1000),
+            Text(stringResource(R.string.draft_first_pick, first.cardsLeft, (first.durationMs ?: 0L) / 1000),
                 style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
     }
@@ -292,7 +292,7 @@ private fun ConstructionContent(s: DraftSnapshot, p: DraftPosition.Running, wait
         left = { DraftChip(stringResource(R.string.draft_complete), colors.primary, outlined = true) },
         right = { DraftChip(stringResource(R.string.draft_build)) },
     )
-    Countdown(stringResource(R.string.draft_construction), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatClock(p.step.durationMs)), size = 80)
+    Countdown(stringResource(R.string.draft_construction), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatClock(p.step.durationMs ?: 0L)), size = 80)
     DraftCard {
         DraftLabel(stringResource(R.string.draft_when_time_is_up))
         Text(stringResource(R.string.draft_when_time_is_up_text), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
@@ -345,8 +345,8 @@ private fun Countdown(
     val paused = !running && !waiting
     CountdownFrame(
         label = if (paused) stringResource(R.string.draft_paused_label, label) else label,
-        time = formatClock(p.remainingMs),
-        fraction = smoothFraction(p.index, p.remainingMs, p.step.durationMs, running = running && !waiting),
+        time = formatClock(p.remainingMs ?: p.elapsedInStepMs),
+        fraction = smoothFraction(p.index, p.remainingMs ?: 0L, p.step.durationMs ?: 1L, running = running && !waiting),
         sub = if (waiting) waitingSub ?: stringResource(R.string.draft_time_is_up) else sub,
         color = when {
             waiting -> colors.primary
@@ -427,9 +427,9 @@ private fun PickSegments(done: Int, total: Int) {
 
 @Composable
 private fun nextText(next: DraftStep?): String? = when (next) {
-    is DraftStep.Pick -> stringResource(R.string.draft_next_pick_value, next.cardsLeft, next.durationMs / 1000)
+    is DraftStep.Pick -> stringResource(R.string.draft_next_pick_value, next.cardsLeft, (next.durationMs ?: 0L) / 1000)
     is DraftStep.LayOut -> stringResource(R.string.draft_next_layout_value, next.pack, next.opener)
-    is DraftStep.Review -> stringResource(R.string.draft_next_review_value, formatDuration(next.durationMs))
+    is DraftStep.Review -> stringResource(R.string.draft_next_review_value, formatDuration(next.durationMs ?: 0L))
     is DraftStep.Construction -> stringResource(R.string.draft_next_construction_value, formatDuration(next.durationMs))
     null -> null
 }

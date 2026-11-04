@@ -31,21 +31,21 @@ class DraftSessionTest {
         val paused = started.paused(now = 6_000)    // 5 s into the pick
         val p = paused.positionAt(plan, now = 999_000) as Running
         assertEquals(0, p.index)
-        assertEquals(5_000, p.remainingMs)
+        assertEquals(5_000L, p.remainingMs)
     }
 
     @Test fun resume_continuesWhereItWas() {
         val s = started.paused(6_000).started(100_000)
-        assertEquals(5_000, (s.positionAt(plan, 100_000) as Running).remainingMs)
+        assertEquals(5_000L, (s.positionAt(plan, 100_000) as Running).remainingMs)
     }
 
     @Test fun next_startsTheNextStepWithItsFullTime_andKeepsRunning() {
         val s = started.next(plan, now = 4_000)     // 3 s into the pick
         val p = s.positionAt(plan, 4_000) as Running
         assertEquals(1, p.index)
-        assertEquals(5_000, p.remainingMs)
+        assertEquals(5_000L, p.remainingMs)
         assertTrue(s.isRunning)
-        assertEquals(2_000, (s.positionAt(plan, 7_000) as Running).remainingMs)
+        assertEquals(2_000L, (s.positionAt(plan, 7_000) as Running).remainingMs)
     }
 
     @Test fun next_whilePaused_staysPaused() {
@@ -58,12 +58,12 @@ class DraftSessionTest {
         val s = started.previous(plan, now = 13_000)   // in the review
         val p = s.positionAt(plan, 13_000) as Running
         assertEquals(0, p.index)
-        assertEquals(10_000, p.remainingMs)
+        assertEquals(10_000L, p.remainingMs)
     }
 
     @Test fun previous_onTheFirstStep_restartsIt() {
         val s = started.previous(plan, now = 8_000)
-        assertEquals(10_000, (s.positionAt(plan, 8_000) as Running).remainingMs)
+        assertEquals(10_000L, (s.positionAt(plan, 8_000) as Running).remainingMs)
     }
 
     @Test fun next_fromConstruction_finishes() {
@@ -102,7 +102,7 @@ class DraftSessionTest {
         val p = s.positionAt(plan, 0) as Running
         assertEquals(2, p.index)
         assertEquals(1_000, p.elapsedInStepMs)
-        assertEquals(59_000, p.remainingMs)
+        assertEquals(59_000L, p.remainingMs)
     }
 
     @Test fun fromAStepAfterTheFirst_finishesAtTheEnd() =

@@ -42,7 +42,9 @@ data class DraftSession(
         var start = 0L   // start of step i, counted from the start of [step]
         while (i < plan.steps.size) {
             val s = plan.steps[i]
-            val end = start + s.durationMs
+            // Untimed: it never runs out; the judge moves on ("Next pick", "Start pack 2").
+            val duration = s.durationMs ?: return DraftPosition.Running(i, s, elapsedInStepMs = elapsed - start, remainingMs = null) to elapsed
+            val end = start + duration
             if (elapsed < end) return DraftPosition.Running(i, s, elapsedInStepMs = elapsed - start, remainingMs = end - elapsed) to elapsed
             if (waitsAfter(plan, i)) {
                 val position = if (i == plan.steps.lastIndex) DraftPosition.Finished else DraftPosition.Waiting(i, s)

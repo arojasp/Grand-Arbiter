@@ -110,7 +110,7 @@ fun DraftTimesScreen(
             DraftCard(Modifier, verticalSpacing = 4) {
                 DraftLabel(stringResource(R.string.draft_construction))
                 val minutes = stringResource(R.string.draft_unit_minutes)
-                val label = stringResource(R.string.draft_times_construction_minutes)
+                val label = stringResource(R.string.draft_times_construction_duration)
                 TimeRow(label,
                     if (m.constructionChanged) stringResource(R.string.draft_times_mtr, "${m.mtrConstructionMinutes} $minutes")
                         else if (!m.timedPicks) stringResource(R.string.draft_times_construction_untimed_hint) else null,

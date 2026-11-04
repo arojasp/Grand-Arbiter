@@ -1,6 +1,7 @@
 package es.alejandro.grandarbiter.ui.tools.drafttimer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,27 +15,27 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.Icon
-import androidx.compose.material3.TextButton
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.layout.PaddingValues
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftEstimate
@@ -157,13 +158,15 @@ fun DraftSetupScreen(
 
 /**
  * Canvas "Tiempos · Setup": the times this draft uses (MTR / custom / untimed) and what differs;
- * the whole row opens the Times screen. "Reset to MTR" only when something differs.
+ * the whole card above the reset opens the Times screen (the ripple fills it, edge to edge).
+ * "Reset to MTR" only when something differs.
  */
 @Composable
 private fun TimesCard(t: DraftTimesModel, onOpen: () -> Unit, onReset: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    DraftCard {
-        DraftLabel(stringResource(R.string.draft_section_times))
+    val shape = RoundedCornerShape(12.dp)
+    // Like DraftCard, but the padding is inside the clickable area.
+    Column(Modifier.fillMaxWidth().clip(shape).background(colors.surfaceContainer).border(1.dp, colors.outlineVariant, shape)) {
         val title = stringResource(when {
             !t.timedPicks -> R.string.draft_times_untimed_title
             t.differsInUse -> R.string.draft_times_custom_title
@@ -180,19 +183,22 @@ private fun TimesCard(t: DraftTimesModel, onOpen: () -> Unit, onReset: () -> Uni
             }
             add(stringResource(R.string.draft_times_summary_construction, t.constructionMinutes))
         }
-        Row(
-            Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onOpen),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onOpen).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(title, style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
-                Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+            DraftLabel(stringResource(R.string.draft_section_times))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(title, style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
+                    Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                }
+                Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant)
             }
-            Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant)
         }
         if (t.differsInUse) {
-            HorizontalDivider(color = colors.outlineVariant)
-            TextButton(onClick = onReset, contentPadding = PaddingValues(horizontal = 0.dp)) {
+            HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = colors.outlineVariant)
+            TextButton(onClick = onReset, modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)) {
                 Text(stringResource(R.string.draft_times_reset), style = MaterialTheme.typography.labelLarge, color = colors.primary)
             }
         }

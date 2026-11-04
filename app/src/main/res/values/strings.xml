@@ -326,7 +326,7 @@
     <string name="draft_times_section_review">Review between packs</string>
     <string name="draft_times_review_after">After pack %1$d</string>
     <string name="draft_times_review_every">Every review</string>
-    <string name="draft_times_construction_minutes">Minutes</string>
+    <string name="draft_times_construction_duration">Duration</string>
     <string name="draft_times_construction_untimed_hint">Still timed when picks aren\'t</string>
     <string name="draft_times_reset">Reset to MTR</string>
     <string name="draft_section_times">Times</string>

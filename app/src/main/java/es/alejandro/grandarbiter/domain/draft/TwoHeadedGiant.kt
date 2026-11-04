@@ -42,28 +42,27 @@ data class DraftTimings(
 
 /**
  * Two-Headed Giant Booster Draft (MTR 9.6, 9.7 + Appendix B): each team takes two cards per pick,
- * packs alternate left / right, a fixed review between packs, then deck construction.
+ * packs alternate left / right, a fixed review between packs, then deck construction. The judge's
+ * own times ([DraftConfig.times]) replace the MTR's where set; untimed picks and reviews have no duration.
  */
 object TwoHeadedGiantPlanFactory {
     const val CARDS_PER_PICK = 2
 
     fun create(config: DraftConfig, timings: TwoHeadedGiantTimings): DraftPlan {
         require(config.format == DraftFormat.TWO_HEADED_GIANT) { "not a Two-Headed Giant draft: ${config.format}" }
+        val times = config.times
+        val timed = times.timedPicks
         val steps = buildList {
             for (pack in 1..config.packs) {
-                val cards = config.cardsInPack(pack)
-                val table = requireNotNull(timings.pickSeconds[cards]) { "no Two-Headed Giant times for $cards-card boosters" }
                 val direction = PassDirection.forPack(pack)
-                var pick = 1
-                for (cardsLeft in cards downTo 1 step CARDS_PER_PICK) {
-                    // No time in the table ("N/A": the last card or two) -> no timer, no step.
-                    table[cardsLeft]?.let { seconds ->
-                        add(DraftStep.Pick(pack, pick, cardsLeft, direction, seconds * 1_000L, cardsTaken = CARDS_PER_PICK))
-                    }
-                    pick++
+                // No time in the table ("N/A": the last card or two) -> no row, no step.
+                for (row in DraftTimeRows.twoHeadedGiant(config.cardsInPack(pack), timings)) {
+                    val ms = if (timed) times.secondsFor(row) * 1_000L else null
+                    add(DraftStep.Pick(pack, row.pick, row.cardsLeft, direction, ms, cardsTaken = CARDS_PER_PICK))
                 }
                 if (pack < config.packs) {
-                    add(DraftStep.Review(pack, PassDirection.forPack(pack + 1), timings.reviewSeconds * 1_000L))
+                    val ms = if (timed) times.reviewSecondsAfter(pack, timings.reviewSeconds) * 1_000L else null
+                    add(DraftStep.Review(pack, PassDirection.forPack(pack + 1), ms))
                 }
             }
             add(DraftStep.Construction(config.constructionMinutes * 60_000L))

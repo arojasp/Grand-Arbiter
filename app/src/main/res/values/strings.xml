@@ -347,6 +347,13 @@
     <string name="draft_estimate_untimed">Untimed</string>
     <string name="draft_estimate_review_untimed">Review</string>
     <string name="draft_estimate_total_untimed">%1$s + picks</string>
+    <string name="draft_untimed_pick_sub">Time spent · untimed pick</string>
+    <string name="draft_untimed_review_sub">Time spent · untimed review</string>
+    <string name="draft_untimed_hint">Tap to move on · Hold to go back</string>
+    <string name="draft_next_pick_value_untimed" tools:ignore="PluralsCandidate">%1$d cards</string>
+    <string name="draft_first_pick_untimed" tools:ignore="PluralsCandidate">First pick: %1$d cards</string>
+    <string name="draft_active_pick_untimed">Pack %1$d · Pick %2$d · untimed</string>
+    <string name="draft_active_review_untimed">Review after pack %1$d · untimed</string>
     <string name="draft_section_alerts">Alerts</string>
     <string name="draft_vibrate">Vibrate at 0:00</string>
     <string name="draft_vibrate_hint">One vibration per step</string>

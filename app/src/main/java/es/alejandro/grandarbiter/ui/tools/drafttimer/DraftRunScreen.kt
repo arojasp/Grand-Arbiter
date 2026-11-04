@@ -250,7 +250,7 @@ private fun PickContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftS
     val label = if (step.cardsTaken > 1) stringResource(R.string.draft_pick_take_label, step.pick, step.cardsTaken, step.cardsLeft)
         else stringResource(R.string.draft_pick_label, step.pick, step.cardsLeft)
     Countdown(label, p, s.isRunning, waiting,
-        stringResource(R.string.draft_of, formatDuration(step.durationMs ?: 0L)))
+        step.durationMs?.let { stringResource(R.string.draft_of, formatDuration(it)) } ?: stringResource(R.string.draft_untimed_pick_sub))
     DraftCard {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             DraftLabel(stringResource(R.string.draft_pack_progress))
@@ -269,15 +269,17 @@ private fun ReviewContent(s: DraftSnapshot, p: DraftPosition.Running, step: Draf
         left = { DraftChip(stringResource(R.string.draft_pack_complete, step.afterPack), colors.primary, outlined = true) },
         right = { DraftChip(stringResource(R.string.draft_review)) },
     )
-    Countdown(stringResource(R.string.draft_review_label), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatDuration(step.durationMs ?: 0L)))
+    Countdown(stringResource(R.string.draft_review_label), p, s.isRunning, waiting,
+        step.durationMs?.let { stringResource(R.string.draft_of, formatDuration(it)) } ?: stringResource(R.string.draft_untimed_review_sub))
     DraftCard {
         DraftLabel(stringResource(R.string.draft_up_next))
         Text(stringResource(R.string.draft_pack_n, step.nextPack), style = MaterialTheme.typography.titleLarge,
             color = colors.onSurface)
         Text(directionText(step.nextDirection), style = MaterialTheme.typography.titleSmall, color = colors.primary)
         (s.nextStep as? DraftStep.Pick)?.let { first ->
-            Text(stringResource(R.string.draft_first_pick, first.cardsLeft, (first.durationMs ?: 0L) / 1000),
-                style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            val text = first.durationMs?.let { stringResource(R.string.draft_first_pick, first.cardsLeft, it / 1000) }
+                ?: stringResource(R.string.draft_first_pick_untimed, first.cardsLeft)
+            Text(text, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
     }
     DraftCard(background = colors.surfaceContainerLow) {
@@ -292,7 +294,7 @@ private fun ConstructionContent(s: DraftSnapshot, p: DraftPosition.Running, wait
         left = { DraftChip(stringResource(R.string.draft_complete), colors.primary, outlined = true) },
         right = { DraftChip(stringResource(R.string.draft_build)) },
     )
-    Countdown(stringResource(R.string.draft_construction), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatClock(p.step.durationMs ?: 0L)), size = 80)
+    Countdown(stringResource(R.string.draft_construction), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatClock(s.config.constructionMinutes * 60_000L)), size = 80)
     DraftCard {
         DraftLabel(stringResource(R.string.draft_when_time_is_up))
         Text(stringResource(R.string.draft_when_time_is_up_text), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
@@ -313,10 +315,15 @@ private fun TimeUpContent(s: DraftSnapshot) {
     val bound = if (s.config.format == DraftFormat.ROCHESTER) "≤ " else ""
     DraftCard {
         DraftLabel(stringResource(R.string.draft_summary))
-        SummaryRow(pluralStringResource(R.plurals.draft_summary_draft, s.config.totalPacks, s.config.totalPacks), bound + formatClock(s.totalMs - constructionMs))
+        // Untimed picks: the app doesn't know how long they took.
+        val untimed = !s.config.times.timedPicks
+        SummaryRow(pluralStringResource(R.plurals.draft_summary_draft, s.config.totalPacks, s.config.totalPacks),
+            if (untimed) stringResource(R.string.draft_estimate_untimed) else bound + formatClock(s.totalMs - constructionMs))
         SummaryRow(stringResource(R.string.draft_construction), formatClock(constructionMs))
         HorizontalDivider(color = colors.outlineVariant)
-        SummaryRow(stringResource(R.string.draft_total), bound + formatClock(s.totalMs), emphasis = true)
+        SummaryRow(stringResource(R.string.draft_total),
+            if (untimed) stringResource(R.string.draft_estimate_total_untimed, formatClock(constructionMs)) else bound + formatClock(s.totalMs),
+            emphasis = true)
     }
 }
 
@@ -343,10 +350,13 @@ private fun Countdown(
 ) {
     val colors = MaterialTheme.colorScheme
     val paused = !running && !waiting
+    val remaining = p.remainingMs
+    val duration = p.step.durationMs
     CountdownFrame(
         label = if (paused) stringResource(R.string.draft_paused_label, label) else label,
-        time = formatClock(p.remainingMs ?: p.elapsedInStepMs),
-        fraction = smoothFraction(p.index, p.remainingMs ?: 0L, p.step.durationMs ?: 1L, running = running && !waiting),
+        // Untimed: the time spent so far, counting up, and no bar.
+        time = if (remaining != null) formatClock(remaining) else formatElapsed(p.elapsedInStepMs),
+        fraction = if (remaining != null && duration != null) smoothFraction(p.index, remaining, duration, running = running && !waiting) else null,
         sub = if (waiting) waitingSub ?: stringResource(R.string.draft_time_is_up) else sub,
         color = when {
             waiting -> colors.primary
@@ -386,7 +396,8 @@ private fun smoothFraction(stepIndex: Int, remainingMs: Long, durationMs: Long, 
 private fun CountdownFrame(
     label: String,
     time: String,
-    fraction: Float,
+    /** Null: no bar (untimed step). */
+    fraction: Float?,
     sub: String,
     color: Color,
     size: Int,
@@ -405,7 +416,7 @@ private fun CountdownFrame(
     ) {
         DraftLabel(label, labelColor)
         Text(time, style = MaterialTheme.typography.displayLarge.copy(fontSize = size.sp, lineHeight = (size + 8).sp, letterSpacing = (-2).sp, fontFeatureSettings = "tnum"), color = color)
-        DraftProgress(fraction)
+        if (fraction != null) DraftProgress(fraction)
         Text(sub, style = MaterialTheme.typography.bodySmall, color = subColor, textAlign = TextAlign.Center)
     }
 }
@@ -427,10 +438,12 @@ private fun PickSegments(done: Int, total: Int) {
 
 @Composable
 private fun nextText(next: DraftStep?): String? = when (next) {
-    is DraftStep.Pick -> stringResource(R.string.draft_next_pick_value, next.cardsLeft, (next.durationMs ?: 0L) / 1000)
+    is DraftStep.Pick -> next.durationMs?.let { stringResource(R.string.draft_next_pick_value, next.cardsLeft, it / 1000) }
+        ?: stringResource(R.string.draft_next_pick_value_untimed, next.cardsLeft)
     is DraftStep.LayOut -> stringResource(R.string.draft_next_layout_value, next.pack, next.opener)
-    is DraftStep.Review -> stringResource(R.string.draft_next_review_value, formatDuration(next.durationMs ?: 0L))
-    is DraftStep.Construction -> stringResource(R.string.draft_next_construction_value, formatDuration(next.durationMs))
+    is DraftStep.Review -> next.durationMs?.let { stringResource(R.string.draft_next_review_value, formatDuration(it)) }
+        ?: stringResource(R.string.draft_review)
+    is DraftStep.Construction -> stringResource(R.string.draft_next_construction_value, formatClock(next.durationMs))
     null -> null
 }
 
@@ -488,6 +501,11 @@ private fun Footer(s: DraftSnapshot, viewModel: DraftRunViewModel, onEnd: () -> 
             return@Column
         }
         val running = position as DraftPosition.Running
+        if (!running.step.isTimed) {
+            // Untimed pick or review: moving on is THE action, a plain tap; going back needs a hold.
+            UntimedFooter(s, running.step, viewModel, onEnd)
+            return@Column
+        }
 
         PauseButton(s.isRunning, viewModel::togglePause)
 
@@ -520,6 +538,40 @@ private fun Footer(s: DraftSnapshot, viewModel: DraftRunViewModel, onEnd: () -> 
 
         EndDraftLink(onEnd)
     }
+}
+
+/**
+ * Canvas "Tiempos · Draft en curso / Revisión / Último pick sin tiempo": "Next pick ›", "Start pack 2 ›",
+ * "Start deck construction ›" big, a held "‹ Previous pick" below. No pause: nothing counts down
+ * (only if the draft was left paused, so it can be resumed).
+ */
+@Composable
+private fun UntimedFooter(s: DraftSnapshot, step: DraftStep, viewModel: DraftRunViewModel, onEnd: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val next = s.nextStep
+    val nextLabel = when {
+        step is DraftStep.Review -> stringResource(R.string.draft_start_pack, step.nextPack)
+        next is DraftStep.Pick -> stringResource(R.string.draft_next_pick_button)
+        else -> startLabel(step, next)
+    }
+    PrimaryButton("$nextLabel  ›", viewModel::next)
+    var hold by remember { mutableStateOf(HoldState.IDLE) }
+    LaunchedEffect(hold) { if (hold == HoldState.TAPPED) { delay(1_500); hold = HoldState.IDLE } }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (!s.isRunning) PauseButton(running = false, viewModel::togglePause, size = 52)
+        HoldToConfirmButton("‹  " + stringResource(R.string.draft_previous_pick), viewModel::previous, Modifier.weight(1f),
+            onStateChange = { hold = it })
+    }
+    Text(
+        stringResource(when (hold) {
+            HoldState.IDLE -> R.string.draft_untimed_hint
+            HoldState.HOLDING -> R.string.hold_keep_holding
+            HoldState.TAPPED -> R.string.draft_hold_to_confirm
+        }),
+        style = MaterialTheme.typography.bodySmall,
+        color = if (hold == HoldState.IDLE) colors.onSurfaceVariant else colors.primary,
+    )
+    EndDraftLink(onEnd)
 }
 
 /** Figma "Rochester - Pick": "Picked ›" big; pause and a held "‹ Previous pick" below. */

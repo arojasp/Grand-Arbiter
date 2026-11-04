@@ -53,6 +53,7 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
             firstTeam = prefs.getInt(prefix + FIRST_TEAM, 1),
             packSizes = prefs.getString(prefix + PACK_SIZES, null),
             timeBase = prefs.getString(prefix + TIME_BASE, null),
+            times = prefs.getString(prefix + TIMES, null),
         )
     }
 
@@ -66,6 +67,7 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
         putInt(prefix + FIRST_TEAM, s.firstTeam)
         if (s.packSizes != null) putString(prefix + PACK_SIZES, s.packSizes) else remove(prefix + PACK_SIZES)
         if (s.timeBase != null) putString(prefix + TIME_BASE, s.timeBase) else remove(prefix + TIME_BASE)
+        if (s.times != null) putString(prefix + TIMES, s.times) else remove(prefix + TIMES)
         putLong(prefix + ACCUMULATED, s.accumulatedMs)
         if (s.runningSince != null) putLong(prefix + SINCE, s.runningSince) else remove(prefix + SINCE)
     }
@@ -84,6 +86,7 @@ class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
         const val FIRST_TEAM = "first_team"
         const val PACK_SIZES = "pack_sizes"
         const val TIME_BASE = "time_base"
-        val KEYS = listOf(FORMAT, PACKS, CARDS, MINUTES, MANUAL, ACCUMULATED, SINCE, STEP, FIRST_TEAM, PACK_SIZES, TIME_BASE)
+        const val TIMES = "times"
+        val KEYS = listOf(FORMAT, PACKS, CARDS, MINUTES, MANUAL, ACCUMULATED, SINCE, STEP, FIRST_TEAM, PACK_SIZES, TIME_BASE, TIMES)
     }
 }

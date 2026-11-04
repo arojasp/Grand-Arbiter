@@ -33,6 +33,8 @@ object DraftSessionCodec {
          * Null: an older version, counted from the start of the draft.
          */
         val timeBase: String? = null,
+        /** The judge's own times ([DraftTimesCodec]); null = the MTR's (or stored before this existed). */
+        val times: String? = null,
     )
 
     const val TIME_BASE_STEP = "step"
@@ -46,7 +48,7 @@ object DraftSessionCodec {
 
     fun encodeConfig(config: DraftConfig): Stored =
         Stored(config.format.name, config.packs, config.cardsPerPack, config.constructionMinutes, config.manualStart,
-            firstTeam = config.firstTeam, packSizes = config.packSizes?.joinToString(","))
+            firstTeam = config.firstTeam, packSizes = config.packSizes?.joinToString(","), times = DraftTimesCodec.encode(config.times))
 
     /** A draft started before "Manual start" existed ran on its own: it keeps doing so. */
     fun decode(stored: Stored): DraftSession? {
@@ -75,7 +77,7 @@ object DraftSessionCodec {
             // A malformed list throws (NumberFormatException) like any other bad value: null.
             val packSizes = stored.packSizes?.split(",")?.map { it.trim().toInt() }
             DraftConfig(format, stored.packs, stored.cardsPerPack, stored.constructionMinutes, stored.manualStart ?: manualStartIfMissing,
-                stored.firstTeam, packSizes)
+                stored.firstTeam, packSizes, DraftTimesCodec.decode(stored.times))
         }.getOrNull()
     }
 }

@@ -4,6 +4,7 @@ import es.alejandro.grandarbiter.data.draft.DraftSessionCodec.Stored
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftSession
+import es.alejandro.grandarbiter.domain.draft.DraftTimes
 import es.alejandro.grandarbiter.domain.timer.TimerState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -85,4 +86,18 @@ class DraftSessionCodecTest {
 
     @Test fun draftFromAnOlderVersion_neverNegative() =
         assertEquals(0L, DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, accumulatedMs = 10_000, step = 2))!!.timer.accumulatedMs)
+
+    // ---- The judge's own times travel with the draft
+
+    @Test fun customTimes_roundTrip() {
+        val times = DraftTimes.MTR.withTimedPicks(false)
+        val s = DraftSession(DraftConfig(constructionMinutes = 300, times = times), TimerState(5_000, null), step = 1)
+        assertEquals(s, DraftSessionCodec.decode(DraftSessionCodec.encode(s)))
+    }
+
+    @Test fun mtrTimes_storedAsNull() = assertNull(DraftSessionCodec.encode(session).times)
+
+    @Test fun badTimes_draftKeepsTheMtrs() =
+        assertEquals(DraftTimes.MTR,
+            DraftSessionCodec.decode(Stored("BOOSTER", 3, 14, 25, timeBase = DraftSessionCodec.TIME_BASE_STEP, times = "x"))!!.config.times)
 }

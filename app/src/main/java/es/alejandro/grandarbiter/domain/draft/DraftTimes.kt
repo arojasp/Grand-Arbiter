@@ -1,5 +1,7 @@
 package es.alejandro.grandarbiter.domain.draft
 
+import kotlinx.coroutines.flow.StateFlow
+
 /**
  * The judge's own draft times (Booster and Two-Headed Giant; casual drafts). Only what was changed
  * is kept: a row left alone follows the installed MTR, so an MTR update still reaches it.
@@ -74,4 +76,17 @@ object DraftTimeRows {
             table[cardsLeft]?.let { PickRow(packSize, i + 1, cardsLeft, it) }
         }
     }
+}
+
+/** A format's times as the judge left them on the Times screen. */
+data class FormatTimes(
+    val times: DraftTimes = DraftTimes.MTR,
+    /** Null: never changed here (the setup uses the last draft's, or the format's default). */
+    val constructionMinutes: Int? = null,
+)
+
+/** Each format's own times, remembered on every change (not only when a draft starts). */
+interface DraftTimesStore {
+    fun times(format: DraftFormat): StateFlow<FormatTimes>
+    fun save(format: DraftFormat, times: FormatTimes)
 }

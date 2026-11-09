@@ -49,7 +49,9 @@ class CardQueryParserTest {
         assertEquals(listOf(Colors(ColorField.COLOR, Cmp.GE, "UR")), terms("c:ru"))   // WUBRG order
         assertEquals(listOf(Colors(ColorField.COLOR, Cmp.EQ, "WU")), terms("c=wu"))
         assertEquals(listOf(Colors(ColorField.COLOR, Cmp.LE, "B")), terms("color<=black"))
-        assertEquals(listOf(Colors(ColorField.COLOR, Cmp.GE, "")), terms("c:c"))     // colorless
+        assertEquals(listOf(Colors(ColorField.COLOR, Cmp.EQ, "")), terms("c:c"))     // colorless, not "everything"
+        assertEquals(listOf(Colors(ColorField.COLOR, Cmp.EQ, "")), terms("c:colorless"))
+        assertEquals(listOf(Colors(ColorField.IDENTITY, Cmp.LE, "")), terms("id:c"))
     }
 
     @Test fun identity_colonMeansFitsIn_asScryfall() {

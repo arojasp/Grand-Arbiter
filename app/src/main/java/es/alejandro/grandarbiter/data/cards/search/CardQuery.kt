@@ -129,7 +129,12 @@ object CardQueryParser {
             else -> return Result.Online              // c:m, c:azorius, c:2…: Scryfall knows them
         }
         val ordered = "WUBRG".filter { it in letters }
-        val cmp = if (op == ":") (if (field == ColorField.COLOR) Cmp.GE else Cmp.LE) else cmp(op)
+        val cmp = when {
+            op != ":" -> cmp(op)
+            field == ColorField.IDENTITY -> Cmp.LE
+            ordered.isEmpty() -> Cmp.EQ          // c:c is "colorless", not "includes nothing" (= everything)
+            else -> Cmp.GE
+        }
         return QueryTerm.Colors(field, cmp, ordered).ok()
     }
 

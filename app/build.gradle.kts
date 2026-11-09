@@ -135,6 +135,8 @@ dependencies {
 
 
     testImplementation(libs.junit)
+    // Runs the card search SQL against the real seed on the JVM (CardQuerySqlTest). Tests only.
+    testImplementation(libs.sqlite.jdbc)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

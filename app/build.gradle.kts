@@ -19,8 +19,8 @@ android {
         // appended to the patch, tracks document changes (rules, cards, release notes) since that
         // A.B.C. 1.2.3001: app 1.2.3 with its first document update; 1.2.3002: one more, app
         // unchanged; 1.2.4: new app version with no document changes. versionCode always +1.
-        versionCode = 11
-        versionName = "1.4.0"
+        versionCode = 12
+        versionName = "1.4.0001"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

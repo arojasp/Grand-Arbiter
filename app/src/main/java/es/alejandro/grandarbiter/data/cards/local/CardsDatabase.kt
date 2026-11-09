@@ -9,7 +9,9 @@ import androidx.room.Index
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 
 /*
@@ -106,20 +108,11 @@ data class LegalityRow(
 interface CardsDao {
 
     /**
-     * [match] is an FTS query (see CardSearchQuery). Exact name first, then names starting with
-     * what was typed, real cards before tokens, then alphabetical.
+     * The card search, built by CardQuerySql (names via card_fts + filters on card). Raw because
+     * the filters depend on the query; CardQuerySqlTest runs that SQL on the real card seed.
      */
-    @Query(
-        """
-        SELECT c.oracleId, c.name, c.manaCost, c.typeLine, c.isToken
-        FROM card_fts JOIN card c ON c.rowid = card_fts.rowid
-        WHERE card_fts MATCH :match
-        ORDER BY (lower(c.name) = :typed) DESC, (lower(c.name) LIKE :typed || '%') DESC,
-                 c.isToken, c.name
-        LIMIT :limit
-        """
-    )
-    suspend fun search(match: String, typed: String, limit: Int): List<CardHit>
+    @RawQuery
+    suspend fun search(query: SupportSQLiteQuery): List<CardHit>
 
     @Query("SELECT * FROM card WHERE oracleId = :oracleId")
     suspend fun card(oracleId: String): CardEntity?

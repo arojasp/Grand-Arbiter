@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
-import es.alejandro.grandarbiter.domain.model.cards.CardSummary
+import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.repository.CardRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -29,7 +29,6 @@ class CardSearchViewModel(
 ) : ViewModel() {
 
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
-    val inText: StateFlow<Boolean> = savedStateHandle.getStateFlow(KEY_IN_TEXT, false)
 
     /**
      * Re-emits when an import finishes, so results appear by themselves after the first run.
@@ -43,20 +42,18 @@ class CardSearchViewModel(
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardDataState.Checking)
 
-    val results: StateFlow<List<CardSummary>> = combine(query.debounce(200), inText, dataState) { q, t, d -> Triple(q, t, d) }
-        .mapLatest { (q, t, d) ->
-            if (q.isBlank() || d !is CardDataState.Ready) emptyList() else repository.search(q, inText = t, limit = LIMIT)
+    val results: StateFlow<CardSearchResult> = combine(query.debounce(200), dataState) { q, d -> q to d }
+        .mapLatest { (q, d) ->
+            if (q.isBlank() || d !is CardDataState.Ready) CardSearchResult.Empty else repository.search(q, limit = LIMIT)
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardSearchResult.Empty)
 
     fun onQueryChange(value: String) { savedStateHandle[KEY_QUERY] = value }
-    fun onInTextChange(value: Boolean) { savedStateHandle[KEY_IN_TEXT] = value }
 
     companion object {
         /** Results shown; at the limit the header says "100+". */
         const val LIMIT = 100
         private const val KEY_QUERY = "query"
-        private const val KEY_IN_TEXT = "inText"
     }
 }
 

@@ -2,13 +2,14 @@ package es.alejandro.grandarbiter.domain.repository
 
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
-import es.alejandro.grandarbiter.domain.model.cards.CardSummary
+import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.cards.FormatBanList
 import kotlinx.coroutines.flow.Flow
 
 /** Offline card data (Scryfall snapshot in cards.db). Images are the only online part. */
 interface CardRepository {
-    suspend fun search(query: String, inText: Boolean = false, limit: Int = 100): List<CardSummary>
+    /** [query]: card names and a subset of Scryfall's syntax (data/cards/search/CardQuery.kt). */
+    suspend fun search(query: String, limit: Int = 100): CardSearchResult
     suspend fun card(oracleId: String): CardDetail?
     fun observeDataInfo(): Flow<CardDataInfo?>
     /** Cards written so far by an import in progress; null when none runs. */

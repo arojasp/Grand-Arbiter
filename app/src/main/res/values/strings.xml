@@ -44,7 +44,6 @@
     <string name="cards_title">Oracle Search</string>
     <string name="cards_details">Card details</string>
     <string name="cards_settings">Settings</string>
-    <string name="cards_filter">Search options</string>
     <plurals name="cards_found">
         <item quantity="one">%1$d card found</item>
         <item quantity="other">%1$d cards found</item>
@@ -66,8 +65,8 @@
     <string name="cards_art_credit">Illustrated by %1$s · © Wizards of the Coast</string>
     <string name="cards_art_copyright">© Wizards of the Coast</string>
     <string name="cards_search_placeholder">Card name…</string>
-    <string name="cards_search_text_placeholder">Words in name, type or rules text…</string>
-    <string name="cards_search_in_text">Search rules text</string>
+    <string name="cards_syntax_hint">Plain words search card names. Scryfall filters work too: o: t: c: id: mv pow tou</string>
+    <string name="cards_needs_online">Only Scryfall understands %1$s. Online search isn\'t ready yet.</string>
     <string name="cards_preparing">Preparing card data… This only takes a while the first time.</string>
     <string name="cards_preparing_count">%1$s cards ready</string>
     <string name="cards_count">%1$s cards</string>

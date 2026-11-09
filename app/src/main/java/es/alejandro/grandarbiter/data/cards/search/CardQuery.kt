@@ -58,7 +58,15 @@ object CardQueryParser {
     fun parse(query: String): CardQuery {
         val terms = mutableListOf<QueryTerm>()
         val online = mutableListOf<String>()
-        for (token in tokens(query)) {
+        val tokens = tokens(query)
+        // A query with no syntax at all is a card name, as the search always was: "Fight or
+        // Flight" and "Sword of Fire and Ice" must not turn into operators. (Scryfall would read
+        // "fight OR flight"; our answer is the subset the judge is looking for.)
+        if (tokens.none(::isSyntax)) {
+            val words = tokens.filterNot(::isHalfTypedKey).map(::unquote).filter { it.isNotBlank() }
+            return CardQuery(query, words.map { QueryTerm.Name(it) }, emptyList())
+        }
+        for (token in tokens) {
             when (val result = read(token)) {
                 Result.Empty -> Unit
                 Result.Online -> online += token
@@ -75,6 +83,17 @@ object CardQueryParser {
     }
 
     private fun QueryTerm.ok() = Result.Term(this)
+
+    /** "o:" or "mv>=" while typing: says nothing yet ("Protection:" is a name word, not a key). */
+    private fun isHalfTypedKey(token: String): Boolean =
+        KEYED.find(token)?.let { m ->
+            unquote(m.groupValues[3]).isBlank() && (m.groupValues[1].lowercase() in OFFLINE_KEYS || m.groupValues[2] != ":")
+        } == true
+
+    /** Anything beyond plain words: a key with a value, "-", "!" or parentheses. */
+    private fun isSyntax(token: String): Boolean =
+        token.startsWith("-") || token.startsWith("!") || '(' in token || ')' in token ||
+            KEYED.find(token)?.let { unquote(it.groupValues[3]).isNotBlank() } == true
 
     private fun read(token: String): Result {
         if (token.startsWith("-") || token.startsWith("!") || '(' in token || ')' in token) return Result.Online

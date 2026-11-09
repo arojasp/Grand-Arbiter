@@ -66,7 +66,19 @@ class CardQueryParserTest {
     }
 
     @Test fun nameWithAColon_staysAName() {
-        assertEquals(listOf(Name("Protection"), Name("red")), terms("Protection: red"))
+        // A plain query keeps its words as typed; the name search only looks at letters and digits.
+        assertEquals(listOf(Name("Protection:"), Name("red")), terms("Protection: red"))
+        assertEquals(listOf(Name("Protection"), Name("red")), terms("Protection: red t:enchantment").take(2))
+    }
+
+    @Test fun plainNames_keepOrAndAnd_asWords() {
+        assertEquals(listOf(Name("fight"), Name("or"), Name("flight")), terms("fight or flight"))
+        assertEquals(listOf(Name("Sword"), Name("of"), Name("Fire"), Name("and"), Name("Ice")), terms("Sword of Fire and Ice"))
+        assertEquals(listOf(Name("Ajani's"), Name("Pridemate")), terms("Ajani's Pridemate"))
+    }
+
+    @Test fun or_withSyntax_isScryfallsOperator() {
+        assertEquals(listOf("or"), online("t:elf or t:goblin"))
     }
 
     @Test fun and_isWhatWeDoAnyway() {

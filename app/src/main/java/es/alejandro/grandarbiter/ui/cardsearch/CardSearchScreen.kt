@@ -1,7 +1,5 @@
 package es.alejandro.grandarbiter.ui.cardsearch
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,13 +20,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -40,9 +34,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -58,6 +49,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.ui.components.Tag
 import java.text.NumberFormat
@@ -74,7 +66,6 @@ fun CardSearchScreen(
     viewModel: CardSearchViewModel = koinViewModel(),
 ) {
     val query by viewModel.query.collectAsState()
-    val inText by viewModel.inText.collectAsState()
     val dataState by viewModel.dataState.collectAsState()
     val results by viewModel.results.collectAsState()
 
@@ -103,7 +94,7 @@ fun CardSearchScreen(
         },
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding).fillMaxSize()) {
-            SearchHeader(query, viewModel::onQueryChange, inText)
+            SearchHeader(query, viewModel::onQueryChange)
             when {
                 dataState is CardDataState.Checking -> Unit
                 dataState is CardDataState.Preparing -> Centered {
@@ -123,7 +114,10 @@ fun CardSearchScreen(
                     }
                 }
                 query.isBlank() -> (dataState as? CardDataState.Ready)?.let { IdleState(it) }
-                else -> Results(results, inText, viewModel::onInTextChange, onOpenCard)
+                else -> when (val r = results) {
+                    is CardSearchResult.Offline -> Results(r.cards, onOpenCard)
+                    is CardSearchResult.NeedsOnline -> NeedsOnline(r.parts)
+                }
             }
         }
     }
@@ -132,22 +126,28 @@ fun CardSearchScreen(
 // ---------------------------------------------------------------- search header
 
 @Composable
-private fun SearchHeader(query: String, onQueryChange: (String) -> Unit, inText: Boolean) {
+private fun SearchHeader(query: String, onQueryChange: (String) -> Unit) {
     val border = MaterialTheme.colorScheme.outlineVariant
-    Box(
+    Column(
         Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .drawBehind { drawLine(border, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        CardSearchField(query, onQueryChange, inText)
+        CardSearchField(query, onQueryChange)
+        // Teaches the syntax while there's nothing typed (canvas Busqueda2_inicio).
+        if (query.isEmpty()) {
+            Text(stringResource(R.string.cards_syntax_hint), style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 
 /** 48dp field (a Material TextField is 56dp min): Figma "Search Bar". */
 @Composable
-private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, inText: Boolean) {
+private fun CardSearchField(query: String, onQueryChange: (String) -> Unit) {
     val colors = MaterialTheme.colorScheme
     BasicTextField(
         value = query,
@@ -171,7 +171,7 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, inTe
                 Box(Modifier.weight(1f)) {
                     if (query.isEmpty()) {
                         Text(
-                            stringResource(if (inText) R.string.cards_search_text_placeholder else R.string.cards_search_placeholder),
+                            stringResource(R.string.cards_search_placeholder),
                             style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant, maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -194,14 +194,9 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, inTe
 // ---------------------------------------------------------------- results
 
 @Composable
-private fun Results(
-    results: List<CardSummary>,
-    inText: Boolean,
-    onInTextChange: (Boolean) -> Unit,
-    onOpenCard: (String) -> Unit,
-) {
+private fun Results(results: List<CardSummary>, onOpenCard: (String) -> Unit) {
     LazyColumn(Modifier.fillMaxSize()) {
-        item { ResultsMeta(results.size, inText, onInTextChange) }
+        item { ResultsMeta(results.size) }
         if (results.isEmpty()) {
             item {
                 Text(
@@ -218,50 +213,34 @@ private fun Results(
     }
 }
 
-/** "4 CARDS FOUND" + the filter menu (search rules text). */
+/** "4 CARDS FOUND". (The hidden "search rules text" menu is gone: rules text is o:.) */
 @Composable
-private fun ResultsMeta(count: Int, inText: Boolean, onInTextChange: (Boolean) -> Unit) {
-    var menu by remember { mutableStateOf(false) }
+private fun ResultsMeta(count: Int) {
     val label = if (count >= CardSearchViewModel.LIMIT) {
         stringResource(R.string.cards_found_many, CardSearchViewModel.LIMIT)
     } else {
         pluralStringResource(R.plurals.cards_found, count, count)
     }
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            label.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.55.sp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,   // was onSurface at 0.6 alpha (no alpha on text)
-            modifier = Modifier.weight(1f),
-        )
-        Box {
-            IconButton(
-                onClick = { menu = true },
-                // A filled tonal circle when a filter is on, so it's never applied without the judge
-                // noticing (it was gold; with a neutral palette a tint alone isn't enough).
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = if (inText) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                ),
-            ) {
-                Icon(
-                    Icons.Default.FilterList,
-                    contentDescription = stringResource(R.string.cards_filter),
-                    tint = if (inText) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.cards_search_in_text)) },
-                    leadingIcon = { Checkbox(checked = inText, onCheckedChange = null) },
-                    onClick = { onInTextChange(!inText); menu = false },
-                )
-            }
-        }
-    }
+    Text(
+        label.uppercase(),
+        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.55.sp),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,   // was onSurface at 0.6 alpha (no alpha on text)
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp),
+    )
+}
+
+/**
+ * The query uses parts only Scryfall understands. Temporary on this branch: the online search
+ * (canvas Busqueda2_online / _sin_conexion) replaces this panel in the next step.
+ */
+@Composable
+private fun NeedsOnline(parts: List<String>) {
+    Text(
+        stringResource(R.string.cards_needs_online, parts.joinToString(" ")),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+    )
 }
 
 @Composable

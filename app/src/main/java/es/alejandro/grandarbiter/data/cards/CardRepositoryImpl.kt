@@ -1,10 +1,14 @@
 package es.alejandro.grandarbiter.data.cards
 
+import androidx.sqlite.db.SimpleSQLiteQuery
 import es.alejandro.grandarbiter.data.cards.local.CardImporter
 import es.alejandro.grandarbiter.data.cards.local.CardMapper
 import es.alejandro.grandarbiter.data.cards.local.CardsDao
+import es.alejandro.grandarbiter.data.cards.search.CardQueryParser
+import es.alejandro.grandarbiter.data.cards.search.CardQuerySql
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
+import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.domain.model.cards.FormatBanList
 import es.alejandro.grandarbiter.domain.repository.CardRepository
@@ -15,11 +19,12 @@ class CardRepositoryImpl(private val dao: CardsDao, private val importer: CardIm
 
     override fun observeImportProgress(): Flow<Int?> = importer.progress
 
-    override suspend fun search(query: String, inText: Boolean, limit: Int): List<CardSummary> {
-        val match = CardSearchQuery.toFts(query, inText) ?: return emptyList()
-        return dao.search(match, CardSearchQuery.typed(query), limit).map {
-            CardSummary(it.oracleId, it.name, it.manaCost, it.typeLine, it.isToken)
-        }
+    override suspend fun search(query: String, limit: Int): CardSearchResult {
+        val parsed = CardQueryParser.parse(query)
+        if (parsed.needsOnline) return CardSearchResult.NeedsOnline(parsed.onlineParts)
+        val sql = CardQuerySql.build(parsed, limit) ?: return CardSearchResult.Empty
+        val hits = dao.search(SimpleSQLiteQuery(sql.text, sql.args.toTypedArray()))
+        return CardSearchResult.Offline(hits.map { CardSummary(it.oracleId, it.name, it.manaCost, it.typeLine, it.isToken) })
     }
 
     override suspend fun card(oracleId: String): CardDetail? {
@@ -34,22 +39,4 @@ class CardRepositoryImpl(private val dao: CardsDao, private val importer: CardIm
     override fun observeDataInfo(): Flow<CardDataInfo?> = dao.observeMeta().map { m ->
         m?.let { CardDataInfo(it.oracleUpdatedAt, it.rulingsUpdatedAt, it.source, it.importedAt, it.cardCount) }
     }
-}
-
-/** What a judge types -> FTS query. Pure, unit-tested. */
-object CardSearchQuery {
-    private val WORD = Regex("""[\p{L}\p{N}]+""")
-
-    /**
-     * Every word must match as a prefix. Name only by default ("light bol" -> name:light* name:bol*);
-     * [inText] also searches type line and rules text ("draw a card").
-     */
-    fun toFts(query: String, inText: Boolean): String? {
-        val words = WORD.findAll(query.lowercase()).map { it.value }.toList()
-        if (words.isEmpty()) return null
-        return words.joinToString(" ") { if (inText) "$it*" else "name:$it*" }
-    }
-
-    /** For ranking exact and prefix name matches first. */
-    fun typed(query: String): String = query.trim().lowercase()
 }

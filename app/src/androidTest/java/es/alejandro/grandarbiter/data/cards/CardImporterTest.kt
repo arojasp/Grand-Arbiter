@@ -9,6 +9,7 @@ import es.alejandro.grandarbiter.data.cards.local.CardImportResult
 import es.alejandro.grandarbiter.data.cards.local.CardImporter
 import es.alejandro.grandarbiter.data.cards.local.CardsDao
 import es.alejandro.grandarbiter.data.cards.local.CardsDatabase
+import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -59,12 +60,14 @@ class CardImporterTest {
         assertEquals(2, result.rulingTexts)           // shared text stored once
         assertEquals(3, result.rulingRefs)            // duplicate (same card, later date) skipped
 
-        assertEquals("Alpha Bolt", repo.search("alpha bo").first().name)
-        assertEquals("Lim-Dûl Placeholder", repo.search("lim dul").single().name)   // diacritics folded
-        assertTrue(repo.search("zap", inText = false).isEmpty())
-        assertEquals(1, repo.search("zap", inText = true).size)
+        suspend fun names(q: String) = (repo.search(q) as CardSearchResult.Offline).cards.map { it.name }
+        assertEquals("Alpha Bolt", names("alpha bo").first())
+        assertEquals("Lim-Dûl Placeholder", names("lim dul").single())   // diacritics folded
+        assertTrue(names("zap").isEmpty())                               // plain words: names only
+        assertEquals(1, names("o:zap").size)                             // rules text with o:
         // exact name first, tokens after cards
-        assertEquals(listOf("Alpha Bolt", "Alpha Bolt Token"), repo.search("alpha bolt").map { it.name })
+        assertEquals(listOf("Alpha Bolt", "Alpha Bolt Token"), names("alpha bolt"))
+        assertTrue(repo.search("set:abc cn:1") is CardSearchResult.NeedsOnline)
 
         val detail = repo.card("a1")
         assertNotNull(detail)

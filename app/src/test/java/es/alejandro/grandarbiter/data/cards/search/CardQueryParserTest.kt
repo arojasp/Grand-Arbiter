@@ -78,6 +78,49 @@ class CardQueryParserTest {
         assertTrue(CardQueryParser.parse("o:\"draw a card\" -t:land").isComplete)
     }
 
+    /** Where each typed query is searched: "offline", "online" or "nothing" (blank / not ready). */
+    private fun where(q: String): String = CardQueryParser.parse(q).let {
+        when {
+            it.needsOnline -> if (it.isComplete) "online" else "waits"
+            it.isBlank -> "nothing"
+            else -> "offline"
+        }
+    }
+
+    @Test fun table_ofTypedQueries() {
+        mapOf(
+            "" to "nothing",
+            "   " to "nothing",
+            "o:" to "nothing",
+            "-" to "nothing",
+            "lightning bolt" to "offline",
+            "  Lightning   Bolt  " to "offline",
+            "Ajani’s Pridemate" to "offline",
+            "fight or flight" to "offline",
+            "Circle of Protection: Red" to "offline",
+            "T:Elf C:G" to "offline",
+            "o:\"draw a" to "offline",                 // offline needs no closing quote
+            "t:elf -t:" to "offline",
+            "t:elf -t:goblin" to "online",
+            "t:elf or t:goblin" to "online",
+            "set:dmu cn:47" to "online",
+            "!\"Lightning Bolt\"" to "online",
+            "f:modern t:elf" to "online",
+            "-t:land o:\"draw a" to "waits",
+            "-t:land o:“draw a" to "waits",
+            "(t:elf or t:goblin" to "waits",
+            "(t:elf or t:goblin)" to "online",
+        ).forEach { (q, expected) -> assertEquals("for [$q]", expected, where(q)) }
+    }
+
+    @Test fun typographicQuotes_areQuotes() {
+        assertEquals(listOf(RulesText("draw a card")), terms("o:“draw a card”"))
+        assertEquals(listOf(RulesText("draw a card")), terms("o:«draw a card»"))
+        assertFalse(CardQueryParser.parse("-t:land o:“draw a").isComplete)
+        assertEquals("Ajani's Pridemate", CardQueryParser.normalize("Ajani’s Pridemate"))
+        assertEquals("o:\"draw a card\"", CardQueryParser.normalize("o:“draw a card”"))
+    }
+
     @Test fun nameWithAColon_staysAName() {
         // A plain query keeps its words as typed; the name search only looks at letters and digits.
         assertEquals(listOf(Name("Protection:"), Name("red")), terms("Protection: red"))

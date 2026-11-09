@@ -137,6 +137,8 @@ dependencies {
     testImplementation(libs.junit)
     // Runs the card search SQL against the real seed on the JVM (CardQuerySqlTest). Tests only.
     testImplementation(libs.sqlite.jdbc)
+    // Virtual time for ViewModel tests (debounce, cancellation). Same version as the app's coroutines.
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -58,7 +58,24 @@ object CardQueryParser {
         "white" to "W", "blue" to "U", "black" to "B", "red" to "R", "green" to "G",
     )
 
-    fun parse(query: String): CardQuery {
+    /**
+     * Phone keyboards type typographic quotes (“draw a card”, «…», Ajani’s): they mean the plain
+     * ones here and on Scryfall, which only understands " and '.
+     */
+    fun normalize(query: String): String {
+        val sb = StringBuilder(query.length)
+        for (ch in query) sb.append(
+            when (ch) {
+                '“', '”', '„', '‟', '«', '»', '″' -> '"'
+                '‘', '’', '‚', '‛', '′' -> '\''
+                else -> ch
+            }
+        )
+        return sb.toString()
+    }
+
+    fun parse(rawQuery: String): CardQuery {
+        val query = normalize(rawQuery)
         val terms = mutableListOf<QueryTerm>()
         val online = mutableListOf<String>()
         val tokens = tokens(query)

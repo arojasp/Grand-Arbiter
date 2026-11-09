@@ -35,7 +35,7 @@ class CardRepositoryImpl(
 
     override suspend fun searchOnline(query: String): CardSearchResult {
         val parts = CardQueryParser.parse(query).onlineParts
-        return when (val r = online.search(query)) {
+        return when (val r = online.search(CardQueryParser.normalize(query))) {
             is OnlineSearch.Found -> CardSearchResult.Online(r.cards, r.total, r.warnings)
             is OnlineSearch.Rejected -> CardSearchResult.OnlineFailed(
                 CardSearchResult.OnlineFailed.Reason.REJECTED, parts, (listOf(r.details) + r.warnings).filter { it.isNotBlank() }.joinToString("\n"),

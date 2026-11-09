@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -58,27 +61,23 @@ import es.alejandro.grandarbiter.data.cards.search.ColorField
 import es.alejandro.grandarbiter.data.cards.search.ColorMatch
 import es.alejandro.grandarbiter.data.cards.search.NumberFilter
 import es.alejandro.grandarbiter.data.cards.search.NumberOp
-import es.alejandro.grandarbiter.ui.components.Label
-import es.alejandro.grandarbiter.ui.components.Panel
+import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 import es.alejandro.grandarbiter.ui.tools.drafttimer.Choice
 import es.alejandro.grandarbiter.ui.tools.drafttimer.StepperControl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.androidx.compose.koinViewModel
 
-/**
- * The form that WRITES the search syntax (canvas Busqueda2_avanzada_revisada). Opens with the
- * current query read into fields; "Search" hands the new query back; back with changes asks first.
- */
+/** A form that writes the search syntax. Opens with the current query read into its fields. */
 class AdvancedSearchViewModel(private val state: SavedStateHandle) : ViewModel() {
-    /** The form as it opened: "changed" is measured against it. */
+    /** The form as it opened, to tell whether anything changed. */
     val initial: AdvancedSearchForm = AdvancedSearchForm.fromQuery(state.get<String>(ARG_QUERY).orEmpty())
     private val _form = MutableStateFlow(state.get<String>(KEY_FORM)?.let(AdvancedSearchForm::fromQuery) ?: initial)
     val form: StateFlow<AdvancedSearchForm> = _form
 
     fun update(change: (AdvancedSearchForm) -> AdvancedSearchForm) {
         _form.value = change(_form.value)
-        state[KEY_FORM] = _form.value.toQuery()      // survives process death (as the syntax it writes)
+        state[KEY_FORM] = _form.value.toQuery()
     }
 
     companion object {
@@ -112,7 +111,6 @@ fun AdvancedSearchScreen(
                 },
                 title = { Text(stringResource(R.string.cards_adv_title), style = MaterialTheme.typography.titleLarge, color = colors.primary) },
                 actions = {
-                    // Offer only what changes something: nothing to clear in an empty form.
                     if (!form.isEmpty) TextButton(onClick = { viewModel.update { AdvancedSearchForm() } }) { Text(stringResource(R.string.cards_adv_clear)) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background),
@@ -121,14 +119,16 @@ fun AdvancedSearchScreen(
         bottomBar = { Footer(form.toQuery()) { onSearch(form.toQuery()) } },
     ) { padding ->
         Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
-            TextBlock(form, viewModel::update)
-            ColorBlock(form, viewModel::update)
-            NumberBlock(form, viewModel::update)
-            PrintingBlock(form, viewModel::update)
-            if (form.extra.isNotBlank() || viewModel.initial.extra.isNotBlank()) ExtraBlock(form, viewModel::update)
+            TextGroup(form, viewModel::update)
+            ColorGroup(form, viewModel::update)
+            NumberGroup(form, viewModel::update)
+            PrintingGroup(form, viewModel::update)
+            if (form.extra.isNotBlank() || viewModel.initial.extra.isNotBlank()) {
+                Field(stringResource(R.string.cards_adv_other), form.extra, { v -> viewModel.update { it.copy(extra = v) } })
+            }
         }
     }
 
@@ -136,7 +136,6 @@ fun AdvancedSearchScreen(
         AlertDialog(
             onDismissRequest = { confirmDiscard = false },
             title = { Text(stringResource(R.string.cards_adv_discard_title)) },
-            text = { Text(stringResource(R.string.cards_adv_discard_body)) },
             confirmButton = { TextButton(onClick = { confirmDiscard = false; onBack() }) { Text(stringResource(R.string.cards_adv_discard)) } },
             dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.cards_adv_keep_editing)) } },
         )
@@ -146,13 +145,8 @@ fun AdvancedSearchScreen(
 private typealias Update = ((AdvancedSearchForm) -> AdvancedSearchForm) -> Unit
 
 @Composable
-private fun Block(label: String, content: @Composable () -> Unit) {
-    Panel(contentModifier = Modifier.padding(16.dp)) {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Label(label)
-            content()
-        }
-    }
+private fun Group(content: @Composable () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { content() }
 }
 
 @Composable
@@ -168,8 +162,8 @@ private fun Field(label: String, value: String, onChange: (String) -> Unit, caps
 }
 
 @Composable
-private fun TextBlock(form: AdvancedSearchForm, update: Update) {
-    Block(stringResource(R.string.cards_adv_text)) {
+private fun TextGroup(form: AdvancedSearchForm, update: Update) {
+    Group {
         Field(stringResource(R.string.cards_adv_name), form.name, { v -> update { it.copy(name = v) } }, KeyboardCapitalization.Words)
         Field(stringResource(R.string.cards_adv_rules_text), form.rulesText, { v -> update { it.copy(rulesText = v) } })
         Field(stringResource(R.string.cards_adv_type), form.type, { v -> update { it.copy(type = v) } })
@@ -181,20 +175,21 @@ private val COLOR_CHOICES = listOf('W' to R.string.cards_adv_white, 'U' to R.str
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ColorBlock(form: AdvancedSearchForm, update: Update) {
+private fun ColorGroup(form: AdvancedSearchForm, update: Update) {
     val colors = MaterialTheme.colorScheme
-    Block(stringResource(R.string.cards_adv_color)) {
+    Group {
         Choice(
             values = listOf(0, 1),
             selected = if (form.colorField == ColorField.COLOR) 0 else 1,
             onSelect = { i ->
-                // Identity is mostly "fits in this deck": At most is the useful default there.
+                // Identity is usually asked as "fits in this deck", so it starts at At most.
                 update {
                     if (i == 0) it.copy(colorField = ColorField.COLOR, colorMatch = ColorMatch.INCLUDES)
                     else it.copy(colorField = ColorField.IDENTITY, colorMatch = ColorMatch.AT_MOST)
                 }
             },
-            width = 140,
+            width = null,
+            modifier = Modifier.fillMaxWidth(),
             label = { stringResource(if (it == 0) R.string.cards_adv_card_colors else R.string.cards_adv_identity) },
         )
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -204,7 +199,7 @@ private fun ColorBlock(form: AdvancedSearchForm, update: Update) {
                     selected = on,
                     onClick = {
                         update {
-                            // Colorless excludes the five colors, and the other way round.
+                            // Colorless and the five colors exclude each other.
                             val next = when {
                                 on -> it.colors - letter
                                 letter == 'C' -> setOf('C')
@@ -214,8 +209,6 @@ private fun ColorBlock(form: AdvancedSearchForm, update: Update) {
                         }
                     },
                     label = { Text(stringResource(name), style = MaterialTheme.typography.labelLarge) },
-                    // The symbol always stays (Alejandro). Selected = filled in the ink color, not
-                    // only outlined: the fill and the contrast tell it apart, not a hue.
                     leadingIcon = { ManaSymbol(letter.toString(), Modifier.size(18.dp)) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = colors.primary,
@@ -234,7 +227,8 @@ private fun ColorBlock(form: AdvancedSearchForm, update: Update) {
                 values = ColorMatch.entries.map { it.ordinal },
                 selected = form.colorMatch.ordinal,
                 onSelect = { i -> update { it.copy(colorMatch = ColorMatch.entries[i]) } },
-                width = 96,
+                width = null,
+                modifier = Modifier.fillMaxWidth(),
                 label = {
                     stringResource(
                         when (ColorMatch.entries[it]) {
@@ -250,8 +244,8 @@ private fun ColorBlock(form: AdvancedSearchForm, update: Update) {
 }
 
 @Composable
-private fun NumberBlock(form: AdvancedSearchForm, update: Update) {
-    Block(stringResource(R.string.cards_adv_numbers)) {
+private fun NumberGroup(form: AdvancedSearchForm, update: Update) {
+    Column {
         NumberRow(stringResource(R.string.cards_adv_mana_value), form.manaValue) { f -> update { it.copy(manaValue = f) } }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         NumberRow(stringResource(R.string.cards_adv_power), form.power) { f -> update { it.copy(power = f) } }
@@ -260,7 +254,6 @@ private fun NumberBlock(form: AdvancedSearchForm, update: Update) {
     }
 }
 
-/** Label, operator (a dropdown: design-decisions exception), and the number only when it counts. */
 @Composable
 private fun NumberRow(label: String, filter: NumberFilter, onChange: (NumberFilter) -> Unit) {
     var menu by rememberSaveable { mutableStateOf(false) }
@@ -272,15 +265,19 @@ private fun NumberRow(label: String, filter: NumberFilter, onChange: (NumberFilt
             NumberOp.GE -> "≥"
         }
     }
+    // Read alone, the button would say only "≤".
     val opDescription = stringResource(R.string.cards_adv_operator, label, opLabel(filter.op))
-    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically,
+    Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(label, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
         Box {
-            // The button alone would read "≤": say which number it's for ("Mana value, ≤").
-            OutlinedButton(onClick = { menu = true },
-                modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = opDescription }) {
+            OutlinedButton(
+                onClick = { menu = true },
+                contentPadding = PaddingValues(start = 16.dp, end = 8.dp),
+                modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = opDescription },
+            ) {
                 Text(opLabel(filter.op), style = MaterialTheme.typography.labelLarge)
+                Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 NumberOp.entries.forEach { op ->
@@ -295,34 +292,28 @@ private fun NumberRow(label: String, filter: NumberFilter, onChange: (NumberFilt
 }
 
 @Composable
-private fun PrintingBlock(form: AdvancedSearchForm, update: Update) {
-    Block(stringResource(R.string.cards_adv_printing)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(Modifier.weight(1f)) {
-                Field(stringResource(R.string.cards_adv_set), form.setCode, { v -> update { it.copy(setCode = v.trim()) } }, KeyboardCapitalization.Characters)
-            }
-            Box(Modifier.weight(1f)) {
-                Field(stringResource(R.string.cards_adv_number), form.collectorNumber, { v -> update { it.copy(collectorNumber = v.trim()) } })
-            }
-        }
-    }
-}
-
-/** What the form has no field for: shown and editable, so it is never lost by surprise. */
-@Composable
-private fun ExtraBlock(form: AdvancedSearchForm, update: Update) {
-    Block(stringResource(R.string.cards_adv_other)) {
-        Field(stringResource(R.string.cards_adv_other_field), form.extra, { v -> update { it.copy(extra = v) } })
+private fun PrintingGroup(form: AdvancedSearchForm, update: Update) {
+    Group {
+        Field(stringResource(R.string.cards_adv_set), form.setCode, { v -> update { it.copy(setCode = v.trim()) } }, KeyboardCapitalization.Characters)
+        Field(stringResource(R.string.cards_adv_number), form.collectorNumber, { v -> update { it.copy(collectorNumber = v.trim()) } })
     }
 }
 
 @Composable
 private fun Footer(query: String, onSearch: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.imePadding()) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = highContrastBorder(),
+        modifier = Modifier.imePadding(),
+    ) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Label(stringResource(R.string.cards_adv_search_label))
-            // Shows the syntax the form writes: how the judge learns it.
-            Text(query.ifEmpty { "—" }, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+            if (query.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.cards_adv_syntax), style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(query, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
             Button(onClick = onSearch, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                 Text(stringResource(R.string.cards_adv_search), style = MaterialTheme.typography.titleMedium)
             }

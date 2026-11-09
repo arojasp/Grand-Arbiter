@@ -80,14 +80,11 @@
     <string name="cards_adv_title">Advanced search</string>
     <string name="cards_adv_clear">Clear all</string>
     <string name="cards_adv_discard_title">Discard changes?</string>
-    <string name="cards_adv_discard_body">The search won\'t change.</string>
     <string name="cards_adv_discard">Discard</string>
     <string name="cards_adv_keep_editing">Keep editing</string>
-    <string name="cards_adv_text">Text</string>
     <string name="cards_adv_name">Name</string>
     <string name="cards_adv_rules_text">Rules text</string>
     <string name="cards_adv_type">Type</string>
-    <string name="cards_adv_color">Color</string>
     <string name="cards_adv_card_colors">Card colors</string>
     <string name="cards_adv_identity">Color identity</string>
     <string name="cards_adv_white">White</string>
@@ -99,23 +96,22 @@
     <string name="cards_adv_includes">Includes</string>
     <string name="cards_adv_exactly">Exactly</string>
     <string name="cards_adv_at_most">At most</string>
-    <string name="cards_adv_numbers">Numbers</string>
     <string name="cards_adv_mana_value">Mana value</string>
     <string name="cards_adv_power">Power</string>
     <string name="cards_adv_toughness">Toughness</string>
     <string name="cards_adv_any">Any</string>
     <string name="cards_adv_operator">%1$s, %2$s</string>
-    <string name="cards_adv_printing">Printing</string>
     <string name="cards_adv_set">Set code</string>
     <string name="cards_adv_number">Collector number</string>
     <string name="cards_adv_other">Other filters</string>
-    <string name="cards_adv_other_field">Kept from the search</string>
-    <string name="cards_adv_search_label">Search</string>
-    <string name="cards_adv_search">Search</string>    <string name="cards_try_again">Try again</string>
+    <string name="cards_adv_syntax">Search syntax</string>
+    <string name="cards_adv_search">Search</string>
+    <string name="cards_try_again">Try again</string>
     <plurals name="cards_found_online">
         <item quantity="one">%d card on Scryfall · online</item>
         <item quantity="other">%d cards on Scryfall · online</item>
-    </plurals>    <string name="cards_preparing">Preparing card data… This only takes a while the first time.</string>
+    </plurals>
+    <string name="cards_preparing">Preparing card data… This only takes a while the first time.</string>
     <string name="cards_preparing_count">%1$s cards ready</string>
     <string name="cards_count">%1$s cards</string>
     <string name="cards_data_from">Scryfall data from %1$s</string>

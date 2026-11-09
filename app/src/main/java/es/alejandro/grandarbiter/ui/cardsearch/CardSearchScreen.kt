@@ -270,18 +270,27 @@ private fun ResultRow(card: CardSummary, onClick: () -> Unit) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(
-                text = card.name,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            // Not in the Figma: tokens share names with cards (Adorned Pouncer), so mark them.
-            if (card.isToken) Tag(stringResource(R.string.cards_token))
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = card.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                // Not in the Figma: tokens share names with cards (Adorned Pouncer), so mark them.
+                if (card.isToken) Tag(stringResource(R.string.cards_token))
+            }
+            // The cost tells similar names apart at a glance (judge feedback). Already in the
+            // search query, so it costs nothing; lands and tokens have none.
+            card.manaCost?.takeIf { it.isNotBlank() }?.let { ManaCostSymbols(it, size = 16.dp) }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }

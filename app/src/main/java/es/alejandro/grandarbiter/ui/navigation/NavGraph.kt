@@ -12,6 +12,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import es.alejandro.grandarbiter.ui.cardsearch.AdvancedSearchScreen
+import es.alejandro.grandarbiter.ui.cardsearch.AdvancedSearchViewModel
 import es.alejandro.grandarbiter.ui.cardsearch.CardDetailScreen
 import es.alejandro.grandarbiter.ui.cardsearch.CardSearchScreen
 import es.alejandro.grandarbiter.ui.home.HomeScreen
@@ -55,6 +59,9 @@ sealed class Screen(val route: String) {
         fun createRoute(documentId: String) = "document_reader/$documentId"
     }
     object CardSearch : Screen("card_search")
+    object AdvancedSearch : Screen("card_search/advanced?${AdvancedSearchViewModel.ARG_QUERY}={${AdvancedSearchViewModel.ARG_QUERY}}") {
+        fun createRoute(query: String) = "card_search/advanced?${AdvancedSearchViewModel.ARG_QUERY}=${Uri.encode(query)}"
+    }
     object CardDetail : Screen("card_detail/{cardId}") {
         fun createRoute(cardId: String) = "card_detail/$cardId"
     }
@@ -87,6 +94,9 @@ sealed class Screen(val route: String) {
 
 /** Cross-fade between screens. Navigation's default (700 ms) felt slow; 0 would remove it. */
 private const val SCREEN_FADE_MS = 150
+
+/** Key under which the Advanced search form hands its query back to Card Search. */
+private const val ADVANCED_RESULT = "advanced_search_query"
 
 @Composable
 fun AppNavGraph(
@@ -146,10 +156,27 @@ fun AppNavGraph(
                 onOpenPage = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
             )
         }
-        composable(Screen.CardSearch.route) {
+        composable(Screen.CardSearch.route) { entry ->
+            // The query the Advanced search form hands back (null when there's none waiting).
+            val fromForm by entry.savedStateHandle.getStateFlow<String?>(ADVANCED_RESULT, null).collectAsState()
             CardSearchScreen(
                 onOpenCard = { oracleId -> navController.navigate(Screen.CardDetail.createRoute(oracleId)) },
                 onOpenSettings = { navController.navigate(Screen.Settings.route) },
+                onOpenAdvanced = { query -> navController.navigate(Screen.AdvancedSearch.createRoute(query)) },
+                queryFromForm = fromForm,
+                onQueryFromFormUsed = { entry.savedStateHandle[ADVANCED_RESULT] = null },
+            )
+        }
+        composable(
+            Screen.AdvancedSearch.route,
+            arguments = listOf(navArgument(AdvancedSearchViewModel.ARG_QUERY) { type = NavType.StringType; defaultValue = "" }),
+        ) {
+            AdvancedSearchScreen(
+                onBack = { navController.popBackStack() },
+                onSearch = { query ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set(ADVANCED_RESULT, query)
+                    navController.popBackStack()
+                },
             )
         }
         composable(Screen.CardDetail.route) {

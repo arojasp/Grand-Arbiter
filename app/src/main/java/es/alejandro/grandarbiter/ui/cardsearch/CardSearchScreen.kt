@@ -54,6 +54,9 @@ import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.ui.components.Tag
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.semantics
@@ -69,9 +72,19 @@ import org.koin.androidx.compose.koinViewModel
 fun CardSearchScreen(
     onOpenCard: (String) -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenAdvanced: (String) -> Unit,
+    queryFromForm: String?,
+    onQueryFromFormUsed: () -> Unit,
     viewModel: CardSearchViewModel = koinViewModel(),
 ) {
     val query by viewModel.query.collectAsState()
+    // The Advanced search form's "Search": its query replaces the field's.
+    LaunchedEffect(queryFromForm) {
+        if (queryFromForm != null) {
+            viewModel.onQueryChange(queryFromForm)
+            onQueryFromFormUsed()
+        }
+    }
     val dataState by viewModel.dataState.collectAsState()
     val results by viewModel.results.collectAsState()
 
@@ -101,7 +114,8 @@ fun CardSearchScreen(
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding).fillMaxSize()) {
             // Nothing to search until the first import is done (an update keeps the old data: Ready).
-            SearchHeader(query, viewModel::onQueryChange, viewModel::retryOnline, enabled = dataState is CardDataState.Ready)
+            SearchHeader(query, viewModel::onQueryChange, viewModel::retryOnline, { onOpenAdvanced(query) },
+                enabled = dataState is CardDataState.Ready)
             when {
                 dataState is CardDataState.Checking -> Unit
                 dataState is CardDataState.Preparing -> Centered {
@@ -138,7 +152,13 @@ fun CardSearchScreen(
 // ---------------------------------------------------------------- search header
 
 @Composable
-private fun SearchHeader(query: String, onQueryChange: (String) -> Unit, onSearch: () -> Unit, enabled: Boolean) {
+private fun SearchHeader(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onSearch: () -> Unit,
+    onOpenAdvanced: () -> Unit,
+    enabled: Boolean,
+) {
     val border = MaterialTheme.colorScheme.outlineVariant
     Column(
         Modifier
@@ -148,7 +168,14 @@ private fun SearchHeader(query: String, onQueryChange: (String) -> Unit, onSearc
             .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        CardSearchField(query, onQueryChange, onSearch, enabled)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(Modifier.weight(1f)) { CardSearchField(query, onQueryChange, onSearch, enabled) }
+            // Icon only (Alejandro's call; canvas Busqueda2_inicio). 48 dp, tonal, with its name for TalkBack.
+            FilledTonalIconButton(onClick = onOpenAdvanced, enabled = enabled, modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(8.dp)) {
+                Icon(Icons.Outlined.Tune, contentDescription = stringResource(R.string.cards_adv_open))
+            }
+        }
         // Teaches the syntax while there's nothing typed (canvas Busqueda2_inicio).
         if (query.isEmpty() && enabled) {
             Text(stringResource(R.string.cards_syntax_hint), style = MaterialTheme.typography.bodySmall,

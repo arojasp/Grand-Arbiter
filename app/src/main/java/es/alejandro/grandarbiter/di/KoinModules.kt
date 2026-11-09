@@ -26,6 +26,7 @@ import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import es.alejandro.grandarbiter.domain.timer.TimerManager
 import es.alejandro.grandarbiter.ui.cardsearch.CardDetailViewModel
 import es.alejandro.grandarbiter.ui.cardsearch.CardSearchViewModel
+import es.alejandro.grandarbiter.ui.cardsearch.AdvancedSearchViewModel
 import es.alejandro.grandarbiter.ui.home.HomeViewModel
 import es.alejandro.grandarbiter.ui.main.MainViewModel
 import es.alejandro.grandarbiter.ui.reader.ReaderContentsViewModel
@@ -153,6 +154,7 @@ val viewModelModule = module {
     viewModelOf(::ReaderContentsViewModel)
     viewModelOf(::ReaderPageViewModel)
     viewModelOf(::CardSearchViewModel)
+    viewModelOf(::AdvancedSearchViewModel)
     viewModelOf(::CardDetailViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::BannedListsViewModel)

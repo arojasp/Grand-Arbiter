@@ -27,7 +27,7 @@ class CardRepositoryImpl(
 
     override suspend fun search(query: String, limit: Int): CardSearchResult {
         val parsed = CardQueryParser.parse(query)
-        if (parsed.needsOnline) return CardSearchResult.NeedsOnline(parsed.onlineParts)
+        if (parsed.needsOnline) return CardSearchResult.NeedsOnline(parsed.onlineParts, parsed.isComplete)
         val sql = CardQuerySql.build(parsed, limit) ?: return CardSearchResult.Empty
         val hits = dao.search(SimpleSQLiteQuery(sql.text, sql.args.toTypedArray()))
         return CardSearchResult.Offline(hits.map { CardSummary(it.oracleId, it.name, it.manaCost, it.typeLine, it.isToken) })

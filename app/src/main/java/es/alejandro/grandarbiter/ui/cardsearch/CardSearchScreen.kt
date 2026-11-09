@@ -101,7 +101,7 @@ fun CardSearchScreen(
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding).fillMaxSize()) {
             // Nothing to search until the first import is done (an update keeps the old data: Ready).
-            SearchHeader(query, viewModel::onQueryChange, viewModel::searchOnline, enabled = dataState is CardDataState.Ready)
+            SearchHeader(query, viewModel::onQueryChange, viewModel::retryOnline, enabled = dataState is CardDataState.Ready)
             when {
                 dataState is CardDataState.Checking -> Unit
                 dataState is CardDataState.Preparing -> Centered {
@@ -125,9 +125,9 @@ fun CardSearchScreen(
                     SearchState.SearchingOnline -> SearchingOnline()
                     is SearchState.Shown -> when (val r = s.result) {
                         is CardSearchResult.Offline -> Results(r.cards, onOpenCard) { ResultsMeta(offlineLabel(r.cards.size)) }
-                        is CardSearchResult.NeedsOnline -> NeedsOnline(r.parts, viewModel::searchOnline)
+                        is CardSearchResult.NeedsOnline -> WaitingToClose()   // quotes/parentheses still open
                         is CardSearchResult.Online -> OnlineResults(r, onOpenCard)
-                        is CardSearchResult.OnlineFailed -> OnlineFailed(r, viewModel::searchOnline)
+                        is CardSearchResult.OnlineFailed -> OnlineFailed(r, viewModel::retryOnline)
                     }
                 }
             }
@@ -173,7 +173,7 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, onSe
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = content),   // typed text: body, Regular
         cursorBrush = SolidColor(colors.primary),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        // Offline results are already there; the key runs the online search when one is needed.
+        // Results come by themselves; after a failed online search the key tries again.
         keyboardActions = KeyboardActions(onSearch = { keyboard?.hide(); onSearch() }),
         modifier = Modifier.fillMaxWidth(),
         decorationBox = { field ->
@@ -276,15 +276,11 @@ private fun InfoPanel(title: String, body: String?, action: String? = null, onAc
     }
 }
 
-/** Not searched yet: only Scryfall understands [parts]. One request when the judge asks. */
+/** An online query with quotes or parentheses still open: nothing is sent until they close. */
 @Composable
-private fun NeedsOnline(parts: List<String>, onSearch: () -> Unit) {
-    InfoPanel(
-        title = stringResource(R.string.cards_online_only, parts.joinToString(" ")),
-        body = stringResource(R.string.cards_online_only_body),
-        action = stringResource(R.string.cards_search_on_scryfall),
-        onAction = onSearch,
-    )
+private fun WaitingToClose() {
+    Text(stringResource(R.string.cards_online_waiting), style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth().padding(16.dp))
 }
 
 @Composable

@@ -39,6 +39,9 @@ data class CardQuery(
 ) {
     val isBlank: Boolean get() = terms.isEmpty() && onlineParts.isEmpty()
     val needsOnline: Boolean get() = onlineParts.isNotEmpty()
+
+    /** Quotes and parentheses closed: ready to send to Scryfall (it would reject it otherwise). */
+    val isComplete: Boolean get() = raw.count { it == '"' } % 2 == 0 && raw.count { it == '(' } == raw.count { it == ')' }
 }
 
 object CardQueryParser {
@@ -96,7 +99,12 @@ object CardQueryParser {
             KEYED.find(token)?.let { unquote(it.groupValues[3]).isNotBlank() } == true
 
     private fun read(token: String): Result {
-        if (token.startsWith("-") || token.startsWith("!") || '(' in token || ')' in token) return Result.Online
+        // Half-typed while the online search runs by itself: "-", "-t:", "!" say nothing yet.
+        if (token.startsWith("-") || token.startsWith("!")) {
+            val rest = token.drop(1)
+            return if (rest.isBlank() || isHalfTypedKey(rest)) Result.Empty else Result.Online
+        }
+        if ('(' in token || ')' in token) return Result.Online
         // Scryfall reads both as operators. "and" is what every search does anyway.
         if (token.equals("or", ignoreCase = true)) return Result.Online
         if (token.equals("and", ignoreCase = true)) return Result.Empty

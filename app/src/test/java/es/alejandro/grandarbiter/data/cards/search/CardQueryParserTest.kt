@@ -65,6 +65,19 @@ class CardQueryParserTest {
         assertEquals(listOf(Name("bolt")), terms("bolt t:"))
     }
 
+    @Test fun halfTypedNegation_saysNothingYet() {
+        assertEquals(listOf(Type("creature")), terms("t:creature -"))
+        assertEquals(listOf(Type("creature")), terms("t:creature -t:"))
+        assertEquals(listOf("-t:faerie"), online("t:creature -t:faerie"))
+    }
+
+    @Test fun unclosedQuotesOrParentheses_areNotComplete() {
+        assertFalse(CardQueryParser.parse("(c:u or c:w").isComplete)
+        assertFalse(CardQueryParser.parse("o:\"draw a").isComplete)
+        assertTrue(CardQueryParser.parse("(c:u or c:w)").isComplete)
+        assertTrue(CardQueryParser.parse("o:\"draw a card\" -t:land").isComplete)
+    }
+
     @Test fun nameWithAColon_staysAName() {
         // A plain query keeps its words as typed; the name search only looks at letters and digits.
         assertEquals(listOf(Name("Protection:"), Name("red")), terms("Protection: red"))

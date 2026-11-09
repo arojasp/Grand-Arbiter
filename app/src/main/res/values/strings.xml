@@ -65,10 +65,8 @@
     <string name="cards_art_credit">Illustrated by %1$s · © Wizards of the Coast</string>
     <string name="cards_art_copyright">© Wizards of the Coast</string>
     <string name="cards_search_placeholder">Card name…</string>
-    <string name="cards_syntax_hint">Plain words search card names. Scryfall filters work too: o: t: c: id: mv pow tou</string>
-    <string name="cards_online_only">Only Scryfall understands %1$s</string>
-    <string name="cards_online_only_body">This search runs on Scryfall and needs a connection. Your search text is sent to Scryfall.</string>
-    <string name="cards_search_on_scryfall">Search on Scryfall</string>
+    <string name="cards_syntax_hint">Supports Scryfall search syntax.</string>
+    <string name="cards_online_waiting">Close the quotes or parentheses to search on Scryfall.</string>
     <string name="cards_searching_online">Searching Scryfall…</string>
     <string name="cards_online_partial">Showing the first %1$d of %2$d. Narrow the search to see the rest.</string>
     <string name="cards_online_warnings">Scryfall ignored part of this search</string>

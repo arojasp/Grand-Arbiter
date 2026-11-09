@@ -5,8 +5,11 @@ sealed interface CardSearchResult {
     /** Searched in the cards on the phone. */
     data class Offline(val cards: List<CardSummary>) : CardSearchResult
 
-    /** The query uses [parts] only Scryfall understands: it can only be searched online, on request. */
-    data class NeedsOnline(val parts: List<String>) : CardSearchResult
+    /**
+     * The query uses [parts] only Scryfall understands: it is searched online. [complete] false =
+     * quotes or parentheses still open: not sent yet.
+     */
+    data class NeedsOnline(val parts: List<String>, val complete: Boolean = true) : CardSearchResult
 
     /**
      * Scryfall's answer. [cards] is its first page; [total] counts them all. [warnings]: parts of

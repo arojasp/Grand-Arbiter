@@ -8,7 +8,7 @@ import es.alejandro.grandarbiter.domain.model.cards.CardDetail
 import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.repository.CardRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
@@ -50,43 +50,59 @@ class CardSearchViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardSearchResult.Empty)
 
-    /** The last online search: for which query, and its answer (null while it runs). */
-    private val online = MutableStateFlow<Pair<String, CardSearchResult?>?>(null)
+    /** Bumped by "Try again": runs the same online search once more. */
+    private val retries = MutableStateFlow(0)
+
+    /** The last successful online answer: (query, retry count, answer). */
+    private var lastOnline: Triple<String, Int, CardSearchResult>? = null
 
     /**
-     * What the screen shows. An online answer only stands while the query is the one searched:
-     * typing again goes back to the offline result (or to "search online?" for the new query).
+     * Queries only Scryfall understands are searched there by themselves, once the judge stops
+     * typing for [ONLINE_DEBOUNCE_MS] (never a request per keystroke; a newer query cancels the
+     * older one). Emits (query, answer), answer null while it runs; null when nothing goes online.
+     */
+    private val online: StateFlow<Pair<String, CardSearchResult?>?> =
+        combine(query.debounce(ONLINE_DEBOUNCE_MS), dataState, retries) { q, d, n -> Triple(q, d, n) }
+            .transformLatest { (q, d, n) ->
+                val local = if (q.isBlank() || d !is CardDataState.Ready) null else repository.search(q, limit = 0)
+                if (local !is CardSearchResult.NeedsOnline || !local.complete) {
+                    emit(null)
+                    return@transformLatest
+                }
+                // Back from a card: the same answer, not a new request (failures are asked again).
+                lastOnline?.takeIf { it.first == q && it.second == n }?.let { emit(q to it.third); return@transformLatest }
+                emit(q to null)
+                val answer = repository.searchOnline(q)
+                if (answer !is CardSearchResult.OnlineFailed) lastOnline = Triple(q, n, answer)
+                emit(q to answer)
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /**
+     * What the screen shows. An online answer only stands while the query is the one searched;
+     * while it's on its way (or the judge is still typing) the screen says it's searching Scryfall.
      */
     val results: StateFlow<SearchState> = combine(offline, online, query) { off, on, q ->
         when {
-            off is CardSearchResult.NeedsOnline && on != null && on.first == q ->
-                on.second?.let { SearchState.Shown(it) } ?: SearchState.SearchingOnline
-            else -> SearchState.Shown(off)
+            off !is CardSearchResult.NeedsOnline -> SearchState.Shown(off)
+            !off.complete -> SearchState.Shown(off)                       // quotes/parentheses still open
+            on != null && on.first == q && on.second != null -> SearchState.Shown(on.second!!)
+            else -> SearchState.SearchingOnline
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchState.Shown(CardSearchResult.Empty))
 
     fun onQueryChange(value: String) { savedStateHandle[KEY_QUERY] = value }
 
-    /**
-     * The search key / "Search on Scryfall". Only for queries that need it, and one request per
-     * press: Scryfall asks apps not to send a request per keystroke.
-     */
-    fun searchOnline() {
-        val q = query.value
-        // Offline queries never go out; "Try again" after a failed online search does.
-        val shown = (results.value as? SearchState.Shown)?.result
-        if (shown !is CardSearchResult.NeedsOnline && shown !is CardSearchResult.OnlineFailed) return
-        if (online.value?.let { it.first == q && it.second == null } == true) return   // already running
-        online.value = q to null
-        viewModelScope.launch {
-            val answer = repository.searchOnline(q)
-            if (online.value?.first == q) online.value = q to answer
-        }
+    /** "Try again" (or the search key) after a failed online search. */
+    fun retryOnline() {
+        if ((results.value as? SearchState.Shown)?.result is CardSearchResult.OnlineFailed) retries.value++
     }
 
     companion object {
         /** Results shown; at the limit the header says "100+". */
         const val LIMIT = 100
+        /** Pause before a query goes to Scryfall: long enough to finish a word, short enough to feel live. */
+        const val ONLINE_DEBOUNCE_MS = 700L
         private const val KEY_QUERY = "query"
     }
 }

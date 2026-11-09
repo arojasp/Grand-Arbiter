@@ -16,14 +16,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -169,17 +168,11 @@ private fun Field(label: String, value: String, onChange: (String) -> Unit, caps
 }
 
 @Composable
-private fun Hint(text: String) {
-    Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-}
-
-@Composable
 private fun TextBlock(form: AdvancedSearchForm, update: Update) {
     Block(stringResource(R.string.cards_adv_text)) {
         Field(stringResource(R.string.cards_adv_name), form.name, { v -> update { it.copy(name = v) } }, KeyboardCapitalization.Words)
         Field(stringResource(R.string.cards_adv_rules_text), form.rulesText, { v -> update { it.copy(rulesText = v) } })
         Field(stringResource(R.string.cards_adv_type), form.type, { v -> update { it.copy(type = v) } })
-        Hint(stringResource(R.string.cards_adv_type_hint))
     }
 }
 
@@ -189,6 +182,7 @@ private val COLOR_CHOICES = listOf('W' to R.string.cards_adv_white, 'U' to R.str
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ColorBlock(form: AdvancedSearchForm, update: Update) {
+    val colors = MaterialTheme.colorScheme
     Block(stringResource(R.string.cards_adv_color)) {
         Choice(
             values = listOf(0, 1),
@@ -220,11 +214,17 @@ private fun ColorBlock(form: AdvancedSearchForm, update: Update) {
                         }
                     },
                     label = { Text(stringResource(name), style = MaterialTheme.typography.labelLarge) },
-                    // The state is the ✓, never the color alone.
-                    leadingIcon = {
-                        if (on) Icon(Icons.Filled.Check, null, Modifier.size(18.dp))
-                        else ManaSymbol(letter.toString(), Modifier.size(18.dp))
-                    },
+                    // The symbol always stays (Alejandro). Selected = filled in the ink color, not
+                    // only outlined: the fill and the contrast tell it apart, not a hue.
+                    leadingIcon = { ManaSymbol(letter.toString(), Modifier.size(18.dp)) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = colors.primary,
+                        selectedLabelColor = colors.onPrimary,
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true, selected = on,
+                        borderColor = colors.outline, selectedBorderColor = colors.primary,
+                    ),
                     modifier = Modifier.heightIn(min = 48.dp),
                 )
             }
@@ -245,24 +245,8 @@ private fun ColorBlock(form: AdvancedSearchForm, update: Update) {
                     )
                 },
             )
-            Hint(colorExplanation(form))
         }
     }
-}
-
-/** What the chosen colors + match mean, in words (Scryfall's c:/id: aren't obvious). */
-@Composable
-private fun colorExplanation(form: AdvancedSearchForm): String {
-    val names = COLOR_CHOICES.filter { it.first in form.colors }.map { stringResource(it.second) }.joinToString(", ")
-    val res = when (form.colorField to form.colorMatch) {
-        ColorField.COLOR to ColorMatch.INCLUDES -> R.string.cards_adv_explain_color_includes
-        ColorField.COLOR to ColorMatch.EXACTLY -> R.string.cards_adv_explain_color_exactly
-        ColorField.COLOR to ColorMatch.AT_MOST -> R.string.cards_adv_explain_color_at_most
-        ColorField.IDENTITY to ColorMatch.INCLUDES -> R.string.cards_adv_explain_id_includes
-        ColorField.IDENTITY to ColorMatch.EXACTLY -> R.string.cards_adv_explain_id_exactly
-        else -> R.string.cards_adv_explain_id_at_most
-    }
-    return stringResource(res, names)
 }
 
 @Composable
@@ -321,7 +305,6 @@ private fun PrintingBlock(form: AdvancedSearchForm, update: Update) {
                 Field(stringResource(R.string.cards_adv_number), form.collectorNumber, { v -> update { it.copy(collectorNumber = v.trim()) } })
             }
         }
-        Hint(stringResource(R.string.cards_adv_printing_hint))
     }
 }
 
@@ -330,7 +313,6 @@ private fun PrintingBlock(form: AdvancedSearchForm, update: Update) {
 private fun ExtraBlock(form: AdvancedSearchForm, update: Update) {
     Block(stringResource(R.string.cards_adv_other)) {
         Field(stringResource(R.string.cards_adv_other_field), form.extra, { v -> update { it.copy(extra = v) } })
-        Hint(stringResource(R.string.cards_adv_other_hint))
     }
 }
 

@@ -3,6 +3,7 @@ package es.alejandro.grandarbiter.di
 import androidx.room.Room
 import es.alejandro.grandarbiter.data.updates.SectionVersions
 import es.alejandro.grandarbiter.data.cards.CardRepositoryImpl
+import es.alejandro.grandarbiter.data.cards.search.ScryfallSearchClient
 import es.alejandro.grandarbiter.data.cards.local.AssetCardDataSource
 import es.alejandro.grandarbiter.data.cards.local.CardImporter
 import es.alejandro.grandarbiter.data.cards.local.CardsDatabase
@@ -132,7 +133,8 @@ val cardsModule = module {
 }
 
 val repositoryModule = module {
-    single<CardRepository> { CardRepositoryImpl(get(), get()) }
+    single { ScryfallSearchClient(get()) }
+    single<CardRepository> { CardRepositoryImpl(get(), get(), get()) }
     single<QuickReferenceRepository> { QuickReferenceRepositoryImpl(get(), get(), get()) }
 }
 

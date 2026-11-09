@@ -52,6 +52,12 @@ import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.ui.components.Tag
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.semantics
+import es.alejandro.grandarbiter.ui.components.Panel
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -95,7 +101,7 @@ fun CardSearchScreen(
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding).fillMaxSize()) {
             // Nothing to search until the first import is done (an update keeps the old data: Ready).
-            SearchHeader(query, viewModel::onQueryChange, enabled = dataState is CardDataState.Ready)
+            SearchHeader(query, viewModel::onQueryChange, viewModel::searchOnline, enabled = dataState is CardDataState.Ready)
             when {
                 dataState is CardDataState.Checking -> Unit
                 dataState is CardDataState.Preparing -> Centered {
@@ -115,9 +121,14 @@ fun CardSearchScreen(
                     }
                 }
                 query.isBlank() -> (dataState as? CardDataState.Ready)?.let { IdleState(it) }
-                else -> when (val r = results) {
-                    is CardSearchResult.Offline -> Results(r.cards, onOpenCard)
-                    is CardSearchResult.NeedsOnline -> NeedsOnline(r.parts)
+                else -> when (val s = results) {
+                    SearchState.SearchingOnline -> SearchingOnline()
+                    is SearchState.Shown -> when (val r = s.result) {
+                        is CardSearchResult.Offline -> Results(r.cards, onOpenCard) { ResultsMeta(offlineLabel(r.cards.size)) }
+                        is CardSearchResult.NeedsOnline -> NeedsOnline(r.parts, viewModel::searchOnline)
+                        is CardSearchResult.Online -> OnlineResults(r, onOpenCard)
+                        is CardSearchResult.OnlineFailed -> OnlineFailed(r, viewModel::searchOnline)
+                    }
                 }
             }
         }
@@ -127,7 +138,7 @@ fun CardSearchScreen(
 // ---------------------------------------------------------------- search header
 
 @Composable
-private fun SearchHeader(query: String, onQueryChange: (String) -> Unit, enabled: Boolean) {
+private fun SearchHeader(query: String, onQueryChange: (String) -> Unit, onSearch: () -> Unit, enabled: Boolean) {
     val border = MaterialTheme.colorScheme.outlineVariant
     Column(
         Modifier
@@ -137,7 +148,7 @@ private fun SearchHeader(query: String, onQueryChange: (String) -> Unit, enabled
             .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        CardSearchField(query, onQueryChange, enabled)
+        CardSearchField(query, onQueryChange, onSearch, enabled)
         // Teaches the syntax while there's nothing typed (canvas Busqueda2_inicio).
         if (query.isEmpty() && enabled) {
             Text(stringResource(R.string.cards_syntax_hint), style = MaterialTheme.typography.bodySmall,
@@ -148,8 +159,9 @@ private fun SearchHeader(query: String, onQueryChange: (String) -> Unit, enabled
 
 /** 48dp field (a Material TextField is 56dp min): Figma "Search Bar". */
 @Composable
-private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, enabled: Boolean) {
+private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, onSearch: () -> Unit, enabled: Boolean) {
     val colors = MaterialTheme.colorScheme
+    val keyboard = LocalSoftwareKeyboardController.current
     // Disabled = M3's dimmed content (the "disabled controls" exception); it also doesn't respond.
     val content = if (enabled) colors.onSurface else colors.onSurface.copy(alpha = 0.38f)
     val secondary = if (enabled) colors.onSurfaceVariant else colors.onSurface.copy(alpha = 0.38f)
@@ -161,6 +173,8 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, enab
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = content),   // typed text: body, Regular
         cursorBrush = SolidColor(colors.primary),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        // Offline results are already there; the key runs the online search when one is needed.
+        keyboardActions = KeyboardActions(onSearch = { keyboard?.hide(); onSearch() }),
         modifier = Modifier.fillMaxWidth(),
         decorationBox = { field ->
             Row(
@@ -199,9 +213,14 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, enab
 // ---------------------------------------------------------------- results
 
 @Composable
-private fun Results(results: List<CardSummary>, onOpenCard: (String) -> Unit) {
+private fun Results(
+    results: List<CardSummary>,
+    onOpenCard: (String) -> Unit,
+    footer: (@Composable () -> Unit)? = null,
+    header: @Composable () -> Unit,
+) {
     LazyColumn(Modifier.fillMaxSize()) {
-        item { ResultsMeta(results.size) }
+        item { header() }
         if (results.isEmpty()) {
             item {
                 Text(
@@ -213,19 +232,20 @@ private fun Results(results: List<CardSummary>, onOpenCard: (String) -> Unit) {
             }
         } else {
             items(results, key = { it.oracleId }) { card -> ResultRow(card) { onOpenCard(card.oracleId) } }
+            footer?.let { item { it() } }
             item { EndOfRecords(stringResource(R.string.cards_end), Modifier.padding(top = 32.dp, bottom = 24.dp)) }
         }
     }
 }
 
-/** "4 CARDS FOUND". (The hidden "search rules text" menu is gone: rules text is o:.) */
 @Composable
-private fun ResultsMeta(count: Int) {
-    val label = if (count >= CardSearchViewModel.LIMIT) {
-        stringResource(R.string.cards_found_many, CardSearchViewModel.LIMIT)
-    } else {
-        pluralStringResource(R.plurals.cards_found, count, count)
-    }
+private fun offlineLabel(count: Int): String =
+    if (count >= CardSearchViewModel.LIMIT) stringResource(R.string.cards_found_many, CardSearchViewModel.LIMIT)
+    else pluralStringResource(R.plurals.cards_found, count, count)
+
+/** "4 CARDS FOUND" / "23 CARDS ON SCRYFALL · ONLINE". */
+@Composable
+private fun ResultsMeta(label: String) {
     Text(
         label.uppercase(),
         style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.55.sp),
@@ -234,18 +254,90 @@ private fun ResultsMeta(count: Int) {
     )
 }
 
-/**
- * The query uses parts only Scryfall understands. Temporary on this branch: the online search
- * (canvas Busqueda2_online / _sin_conexion) replaces this panel in the next step.
- */
+// ---------------------------------------------------------------- online (canvas Busqueda2_online)
+
+/** A block under the search header: title, text, an optional action. */
 @Composable
-private fun NeedsOnline(parts: List<String>) {
-    Text(
-        stringResource(R.string.cards_needs_online, parts.joinToString(" ")),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+private fun InfoPanel(title: String, body: String?, action: String? = null, onAction: () -> Unit = {}) {
+    Box(Modifier.padding(16.dp)) {
+        Panel(contentModifier = Modifier.padding(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                body?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                if (action != null) {
+                    OutlinedButton(onClick = onAction, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                        Icon(Icons.Outlined.Language, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(action, style = MaterialTheme.typography.labelLarge)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Not searched yet: only Scryfall understands [parts]. One request when the judge asks. */
+@Composable
+private fun NeedsOnline(parts: List<String>, onSearch: () -> Unit) {
+    InfoPanel(
+        title = stringResource(R.string.cards_online_only, parts.joinToString(" ")),
+        body = stringResource(R.string.cards_online_only_body),
+        action = stringResource(R.string.cards_search_on_scryfall),
+        onAction = onSearch,
     )
+}
+
+@Composable
+private fun SearchingOnline() {
+    Row(
+        Modifier.fillMaxWidth().padding(16.dp).semantics(mergeDescendants = true) {},
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+        Text(stringResource(R.string.cards_searching_online), style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** Same rows as offline; the label says where they came from, and what Scryfall ignored. */
+@Composable
+private fun OnlineResults(r: CardSearchResult.Online, onOpenCard: (String) -> Unit) {
+    val footer: (@Composable () -> Unit)? = if (r.cards.size < r.total) {
+        {
+            Text(stringResource(R.string.cards_online_partial, r.cards.size, r.total),
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(16.dp))
+        }
+    } else null
+    Results(r.cards, onOpenCard, footer) {
+        Column {
+            if (r.warnings.isNotEmpty()) {
+                // A half-read search can look right: say what Scryfall left out.
+                InfoPanel(stringResource(R.string.cards_online_warnings), r.warnings.joinToString("\n"))
+            }
+            ResultsMeta(pluralStringResource(R.plurals.cards_found_online, r.total, r.total))
+        }
+    }
+}
+
+@Composable
+private fun OnlineFailed(r: CardSearchResult.OnlineFailed, onRetry: () -> Unit) {
+    val retry = stringResource(R.string.cards_try_again)
+    when (r.reason) {
+        CardSearchResult.OnlineFailed.Reason.NO_CONNECTION -> InfoPanel(
+            stringResource(R.string.cards_needs_connection),
+            stringResource(R.string.cards_needs_connection_body, r.parts.joinToString(" ")),
+            retry, onRetry,
+        )
+        CardSearchResult.OnlineFailed.Reason.UNAVAILABLE -> InfoPanel(
+            stringResource(R.string.cards_online_unavailable), stringResource(R.string.cards_online_unavailable_body), retry, onRetry,
+        )
+        // Retrying the same text gets the same answer: the judge has to change the search.
+        CardSearchResult.OnlineFailed.Reason.REJECTED -> InfoPanel(
+            stringResource(R.string.cards_online_rejected), r.details.ifBlank { null },
+        )
+    }
 }
 
 @Composable

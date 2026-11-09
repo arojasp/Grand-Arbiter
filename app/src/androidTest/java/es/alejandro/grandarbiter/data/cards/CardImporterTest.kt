@@ -9,7 +9,9 @@ import es.alejandro.grandarbiter.data.cards.local.CardImportResult
 import es.alejandro.grandarbiter.data.cards.local.CardImporter
 import es.alejandro.grandarbiter.data.cards.local.CardsDao
 import es.alejandro.grandarbiter.data.cards.local.CardsDatabase
+import es.alejandro.grandarbiter.data.cards.search.ScryfallSearchClient
 import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
+import okhttp3.OkHttpClient
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -34,7 +36,7 @@ class CardImporterTest {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), CardsDatabase::class.java).build()
         dao = db.cardsDao()
         importer = CardImporter(db, dao, minCards = 2)
-        repo = CardRepositoryImpl(dao, importer)
+        repo = CardRepositoryImpl(dao, importer, ScryfallSearchClient(OkHttpClient()))   // never called here
     }
 
     @After

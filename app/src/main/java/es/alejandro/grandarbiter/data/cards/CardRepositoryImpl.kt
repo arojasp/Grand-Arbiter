@@ -6,6 +6,8 @@ import es.alejandro.grandarbiter.data.cards.local.CardMapper
 import es.alejandro.grandarbiter.data.cards.local.CardsDao
 import es.alejandro.grandarbiter.data.cards.search.CardQueryParser
 import es.alejandro.grandarbiter.data.cards.search.CardQuerySql
+import es.alejandro.grandarbiter.data.cards.search.OnlineSearch
+import es.alejandro.grandarbiter.data.cards.search.ScryfallSearchClient
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
 import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
@@ -15,7 +17,11 @@ import es.alejandro.grandarbiter.domain.repository.CardRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class CardRepositoryImpl(private val dao: CardsDao, private val importer: CardImporter) : CardRepository {
+class CardRepositoryImpl(
+    private val dao: CardsDao,
+    private val importer: CardImporter,
+    private val online: ScryfallSearchClient,
+) : CardRepository {
 
     override fun observeImportProgress(): Flow<Int?> = importer.progress
 
@@ -25,6 +31,18 @@ class CardRepositoryImpl(private val dao: CardsDao, private val importer: CardIm
         val sql = CardQuerySql.build(parsed, limit) ?: return CardSearchResult.Empty
         val hits = dao.search(SimpleSQLiteQuery(sql.text, sql.args.toTypedArray()))
         return CardSearchResult.Offline(hits.map { CardSummary(it.oracleId, it.name, it.manaCost, it.typeLine, it.isToken) })
+    }
+
+    override suspend fun searchOnline(query: String): CardSearchResult {
+        val parts = CardQueryParser.parse(query).onlineParts
+        return when (val r = online.search(query)) {
+            is OnlineSearch.Found -> CardSearchResult.Online(r.cards, r.total, r.warnings)
+            is OnlineSearch.Rejected -> CardSearchResult.OnlineFailed(
+                CardSearchResult.OnlineFailed.Reason.REJECTED, parts, (listOf(r.details) + r.warnings).filter { it.isNotBlank() }.joinToString("\n"),
+            )
+            OnlineSearch.NoConnection -> CardSearchResult.OnlineFailed(CardSearchResult.OnlineFailed.Reason.NO_CONNECTION, parts)
+            is OnlineSearch.Unavailable -> CardSearchResult.OnlineFailed(CardSearchResult.OnlineFailed.Reason.UNAVAILABLE, parts)
+        }
     }
 
     override suspend fun card(oracleId: String): CardDetail? {

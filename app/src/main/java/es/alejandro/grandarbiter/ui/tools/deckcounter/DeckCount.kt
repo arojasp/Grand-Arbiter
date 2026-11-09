@@ -48,4 +48,10 @@ object DeckCount {
 
     /** "4+4+3+…" as the judge counted it, for reading the count back. */
     fun history(groups: List<Int>): String = groups.joinToString("+")
+
+    /** Largest pile the "Other number" dialog takes: a whole Commander deck. */
+    const val MAX_CUSTOM = 100
+
+    /** The dialog's text as a pile size, or null when it isn't a number from 1 to [MAX_CUSTOM]. */
+    fun parseCustom(text: String): Int? = text.trim().toIntOrNull()?.takeIf { it in 1..MAX_CUSTOM }
 }

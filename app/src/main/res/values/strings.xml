@@ -213,6 +213,15 @@
     <string name="deck_reset">Reset</string>
     <string name="deck_reset_done">Count reset</string>
     <string name="deck_undo">Undo</string>
+    <string name="deck_other_number">Other number…</string>
+    <string name="deck_again">again</string>
+    <string name="deck_add_again">Add %1$d again</string>
+    <string name="deck_other_number_desc">Add another number</string>
+    <string name="deck_custom_title">Add cards</string>
+    <string name="deck_custom_label">Number of cards</string>
+    <string name="deck_custom_range">From 1 to %1$d</string>
+    <string name="deck_custom_add">Add</string>
+    <string name="deck_custom_cancel">Cancel</string>
 
 
     <!-- Quick references -->

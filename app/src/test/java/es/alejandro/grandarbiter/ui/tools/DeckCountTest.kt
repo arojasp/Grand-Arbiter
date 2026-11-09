@@ -34,4 +34,19 @@ class DeckCountTest {
     }
 
     @Test fun history_readsBackTheTaps() = assertEquals("4+4+3+1", DeckCount.history(listOf(4, 4, 3, 1)))
+
+    @Test fun parseCustom_acceptsOneToMax() {
+        assertEquals(17, DeckCount.parseCustom("17"))
+        assertEquals(3, DeckCount.parseCustom(" 3 "))
+        assertEquals(1, DeckCount.parseCustom("1"))
+        assertEquals(DeckCount.MAX_CUSTOM, DeckCount.parseCustom("${DeckCount.MAX_CUSTOM}"))
+    }
+
+    @Test fun parseCustom_rejectsEmptyZeroAndTooBig() {
+        assertEquals(null, DeckCount.parseCustom(""))
+        assertEquals(null, DeckCount.parseCustom("0"))
+        assertEquals(null, DeckCount.parseCustom("${DeckCount.MAX_CUSTOM + 1}"))
+        assertEquals(null, DeckCount.parseCustom("-4"))
+        assertEquals(null, DeckCount.parseCustom("4a"))
+    }
 }

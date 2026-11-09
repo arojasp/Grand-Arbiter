@@ -2,6 +2,9 @@ package es.alejandro.grandarbiter.ui.navigation
 
 import android.net.Uri
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -82,6 +85,9 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
 }
 
+/** Cross-fade between screens. Navigation's default (700 ms) felt slow; 0 would remove it. */
+private const val SCREEN_FADE_MS = 150
+
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
@@ -91,7 +97,13 @@ fun AppNavGraph(
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
+        // Navigation's default is a long fade that made the app feel slow (judge feedback):
+        // a short one keeps the change visible without the wait.
+        enterTransition = { fadeIn(tween(SCREEN_FADE_MS)) },
+        exitTransition = { fadeOut(tween(SCREEN_FADE_MS)) },
+        popEnterTransition = { fadeIn(tween(SCREEN_FADE_MS)) },
+        popExitTransition = { fadeOut(tween(SCREEN_FADE_MS)) },
     ) {
 
         composable(Screen.Home.route) { 

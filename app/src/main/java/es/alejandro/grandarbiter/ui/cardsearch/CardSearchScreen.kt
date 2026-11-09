@@ -94,7 +94,8 @@ fun CardSearchScreen(
         },
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding).fillMaxSize()) {
-            SearchHeader(query, viewModel::onQueryChange)
+            // Nothing to search until the first import is done (an update keeps the old data: Ready).
+            SearchHeader(query, viewModel::onQueryChange, enabled = dataState is CardDataState.Ready)
             when {
                 dataState is CardDataState.Checking -> Unit
                 dataState is CardDataState.Preparing -> Centered {
@@ -126,7 +127,7 @@ fun CardSearchScreen(
 // ---------------------------------------------------------------- search header
 
 @Composable
-private fun SearchHeader(query: String, onQueryChange: (String) -> Unit) {
+private fun SearchHeader(query: String, onQueryChange: (String) -> Unit, enabled: Boolean) {
     val border = MaterialTheme.colorScheme.outlineVariant
     Column(
         Modifier
@@ -136,9 +137,9 @@ private fun SearchHeader(query: String, onQueryChange: (String) -> Unit) {
             .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        CardSearchField(query, onQueryChange)
+        CardSearchField(query, onQueryChange, enabled)
         // Teaches the syntax while there's nothing typed (canvas Busqueda2_inicio).
-        if (query.isEmpty()) {
+        if (query.isEmpty() && enabled) {
             Text(stringResource(R.string.cards_syntax_hint), style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -147,13 +148,17 @@ private fun SearchHeader(query: String, onQueryChange: (String) -> Unit) {
 
 /** 48dp field (a Material TextField is 56dp min): Figma "Search Bar". */
 @Composable
-private fun CardSearchField(query: String, onQueryChange: (String) -> Unit) {
+private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, enabled: Boolean) {
     val colors = MaterialTheme.colorScheme
+    // Disabled = M3's dimmed content (the "disabled controls" exception); it also doesn't respond.
+    val content = if (enabled) colors.onSurface else colors.onSurface.copy(alpha = 0.38f)
+    val secondary = if (enabled) colors.onSurfaceVariant else colors.onSurface.copy(alpha = 0.38f)
     BasicTextField(
         value = query,
         onValueChange = onQueryChange,
+        enabled = enabled,
         singleLine = true,
-        textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),   // typed text: body, Regular
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = content),   // typed text: body, Regular
         cursorBrush = SolidColor(colors.primary),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         modifier = Modifier.fillMaxWidth(),
@@ -166,19 +171,19 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit) {
                     .padding(start = 16.dp, end = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(painterResource(R.drawable.ic_search), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                Icon(painterResource(R.drawable.ic_search), null, tint = secondary, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(12.dp))
                 Box(Modifier.weight(1f)) {
                     if (query.isEmpty()) {
                         Text(
                             stringResource(R.string.cards_search_placeholder),
-                            style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant, maxLines = 1,
+                            style = MaterialTheme.typography.bodyLarge, color = secondary, maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
                     field()
                 }
-                if (query.isNotEmpty()) {
+                if (query.isNotEmpty() && enabled) {
                     Icon(
                         Icons.Outlined.Cancel,
                         contentDescription = stringResource(R.string.reader_clear_search),

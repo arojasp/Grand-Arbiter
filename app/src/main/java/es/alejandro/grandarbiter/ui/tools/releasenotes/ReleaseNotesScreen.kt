@@ -113,7 +113,8 @@ private fun SetRow(set: ReleaseNoteSet, latest: Boolean, onClick: () -> Unit) {
         Modifier.fillMaxWidth().clickable(onClick = onClick).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.widthIn(min = 56.dp)) { Tag(set.code) }
+        // The set code in its own column, like rule numbers: text, not a tag (it isn't a status).
+        Text(set.code, style = MaterialTheme.typography.labelLarge, color = colors.primary, modifier = Modifier.widthIn(min = 56.dp))
         Spacer(Modifier.width(8.dp))
         Text(set.name, style = MaterialTheme.typography.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
         if (latest) {

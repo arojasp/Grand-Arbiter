@@ -50,6 +50,8 @@ import es.alejandro.grandarbiter.ui.cardsearch.CardText
 import es.alejandro.grandarbiter.ui.components.Label
 import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Tag
+import es.alejandro.grandarbiter.ui.components.bannedTagColors
+import es.alejandro.grandarbiter.ui.components.restrictedTagColors
 import es.alejandro.grandarbiter.ui.components.groupedItem
 import es.alejandro.grandarbiter.ui.reader.ReaderSearchField
 import org.koin.androidx.compose.koinViewModel
@@ -247,11 +249,9 @@ private fun EntryRow(entry: BanListEntry, format: String, highlighted: Boolean, 
             else MaterialTheme.typography.bodyLarge,
             color = if (highlighted) colors.primary else colors.onSurface,
             maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-        if (entry.legality == Legality.RESTRICTED) {
-            Tag(stringResource(CardText.restrictedLabel(format)), container = colors.primary, content = colors.onPrimary)
-        } else {
-            Tag(stringResource(R.string.legality_banned), container = colors.errorContainer, content = colors.onErrorContainer)
-        }
+        val (container, content) = if (entry.legality == Legality.RESTRICTED) restrictedTagColors() else bannedTagColors()
+        Tag(stringResource(if (entry.legality == Legality.RESTRICTED) CardText.restrictedLabel(format) else R.string.legality_banned),
+            container = container, content = content)
     }
 }
 

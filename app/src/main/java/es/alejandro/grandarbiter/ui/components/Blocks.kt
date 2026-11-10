@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import es.alejandro.grandarbiter.ui.theme.restrictedColors
 import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
@@ -96,7 +97,20 @@ fun Panel(
     ) { content() }
 }
 
-/** Small uppercase tag: TOKEN, SCRYFALL NOTE, RESERVED LIST… */
+/**
+ * Colors of a ban status, the same on every screen (card legality, Banned lists, custom lists):
+ * Banned in the error tint; Restricted in amber, see [restrictedColors].
+ */
+@Composable
+fun bannedTagColors(): Pair<Color, Color> = MaterialTheme.colorScheme.let { it.errorContainer to it.error }
+
+@Composable
+fun restrictedTagColors(): Pair<Color, Color> = restrictedColors().let { it.container to it.content }
+
+/**
+ * Small uppercase tag for a status: TOKEN, SCRYFALL NOTE, RESERVED LIST, NOT LEGAL… A 4 dp
+ * rectangle, never a pill: in this app a pill is something you can tap.
+ */
 @Composable
 fun Tag(
     text: String,

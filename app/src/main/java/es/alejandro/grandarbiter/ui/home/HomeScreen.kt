@@ -305,7 +305,7 @@ private fun DocumentRow(item: DocumentLibraryItem, onClick: () -> Unit) {
 @Composable
 private fun UpdatedLabel() {
     Surface(
-        shape = RoundedCornerShape(50),
+        shape = RoundedCornerShape(4.dp),   // a status, the shape of every Tag (pills are for things you tap)
         // Inverted (light on dark / dark on light): the one label on Home that has to stand out.
         color = MaterialTheme.colorScheme.inverseSurface,
         contentColor = MaterialTheme.colorScheme.inverseOnSurface

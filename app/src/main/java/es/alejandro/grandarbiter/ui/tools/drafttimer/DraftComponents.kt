@@ -66,15 +66,16 @@ internal fun DraftCard(
     )
 }
 
-/** Pill: "PACK 1 OF 3", "COMING SOON". */
+/** Status tag of the running draft: "PACK 1 OF 3", "PASS LEFT". The 4 dp shape of [Tag], not a pill (pills can be tapped). */
 @Composable
 internal fun DraftChip(text: String, color: Color = MaterialTheme.colorScheme.onSurfaceVariant, outlined: Boolean = false) {
     val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(4.dp)
     Box(
-        Modifier.clip(CircleShape)
+        Modifier.clip(shape)
             .background(if (outlined) colors.surfaceContainer else colors.surfaceContainerHighest)
-            .border(1.dp, if (outlined) color.softened(0.6f) else colors.outlineVariant, CircleShape)
-            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .border(1.dp, if (outlined) color.softened(0.6f) else colors.outlineVariant, shape)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(text.uppercase(), style = MaterialTheme.typography.labelSmall, color = color)
     }

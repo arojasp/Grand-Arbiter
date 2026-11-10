@@ -35,6 +35,8 @@ import es.alejandro.grandarbiter.domain.model.customlists.CustomListEntry
 import es.alejandro.grandarbiter.domain.model.customlists.ListStatus
 import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Tag
+import es.alejandro.grandarbiter.ui.components.bannedTagColors
+import es.alejandro.grandarbiter.ui.components.restrictedTagColors
 
 private val Indent = 32.dp
 
@@ -116,10 +118,9 @@ private fun CustomEntryRow(entry: CustomListEntry, highlighted: Boolean, onClick
 
 @Composable
 internal fun StatusTag(status: ListStatus) {
-    val colors = MaterialTheme.colorScheme
     when (status) {
-        ListStatus.Banned -> Tag(stringResource(R.string.legality_banned), container = colors.errorContainer, content = colors.onErrorContainer)
-        ListStatus.Restricted -> Tag(stringResource(R.string.legality_restricted), container = colors.primary, content = colors.onPrimary)
+        ListStatus.Banned -> bannedTagColors().let { (bg, fg) -> Tag(stringResource(R.string.legality_banned), container = bg, content = fg) }
+        ListStatus.Restricted -> restrictedTagColors().let { (bg, fg) -> Tag(stringResource(R.string.legality_restricted), container = bg, content = fg) }
         is ListStatus.Points -> Tag(pluralStringResource(R.plurals.custom_points, status.value, status.value))
     }
 }

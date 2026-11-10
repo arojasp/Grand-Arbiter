@@ -38,3 +38,12 @@ fun penaltyColors(penalty: Penalty): StatusColors {
         Penalty.DISQUALIFICATION -> StatusColors(Color(0xFFB3261E), Color(0xFFFFFFFF))
     }
 }
+
+/**
+ * "Restricted" (one copy allowed). Amber, the same values as the IPG Warning: neutral containers
+ * read as plain data and solid ink shouted louder than Banned. Sharing amber with Warning is
+ * a known overlap, to settle in the planned review of status colors (IPG and ban lists).
+ */
+@Composable
+@ReadOnlyComposable
+fun restrictedColors(): StatusColors = penaltyColors(Penalty.WARNING)

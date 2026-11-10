@@ -204,6 +204,37 @@
     <string name="banned_category_un">Un-cards (acorn, stickers, attractions)</string>
     <string name="banned_category_conspiracy">Conspiracy cards</string>
     <string name="banned_category_ante">Cards that play for ante</string>
+    <string name="custom_lists">Custom lists</string>
+    <string name="custom_new_list">New list</string>
+    <string name="custom_edit">Edit</string>
+    <plurals name="custom_points">
+        <item quantity="one">%d point</item>
+        <item quantity="other">%d points</item>
+    </plurals>
+    <plurals name="custom_cards">
+        <item quantity="one">%d card</item>
+        <item quantity="other">%d cards</item>
+    </plurals>
+    <string name="custom_name">Name</string>
+    <string name="custom_note">Note</string>
+    <string name="custom_add_card">Add card</string>
+    <string name="custom_save">Save</string>
+    <string name="custom_more">More options</string>
+    <string name="custom_delete_list">Delete list</string>
+    <string name="custom_delete_title">Delete %1$s?</string>
+    <string name="custom_delete">Delete</string>
+    <string name="custom_cancel">Cancel</string>
+    <string name="custom_discard_title">Discard changes?</string>
+    <string name="custom_discard">Discard</string>
+    <string name="custom_keep_editing">Keep editing</string>
+    <string name="custom_status_of">%1$s, %2$s</string>
+    <string name="custom_points_label">Points</string>
+    <string name="custom_points_menu">Points…</string>
+    <string name="custom_remove">Remove from list</string>
+    <string name="custom_set">Set</string>
+    <string name="custom_search_placeholder">Card name</string>
+    <string name="custom_add">Add</string>
+    <string name="custom_update">Update</string>
     <string name="tools_quick_references_desc">Layers, stack order, combat steps and more</string>
 
     <!-- Head Judge announcement -->

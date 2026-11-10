@@ -25,6 +25,8 @@ import es.alejandro.grandarbiter.ui.reader.ReaderPageScreen
 import es.alejandro.grandarbiter.ui.reader.ReaderRoutes
 import es.alejandro.grandarbiter.ui.settings.SettingsScreen
 import es.alejandro.grandarbiter.ui.tools.banned.BannedListsScreen
+import es.alejandro.grandarbiter.ui.tools.banned.CustomListEditScreen
+import es.alejandro.grandarbiter.ui.tools.banned.CustomListRoutes
 import es.alejandro.grandarbiter.ui.tools.deckcounter.DeckCounterScreen
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftFormatScreen
@@ -247,7 +249,15 @@ fun AppNavGraph(
             BannedListsScreen(
                 onBack = { navController.popBackStack() },
                 onOpenCard = { oracleId -> navController.navigate(Screen.CardDetail.createRoute(oracleId)) },
+                onNewList = { navController.navigate(CustomListRoutes.CREATE) },
+                onEditList = { id -> navController.navigate(CustomListRoutes.edit(id)) },
             )
+        }
+        composable(
+            CustomListRoutes.EDIT,
+            arguments = listOf(navArgument(CustomListRoutes.ARG_ID) { type = NavType.StringType; nullable = true; defaultValue = null }),
+        ) {
+            CustomListEditScreen(onClose = { navController.popBackStack() })
         }
         composable(Screen.QuickReferences.route) {
             QuickReferencesScreen(

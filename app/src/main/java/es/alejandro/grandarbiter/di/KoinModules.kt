@@ -33,6 +33,7 @@ import es.alejandro.grandarbiter.ui.reader.ReaderContentsViewModel
 import es.alejandro.grandarbiter.ui.reader.ReaderPageViewModel
 import es.alejandro.grandarbiter.ui.settings.SettingsViewModel
 import es.alejandro.grandarbiter.ui.tools.banned.BannedListsViewModel
+import es.alejandro.grandarbiter.ui.tools.banned.CustomListEditViewModel
 import es.alejandro.grandarbiter.ui.tools.announcement.AnnouncementViewModel
 import es.alejandro.grandarbiter.ui.tools.deckcounter.DeckCounterViewModel
 import okhttp3.OkHttpClient
@@ -162,6 +163,7 @@ val viewModelModule = module {
     viewModelOf(::CardDetailViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::BannedListsViewModel)
+    viewModelOf(::CustomListEditViewModel)
     viewModelOf(::AnnouncementViewModel)
     viewModelOf(::DeckCounterViewModel)
     viewModelOf(::QuickReferencesViewModel)

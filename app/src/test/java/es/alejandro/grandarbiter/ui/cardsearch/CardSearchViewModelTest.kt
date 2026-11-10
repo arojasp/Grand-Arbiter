@@ -8,6 +8,7 @@ import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.domain.model.cards.FormatBanList
 import es.alejandro.grandarbiter.domain.repository.CardRepository
+import es.alejandro.grandarbiter.domain.repository.SearchPreferences
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -75,9 +76,15 @@ class CardSearchViewModelTest {
 
     private val repo = FakeCards()
 
+    /** Settings › "Search Scryfall automatically". */
+    private val prefs = object : SearchPreferences {
+        val auto = MutableStateFlow(true)
+        override val autoOnlineSearch: Flow<Boolean> = auto
+    }
+
     /** A ViewModel with the screen collecting it, as when Card Search is open. */
     private fun TestScope.open(): CardSearchViewModel {
-        val vm = CardSearchViewModel(SavedStateHandle(), repo)
+        val vm = CardSearchViewModel(SavedStateHandle(), repo, prefs)
         backgroundScope.launch(main) { vm.results.collect {} }
         runCurrent()
         return vm
@@ -208,10 +215,63 @@ class CardSearchViewModelTest {
         assertTrue(repo.onlineCalls.isEmpty())
     }
 
+    // ---- automatic search off (Settings)
+
+    @Test fun autoOff_nothingGoesOut_untilAsked() = runTest(main) {
+        prefs.auto.value = false
+        val vm = open()
+        type(vm, "t:elf -t:goblin")
+        assertEquals(SearchState.AskToSearchOnline(listOf("-t:goblin")), vm.results.value)
+        assertTrue(repo.onlineCalls.isEmpty())
+        vm.retryOnline(); advanceTimeBy(1_000); runCurrent()              // "Search on Scryfall"
+        assertEquals(listOf("t:elf -t:goblin"), repo.onlineCalls)
+        assertEquals(listOf("online:t:elf -t:goblin"), vm.names())
+    }
+
+    @Test fun autoOff_aNewQuery_asksAgain() = runTest(main) {
+        prefs.auto.value = false
+        val vm = open()
+        type(vm, "t:elf -t:goblin")
+        vm.retryOnline(); advanceTimeBy(1_000); runCurrent()
+        type(vm, "t:elf -t:human")
+        assertTrue(vm.results.value is SearchState.AskToSearchOnline)
+        assertEquals(1, repo.onlineCalls.size)
+    }
+
+    @Test fun autoOff_offlineQueries_workAsAlways() = runTest(main) {
+        prefs.auto.value = false
+        val vm = open()
+        type(vm, "t:elf")
+        assertEquals(listOf("local:t:elf"), vm.names())
+        vm.retryOnline(); advanceTimeBy(1_000); runCurrent()
+        assertTrue(repo.onlineCalls.isEmpty())
+    }
+
+    @Test fun autoOff_failedSearch_tryAgain() = runTest(main) {
+        prefs.auto.value = false
+        repo.answer = { CardSearchResult.OnlineFailed(CardSearchResult.OnlineFailed.Reason.NO_CONNECTION, listOf("-t:goblin")) }
+        val vm = open()
+        type(vm, "t:elf -t:goblin")
+        vm.retryOnline(); advanceTimeBy(1_000); runCurrent()
+        assertTrue(vm.shown() is CardSearchResult.OnlineFailed)
+        repo.answer = { q -> CardSearchResult.Online(listOf(FakeCards.row("online:$q")), 1, emptyList()) }
+        vm.retryOnline(); advanceTimeBy(1_000); runCurrent()
+        assertEquals(listOf("online:t:elf -t:goblin"), vm.names())
+    }
+
+    @Test fun turningAutoOn_sendsTheWaitingQuery() = runTest(main) {
+        prefs.auto.value = false
+        val vm = open()
+        type(vm, "t:elf -t:goblin")
+        prefs.auto.value = true
+        advanceTimeBy(1_000); runCurrent()
+        assertEquals(listOf("t:elf -t:goblin"), repo.onlineCalls)
+    }
+
     // ---- coming back, first run
 
     @Test fun comingBackFromACard_reusesTheAnswer() = runTest(main) {
-        val vm = CardSearchViewModel(SavedStateHandle(), repo)
+        val vm = CardSearchViewModel(SavedStateHandle(), repo, prefs)
         val screen = launch(main) { vm.results.collect {} }
         type(vm, "t:elf -t:goblin")
         screen.cancel()

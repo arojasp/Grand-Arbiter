@@ -55,6 +55,10 @@ class SettingsViewModel(
     fun setHighContrast(enabled: Boolean) = viewModelScope.launch { settings.setHighContrast(enabled) }
     fun setKeepScreenOn(enabled: Boolean) = viewModelScope.launch { settings.setKeepScreenOn(enabled) }
 
+    val autoOnlineSearch: StateFlow<Boolean> = settings.autoOnlineSearch
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+    fun setAutoOnlineSearch(enabled: Boolean) = viewModelScope.launch { settings.setAutoOnlineSearch(enabled) }
+
     private companion object {
         val ORDER = listOf(DocumentId.CR, DocumentId.IPG, DocumentId.MTR, DocumentId.JAR)
     }

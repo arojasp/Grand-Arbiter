@@ -7,6 +7,7 @@ import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
 import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.repository.CardRepository
+import es.alejandro.grandarbiter.domain.repository.SearchPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,9 +29,17 @@ const val ARG_CARD = "cardId"
 class CardSearchViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val repository: CardRepository,
+    preferences: SearchPreferences,
 ) : ViewModel() {
 
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
+
+    /** Settings › "Search Scryfall automatically". Off: a Scryfall-only query waits for "Search on Scryfall". */
+    val autoOnline: StateFlow<Boolean> = preferences.autoOnlineSearch
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+
+    /** With automatic search off: the query the judge asked to search on Scryfall. */
+    private val requested = MutableStateFlow<String?>(null)
 
     /**
      * Re-emits when an import finishes, so results appear by themselves after the first run.
@@ -57,14 +66,17 @@ class CardSearchViewModel(
     private var lastOnline: Triple<String, Int, CardSearchResult>? = null
 
     /**
-     * Queries only Scryfall understands are searched there by themselves, once the judge stops
+     * Queries only Scryfall understands are searched there: by themselves once the judge stops
      * typing for [ONLINE_DEBOUNCE_MS] (never a request per keystroke; a newer query cancels the
-     * older one). Emits (query, answer), answer null while it runs; null when nothing goes online.
+     * older one), or, with automatic search off, only the query the judge asked for.
+     * Emits (query, answer), answer null while it runs; null when nothing goes online.
      */
     private val online: StateFlow<Pair<String, CardSearchResult?>?> =
-        combine(query.debounce(ONLINE_DEBOUNCE_MS), dataState, retries) { q, d, n -> Triple(q, d, n) }
-            .transformLatest { (q, d, n) ->
-                val local = if (q.isBlank() || d !is CardDataState.Ready) null else repository.search(q, limit = 0)
+        combine(query.debounce(ONLINE_DEBOUNCE_MS), dataState, retries, autoOnline, requested) { q, d, n, auto, asked ->
+            OnlineInput(q, d, n, auto || asked == q)
+        }
+            .transformLatest { (q, d, n, allowed) ->
+                val local = if (q.isBlank() || d !is CardDataState.Ready || !allowed) null else repository.search(q, limit = 0)
                 if (local !is CardSearchResult.NeedsOnline || !local.complete) {
                     emit(null)
                     return@transformLatest
@@ -82,10 +94,11 @@ class CardSearchViewModel(
      * What the screen shows. An online answer only stands while the query is the one searched;
      * while it's on its way (or the judge is still typing) the screen says it's searching Scryfall.
      */
-    val results: StateFlow<SearchState> = combine(offline, online, query) { off, on, q ->
+    val results: StateFlow<SearchState> = combine(offline, online, query, autoOnline, requested) { off, on, q, auto, asked ->
         when {
             off !is CardSearchResult.NeedsOnline -> SearchState.Shown(off)
             !off.complete -> SearchState.Shown(off)                       // quotes/parentheses still open
+            !auto && asked != q -> SearchState.AskToSearchOnline(off.parts)
             on != null && on.first == q && on.second != null -> SearchState.Shown(on.second!!)
             else -> SearchState.SearchingOnline
         }
@@ -93,10 +106,19 @@ class CardSearchViewModel(
 
     fun onQueryChange(value: String) { savedStateHandle[KEY_QUERY] = value }
 
-    /** "Try again" (or the search key) after a failed online search. */
+    /**
+     * "Search on Scryfall" with automatic search off, or "Try again" after a failed online search.
+     * The search key does the same. Does nothing for a query the phone answers by itself.
+     */
     fun retryOnline() {
-        if ((results.value as? SearchState.Shown)?.result is CardSearchResult.OnlineFailed) retries.value++
+        when (val r = results.value) {
+            is SearchState.AskToSearchOnline -> requested.value = query.value
+            is SearchState.Shown -> if (r.result is CardSearchResult.OnlineFailed) retries.value++
+            SearchState.SearchingOnline -> Unit
+        }
     }
+
+    private data class OnlineInput(val query: String, val data: CardDataState, val retry: Int, val allowed: Boolean)
 
     companion object {
         /** Results shown; at the limit the header says "100+". */
@@ -110,6 +132,8 @@ class CardSearchViewModel(
 sealed interface SearchState {
     data class Shown(val result: CardSearchResult) : SearchState
     data object SearchingOnline : SearchState
+    /** Automatic search off: [parts] need Scryfall, and nothing is sent until the judge asks. */
+    data class AskToSearchOnline(val parts: List<String>) : SearchState
 }
 
 sealed interface CardDetailState {

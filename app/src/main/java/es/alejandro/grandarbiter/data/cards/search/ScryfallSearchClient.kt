@@ -27,7 +27,8 @@ sealed interface OnlineSearch {
 
 /**
  * The online half of the card search: queries the app can't answer offline go to
- * https://api.scryfall.com/cards/search, one request per explicit search (never per keystroke).
+ * https://api.scryfall.com/cards/search, one request per search (CardSearchViewModel decides when:
+ * after a pause in typing, or when the judge asks; never per keystroke).
  * The OkHttpClient must carry ScryfallHeadersInterceptor. Only the first page is read (Scryfall
  * pages hold 175 cards); [OnlineSearch.Found.total] says how many there are in all.
  */

@@ -55,6 +55,7 @@ import es.alejandro.grandarbiter.data.quickrefs.QuickReferenceRepositoryImpl
 import es.alejandro.grandarbiter.domain.repository.QuickReferenceRepository
 import es.alejandro.grandarbiter.data.customlists.CustomListRepositoryImpl
 import es.alejandro.grandarbiter.domain.repository.CustomListRepository
+import es.alejandro.grandarbiter.domain.repository.SearchPreferences
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceDetailViewModel
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceEditViewModel
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferencesViewModel
@@ -104,6 +105,7 @@ val databaseModule = module {
     single { get<AppDatabase>().customListDao() }
     
     single { SettingsDataStore(androidContext()) }
+    single<SearchPreferences> { get<SettingsDataStore>() }
 }
 
 /** Rules content: a separate, disposable DB rebuilt from the bundle (see RulesDatabase.kt). */

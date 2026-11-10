@@ -66,6 +66,10 @@
     <string name="cards_art_copyright">© Wizards of the Coast</string>
     <string name="cards_search_placeholder">Card name…</string>
     <string name="cards_syntax_hint">Supports Scryfall search syntax.</string>
+    <string name="cards_syntax_hint_online">Supports Scryfall search syntax. Searches the app can\'t do offline are sent to Scryfall.</string>
+    <string name="cards_ask_online_title">This search needs Scryfall</string>
+    <string name="cards_ask_online_body">Only Scryfall understands %1$s. Remove it to search the cards on your phone.</string>
+    <string name="cards_search_on_scryfall">Search on Scryfall</string>
     <string name="cards_online_waiting">Close the quotes or parentheses to search on Scryfall.</string>
     <string name="cards_searching_online">Searching Scryfall…</string>
     <string name="cards_online_partial">Showing the first %1$d of %2$d. Narrow the search to see the rest.</string>
@@ -172,6 +176,9 @@
     <string name="settings_high_contrast_hint">Increase legibility</string>
     <string name="settings_keep_screen_on">Keep screen on</string>
     <string name="settings_keep_screen_on_hint">While the app is open</string>
+    <string name="settings_card_search">Card search</string>
+    <string name="settings_auto_online">Search Scryfall automatically</string>
+    <string name="settings_auto_online_hint">Searches the app can\'t do offline go to Scryfall as you type. Off: only when you tap Search on Scryfall.</string>
     <string name="settings_documents">Documents</string>
     <string name="settings_open_pdf">Open the official PDF</string>
     <string name="settings_version">Version %1$s</string>

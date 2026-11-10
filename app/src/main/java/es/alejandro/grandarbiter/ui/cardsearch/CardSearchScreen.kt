@@ -87,6 +87,7 @@ fun CardSearchScreen(
     }
     val dataState by viewModel.dataState.collectAsState()
     val results by viewModel.results.collectAsState()
+    val autoOnline by viewModel.autoOnline.collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -115,7 +116,7 @@ fun CardSearchScreen(
         Column(Modifier.padding(innerPadding).fillMaxSize()) {
             // Nothing to search until the first import is done (an update keeps the old data: Ready).
             SearchHeader(query, viewModel::onQueryChange, viewModel::retryOnline, { onOpenAdvanced(query) },
-                enabled = dataState is CardDataState.Ready)
+                enabled = dataState is CardDataState.Ready, autoOnline = autoOnline)
             when {
                 dataState is CardDataState.Checking -> Unit
                 dataState is CardDataState.Preparing -> Centered {
@@ -137,6 +138,11 @@ fun CardSearchScreen(
                 query.isBlank() -> (dataState as? CardDataState.Ready)?.let { IdleState(it) }
                 else -> when (val s = results) {
                     SearchState.SearchingOnline -> SearchingOnline()
+                    is SearchState.AskToSearchOnline -> InfoPanel(
+                        stringResource(R.string.cards_ask_online_title),
+                        stringResource(R.string.cards_ask_online_body, s.parts.joinToString(" ")),
+                        stringResource(R.string.cards_search_on_scryfall), viewModel::retryOnline,
+                    )
                     is SearchState.Shown -> when (val r = s.result) {
                         is CardSearchResult.Offline -> Results(r.cards, onOpenCard) { ResultsMeta(offlineLabel(r.cards.size)) }
                         is CardSearchResult.NeedsOnline -> WaitingToClose()   // quotes/parentheses still open
@@ -158,6 +164,7 @@ private fun SearchHeader(
     onSearch: () -> Unit,
     onOpenAdvanced: () -> Unit,
     enabled: Boolean,
+    autoOnline: Boolean,
 ) {
     val border = MaterialTheme.colorScheme.outlineVariant
     Column(
@@ -176,9 +183,10 @@ private fun SearchHeader(
                 Icon(Icons.Outlined.Tune, contentDescription = stringResource(R.string.cards_adv_open))
             }
         }
-        // Teaches the syntax while there's nothing typed (canvas Busqueda2_inicio).
+        // Shown while there's nothing typed. With automatic search on, it also says which searches go to Scryfall.
         if (query.isEmpty() && enabled) {
-            Text(stringResource(R.string.cards_syntax_hint), style = MaterialTheme.typography.bodySmall,
+            Text(stringResource(if (autoOnline) R.string.cards_syntax_hint_online else R.string.cards_syntax_hint),
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

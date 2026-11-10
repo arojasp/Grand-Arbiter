@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,15 +25,19 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -60,6 +66,7 @@ import es.alejandro.grandarbiter.ui.components.groupedItem
 import es.alejandro.grandarbiter.ui.reader.ReaderSearchField
 import es.alejandro.grandarbiter.ui.reader.highlightedSnippet
 import es.alejandro.grandarbiter.ui.reader.sectionLabel
+import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 import org.koin.androidx.compose.koinViewModel
 
 /*
@@ -78,6 +85,7 @@ fun QuickReferenceEditScreen(
     val state by viewModel.state.collectAsState()
     var confirmDiscard by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
+    var menu by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
     val close = { if (state.dirty) confirmDiscard = true else onClose() }
 
@@ -96,22 +104,37 @@ fun QuickReferenceEditScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = close) { Icon(Icons.Default.Close, stringResource(R.string.qr_cancel), tint = colors.primary) }
+                    IconButton(onClick = close) {
+                        Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.reader_back), tint = colors.primary)
+                    }
                 },
                 title = {
                     Text(stringResource(if (state.id == null) R.string.qr_new_title else R.string.qr_edit_title),
                         style = MaterialTheme.typography.titleLarge, color = colors.primary)
                 },
                 actions = {
-                    TextButton(onClick = viewModel::save, enabled = state.canSave) { Text(stringResource(R.string.qr_save)) }
+                    if (state.id != null) Box {
+                        IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, stringResource(R.string.qr_more)) }
+                        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                            DropdownMenuItem(text = { Text(stringResource(R.string.qr_delete)) }, onClick = { menu = false; confirmDelete = true })
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background),
             )
         },
+        bottomBar = {
+            if (!state.loading) Surface(color = colors.surfaceContainerLow, border = highContrastBorder(), modifier = Modifier.imePadding()) {
+                Button(onClick = viewModel::save, enabled = state.canSave,
+                    modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp).heightIn(min = 56.dp)) {
+                    Text(stringResource(R.string.qr_save), style = MaterialTheme.typography.titleMedium)
+                }
+            }
+        },
     ) { innerPadding ->
         if (state.loading) return@Scaffold
         LazyColumn(
-            modifier = Modifier.padding(innerPadding).imePadding(),
+            modifier = Modifier.padding(innerPadding),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
         ) {
             // No spacedBy: the index rows below are one grouped list, so each item sets its own gap
@@ -184,16 +207,6 @@ fun QuickReferenceEditScreen(
                         onToggle = { viewModel.toggle(row.sectionId) },
                         onAdd = { viewModel.addSection(row.sectionId, row.label) },
                     )
-                }
-            }
-
-            if (state.id != null) {
-                item {
-                    TextButton(onClick = { confirmDelete = true }, modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
-                        Icon(Icons.Outlined.Delete, null, tint = colors.error)
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.qr_delete), color = colors.error)
-                    }
                 }
             }
         }

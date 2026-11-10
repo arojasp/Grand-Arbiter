@@ -142,3 +142,4 @@ Plan: `claude/ui-debt-plan.md` in the Claude project. Not released yet.
 | Commit | English |
 |---|---|
 | Card search: readable end-of-results caption | Card Search: the card count and data date on the empty search, and "End of results", are readable now (they were drawn at 20 % opacity). |
+| Quick References: the editor works like the other editors | Quick References: the editor works like Advanced search and custom lists — a back arrow, Save at the bottom (above the keyboard) and "Delete reference" in the ⋮ menu instead of at the end of the page. |

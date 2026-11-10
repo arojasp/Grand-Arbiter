@@ -1,3 +1,1 @@
-Comprehensive Rules updated to November 6, 2026, plus the latest Star Trek release notes and card data.
-
-Also in 1.4: your own Draft Timer times for casual drafts. Change any pick, review or construction time, or turn timed picks off. "Reset to MTR" brings back Appendix B.
+Card Search understands Scryfall syntax (t:goblin o:haste…), and the new Advanced search builds it for you. Searches the app can't do offline go to Scryfall; turn off "Search Scryfall automatically" in Settings to send them only when you ask. Results show the mana cost. New in Banned & Restricted: your own lists for store or community formats, with each card banned, restricted or worth points. Paste a list as text or share it. Deck Counter now adds any number.

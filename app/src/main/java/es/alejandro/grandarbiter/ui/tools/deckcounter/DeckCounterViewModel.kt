@@ -39,7 +39,15 @@ class DeckCounterViewModel(private val state: SavedStateHandle) : ViewModel() {
     private val pileKey get() = if (pile.value == Pile.SIDEBOARD.name) KEY_SIDE else KEY_MAIN
     private fun groups(key: String): IntArray = state.get<IntArray>(key) ?: IntArray(0)
 
+    /** The last "Other number" used, offered again with one tap; 0 = none yet. Reset keeps it. */
+    val lastCustom: StateFlow<Int> = state.getStateFlow(KEY_LAST_CUSTOM, 0)
+
     fun add(cards: Int) { state[pileKey] = groups(pileKey) + cards }
+
+    fun addCustom(cards: Int) {
+        state[KEY_LAST_CUSTOM] = cards
+        add(cards)
+    }
 
     fun undo() {
         val g = groups(pileKey)
@@ -71,5 +79,6 @@ class DeckCounterViewModel(private val state: SavedStateHandle) : ViewModel() {
         const val KEY_SIDE = "side"
         const val KEY_PILE = "pile"
         const val KEY_FORMAT = "format"
+        const val KEY_LAST_CUSTOM = "last_custom"
     }
 }

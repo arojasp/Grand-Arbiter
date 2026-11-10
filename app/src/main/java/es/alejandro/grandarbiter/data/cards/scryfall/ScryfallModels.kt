@@ -49,6 +49,8 @@ data class ScryfallCard(
 @Serializable
 data class ScryfallFace(
     val name: String,
+    /** Only on reversible cards, whose card object has none (each face is a whole card). */
+    @SerialName("oracle_id") val oracleId: String? = null,
     @SerialName("mana_cost") val manaCost: String? = null,
     @SerialName("type_line") val typeLine: String? = null,
     @SerialName("oracle_text") val oracleText: String? = null,
@@ -73,6 +75,24 @@ data class ScryfallRuling(
     val source: String = "wotc",
     @SerialName("published_at") val publishedAt: String,
     val comment: String,
+)
+
+/** A page of https://api.scryfall.com/cards/search. [warnings]: parts of the query Scryfall ignored. */
+@Serializable
+data class ScryfallCardList(
+    @SerialName("total_cards") val totalCards: Int = 0,
+    @SerialName("has_more") val hasMore: Boolean = false,
+    val data: List<ScryfallCard> = emptyList(),
+    val warnings: List<String> = emptyList(),
+)
+
+/** Scryfall's error object (404 no cards, 400 a query it can't read, …). */
+@Serializable
+data class ScryfallError(
+    val status: Int = 0,
+    val code: String = "",
+    val details: String = "",
+    val warnings: List<String> = emptyList(),
 )
 
 /** https://api.scryfall.com/bulk-data: the catalog of daily bulk files. */

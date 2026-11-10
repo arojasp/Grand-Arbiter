@@ -31,7 +31,7 @@ class QuickReferenceMigrationTest {
     @After fun close() { db?.close(); context.deleteDatabase(name) }
 
     private fun open(): AppDatabase = Room.databaseBuilder(context, AppDatabase::class.java, name)
-        .addMigrations(AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8)
+        .addMigrations(AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8, AppDatabase.MIGRATION_8_9)
         .addCallback(AppDatabase.SEED_PRESETS)
         .build().also { db = it }
 

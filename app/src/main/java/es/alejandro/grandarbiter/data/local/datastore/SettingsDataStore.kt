@@ -9,6 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import es.alejandro.grandarbiter.domain.model.DisplaySettings
 import es.alejandro.grandarbiter.domain.model.TextScale
 import es.alejandro.grandarbiter.domain.model.ThemeMode
+import es.alejandro.grandarbiter.domain.repository.SearchPreferences
 import es.alejandro.grandarbiter.domain.updates.SectionUpdates
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -16,13 +17,14 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
-class SettingsDataStore(private val context: Context) {
+class SettingsDataStore(private val context: Context) : SearchPreferences {
     private val THEME_MODE = stringPreferencesKey("theme_mode")
     private val TEXT_SCALE = stringPreferencesKey("text_scale")
     private val HIGH_CONTRAST = booleanPreferencesKey("high_contrast")
     private val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
     private val DRAFT_BEEP = booleanPreferencesKey("draft_beep")
     private val DRAFT_VIBRATE = booleanPreferencesKey("draft_vibrate")
+    private val AUTO_ONLINE_SEARCH = booleanPreferencesKey("auto_online_search")
     private val SEEN_PREFIX = "seen_version_"   // + section id: "seen_version_cr" = "2026-09-25"
 
     val displaySettings: Flow<DisplaySettings> = context.dataStore.data.map { p ->
@@ -43,6 +45,10 @@ class SettingsDataStore(private val context: Context) {
     /** Draft timer: one vibration when a step runs out. On by default. */
     val draftVibrate: Flow<Boolean> = context.dataStore.data.map { it[DRAFT_VIBRATE] ?: true }.distinctUntilChanged()
     suspend fun setDraftVibrate(enabled: Boolean) = set(DRAFT_VIBRATE, enabled)
+
+    /** Card search: Scryfall-only searches go out by themselves. On by default. */
+    override val autoOnlineSearch: Flow<Boolean> = context.dataStore.data.map { it[AUTO_ONLINE_SEARCH] ?: true }.distinctUntilChanged()
+    suspend fun setAutoOnlineSearch(enabled: Boolean) = set(AUTO_ONLINE_SEARCH, enabled)
 
     /** «Updated» label: the version of each section the user last entered, by section id (see [SectionUpdates]). */
     val seenSectionVersions: Flow<Map<String, String>> = context.dataStore.data.map(::seenVersions).distinctUntilChanged()

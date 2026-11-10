@@ -2,6 +2,9 @@ package es.alejandro.grandarbiter.ui.navigation
 
 import android.net.Uri
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -9,6 +12,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import es.alejandro.grandarbiter.ui.cardsearch.AdvancedSearchScreen
+import es.alejandro.grandarbiter.ui.cardsearch.AdvancedSearchViewModel
 import es.alejandro.grandarbiter.ui.cardsearch.CardDetailScreen
 import es.alejandro.grandarbiter.ui.cardsearch.CardSearchScreen
 import es.alejandro.grandarbiter.ui.home.HomeScreen
@@ -18,6 +25,8 @@ import es.alejandro.grandarbiter.ui.reader.ReaderPageScreen
 import es.alejandro.grandarbiter.ui.reader.ReaderRoutes
 import es.alejandro.grandarbiter.ui.settings.SettingsScreen
 import es.alejandro.grandarbiter.ui.tools.banned.BannedListsScreen
+import es.alejandro.grandarbiter.ui.tools.banned.CustomListEditScreen
+import es.alejandro.grandarbiter.ui.tools.banned.CustomListRoutes
 import es.alejandro.grandarbiter.ui.tools.deckcounter.DeckCounterScreen
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftFormatScreen
@@ -52,6 +61,9 @@ sealed class Screen(val route: String) {
         fun createRoute(documentId: String) = "document_reader/$documentId"
     }
     object CardSearch : Screen("card_search")
+    object AdvancedSearch : Screen("card_search/advanced?${AdvancedSearchViewModel.ARG_QUERY}={${AdvancedSearchViewModel.ARG_QUERY}}") {
+        fun createRoute(query: String) = "card_search/advanced?${AdvancedSearchViewModel.ARG_QUERY}=${Uri.encode(query)}"
+    }
     object CardDetail : Screen("card_detail/{cardId}") {
         fun createRoute(cardId: String) = "card_detail/$cardId"
     }
@@ -82,6 +94,12 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
 }
 
+/** Cross-fade between screens. Navigation's default (700 ms) felt slow; 0 would remove it. */
+private const val SCREEN_FADE_MS = 150
+
+/** Key under which the Advanced search form hands its query back to Card Search. */
+private const val ADVANCED_RESULT = "advanced_search_query"
+
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
@@ -91,7 +109,13 @@ fun AppNavGraph(
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
+        // Navigation's default is a long fade that made the app feel slow (judge feedback):
+        // a short one keeps the change visible without the wait.
+        enterTransition = { fadeIn(tween(SCREEN_FADE_MS)) },
+        exitTransition = { fadeOut(tween(SCREEN_FADE_MS)) },
+        popEnterTransition = { fadeIn(tween(SCREEN_FADE_MS)) },
+        popExitTransition = { fadeOut(tween(SCREEN_FADE_MS)) },
     ) {
 
         composable(Screen.Home.route) { 
@@ -134,10 +158,27 @@ fun AppNavGraph(
                 onOpenPage = { ref -> navController.navigate(ReaderRoutes.page(ref)) },
             )
         }
-        composable(Screen.CardSearch.route) {
+        composable(Screen.CardSearch.route) { entry ->
+            // The query the Advanced search form hands back (null when there's none waiting).
+            val fromForm by entry.savedStateHandle.getStateFlow<String?>(ADVANCED_RESULT, null).collectAsState()
             CardSearchScreen(
                 onOpenCard = { oracleId -> navController.navigate(Screen.CardDetail.createRoute(oracleId)) },
                 onOpenSettings = { navController.navigate(Screen.Settings.route) },
+                onOpenAdvanced = { query -> navController.navigate(Screen.AdvancedSearch.createRoute(query)) },
+                queryFromForm = fromForm,
+                onQueryFromFormUsed = { entry.savedStateHandle[ADVANCED_RESULT] = null },
+            )
+        }
+        composable(
+            Screen.AdvancedSearch.route,
+            arguments = listOf(navArgument(AdvancedSearchViewModel.ARG_QUERY) { type = NavType.StringType; defaultValue = "" }),
+        ) {
+            AdvancedSearchScreen(
+                onBack = { navController.popBackStack() },
+                onSearch = { query ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set(ADVANCED_RESULT, query)
+                    navController.popBackStack()
+                },
             )
         }
         composable(Screen.CardDetail.route) {
@@ -208,7 +249,15 @@ fun AppNavGraph(
             BannedListsScreen(
                 onBack = { navController.popBackStack() },
                 onOpenCard = { oracleId -> navController.navigate(Screen.CardDetail.createRoute(oracleId)) },
+                onNewList = { navController.navigate(CustomListRoutes.CREATE) },
+                onEditList = { id -> navController.navigate(CustomListRoutes.edit(id)) },
             )
+        }
+        composable(
+            CustomListRoutes.EDIT,
+            arguments = listOf(navArgument(CustomListRoutes.ARG_ID) { type = NavType.StringType; nullable = true; defaultValue = null }),
+        ) {
+            CustomListEditScreen(onClose = { navController.popBackStack() })
         }
         composable(Screen.QuickReferences.route) {
             QuickReferencesScreen(

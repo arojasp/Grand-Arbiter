@@ -22,13 +22,20 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.RestartAlt
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -41,8 +48,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -82,6 +99,8 @@ fun DeckCounterScreen(
     val side by viewModel.side.collectAsState()
     val pileName by viewModel.pile.collectAsState()
     val formatName by viewModel.format.collectAsState()
+    val lastCustom by viewModel.lastCustom.collectAsState()
+    var customDialog by rememberSaveable { mutableStateOf(false) }
     val pile = Pile.valueOf(pileName)
     val format = DeckFormat.valueOf(formatName)
     val groups = if (pile == Pile.MAIN) main else side
@@ -149,6 +168,15 @@ fun DeckCounterScreen(
                         }
                     }
                 }
+                // Any other pile (basic lands, a Commander deck's 30 basics): judge feedback.
+                CustomRow(
+                    last = lastCustom,
+                    onAgain = {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        viewModel.add(lastCustom)
+                    },
+                    onOther = { customDialog = true },
+                )
             }
         }
         val actions: @Composable () -> Unit = {
@@ -168,6 +196,18 @@ fun DeckCounterScreen(
                     }
                 }
             }
+        }
+
+        if (customDialog) {
+            CustomNumberDialog(
+                last = lastCustom,
+                onAdd = { n ->
+                    customDialog = false
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    viewModel.addCustom(n)
+                },
+                onDismiss = { customDialog = false },
+            )
         }
 
         val window = LocalWindowInfo.current.containerSize
@@ -297,6 +337,95 @@ private fun CountPad(n: Int, modifier: Modifier, onClick: () -> Unit) {
     ) {
         Text(n.toString(), style = MaterialTheme.typography.displayLarge.copy(fontSize = 44.sp, lineHeight = 52.sp), color = MaterialTheme.colorScheme.onPrimaryContainer)
     }
+}
+
+/**
+ * Below the 1–4 pads. Before any custom pile: one wide "Other number…" pad. After: "+N again"
+ * (one tap repeats the last custom pile, e.g. 17 basics deck after deck) and a separate edit button.
+ */
+@Composable
+private fun CustomRow(last: Int, onAgain: () -> Unit, onOther: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(12.dp)
+    Row(Modifier.fillMaxWidth().height(64.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (last <= 0) {
+            Row(
+                Modifier.weight(1f).fillMaxHeight().clip(shape).background(colors.primaryContainer)
+                    .clickable(role = Role.Button, onClick = onOther),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.Default.Add, null, tint = colors.onPrimaryContainer, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.deck_other_number), style = MaterialTheme.typography.titleMedium,
+                    color = colors.onPrimaryContainer)
+            }
+        } else {
+            val againLabel = stringResource(R.string.deck_add_again, last)
+            Row(
+                Modifier.weight(1f).fillMaxHeight().clip(shape).background(colors.primaryContainer)
+                    .clickable(role = Role.Button, onClick = onAgain)
+                    .semantics { contentDescription = againLabel },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // The row's description says it once ("Add 17 again"); the visible bits stay silent.
+                Text("+$last", style = MaterialTheme.typography.displayLarge.copy(
+                    fontSize = 32.sp, lineHeight = 40.sp, fontFeatureSettings = "tnum"), color = colors.onPrimaryContainer,
+                    modifier = Modifier.clearAndSetSemantics {})
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.deck_again), style = MaterialTheme.typography.labelLarge,
+                    color = colors.onPrimaryContainer, modifier = Modifier.clearAndSetSemantics {})
+            }
+            Box(
+                Modifier.size(64.dp).clip(shape).background(colors.surfaceContainerHighest)
+                    .border(1.dp, colors.outlineVariant, shape)
+                    .clickable(role = Role.Button, onClick = onOther),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Outlined.Edit, stringResource(R.string.deck_other_number_desc), tint = colors.onSurface)
+            }
+        }
+    }
+}
+
+/** Number entry for any pile size, the last one pre-filled and selected (typing replaces it). */
+@Composable
+private fun CustomNumberDialog(last: Int, onAdd: (Int) -> Unit, onDismiss: () -> Unit) {
+    val initial = if (last > 0) last.toString() else ""
+    var value by remember { mutableStateOf(TextFieldValue(initial, TextRange(0, initial.length))) }
+    val number = DeckCount.parseCustom(value.text)
+    val invalid = value.text.isNotEmpty() && number == null
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focus.requestFocus() }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.deck_custom_title)) },
+        text = {
+            OutlinedTextField(
+                value = value,
+                onValueChange = { new ->
+                    val digits = new.text.filter(Char::isDigit).take(3)
+                    value = if (digits == new.text) new else TextFieldValue(digits, TextRange(digits.length))
+                },
+                label = { Text(stringResource(R.string.deck_custom_label)) },
+                supportingText = { Text(stringResource(R.string.deck_custom_range, DeckCount.MAX_CUSTOM)) },
+                isError = invalid,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { number?.let(onAdd) }),
+                modifier = Modifier.fillMaxWidth().focusRequester(focus),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { number?.let(onAdd) }, enabled = number != null) {
+                Text(stringResource(R.string.deck_custom_add))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.deck_custom_cancel)) }
+        },
+    )
 }
 
 @Composable

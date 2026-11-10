@@ -53,6 +53,7 @@ import es.alejandro.grandarbiter.ui.components.Tag
 import es.alejandro.grandarbiter.ui.components.groupedItem
 import es.alejandro.grandarbiter.ui.reader.ReaderSearchField
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.ui.text.style.TextAlign
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -70,10 +71,13 @@ import java.time.format.FormatStyle
 fun BannedListsScreen(
     onBack: () -> Unit,
     onOpenCard: (oracleId: String) -> Unit,
+    onNewList: () -> Unit,
+    onEditList: (id: Long) -> Unit,
     viewModel: BannedListsViewModel = koinViewModel(),
 ) {
     val query by viewModel.query.collectAsState()
     val views by viewModel.views.collectAsState()
+    val custom by viewModel.customViews.collectAsState()
     val dataInfo by viewModel.dataInfo.collectAsState()
     // Formats the judge opened/closed by hand. Search matches open by themselves; a tap flips that.
     var toggled by rememberSaveable { mutableStateOf(setOf<String>()) }
@@ -110,12 +114,14 @@ fun BannedListsScreen(
             val list = views
             when {
                 list == null -> Box(Modifier.fillMaxSize().padding(bottom = 48.dp), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Same as Card Search's: 32 dp from the edges, centered.
+                    Column(Modifier.padding(horizontal = 32.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         CircularProgressIndicator()
-                        Text(stringResource(R.string.cards_preparing), color = colors.onSurfaceVariant)
+                        Text(stringResource(R.string.cards_preparing), color = colors.onSurfaceVariant, textAlign = TextAlign.Center)
                     }
                 }
-                list.isEmpty() -> Text(stringResource(R.string.cards_no_results), color = colors.onSurfaceVariant,
+                list.isEmpty() && custom.isEmpty() -> Text(stringResource(R.string.cards_no_results), color = colors.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth().padding(32.dp))
                 // No spacedBy: each group is one grouped list (groupedItem), a gap would split it.
                 else -> LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 32.dp)) {
@@ -138,6 +144,26 @@ fun BannedListsScreen(
                         }
                         itemsIndexed(community, key = { _, it -> it.list.format }) { i, view ->
                             format(view, Modifier.groupedItem(i, community.size), i > 0)
+                        }
+                    }
+                    // While searching, only the lists that match; "New list" only without a search.
+                    val showNew = query.isBlank()
+                    if (custom.isNotEmpty() || showNew) {
+                        val rows = custom.size + if (showNew) 1 else 0
+                        item(key = "custom") {
+                            Label(stringResource(R.string.custom_lists), Modifier.padding(start = 4.dp, top = 24.dp, bottom = 8.dp))
+                        }
+                        itemsIndexed(custom, key = { _, it -> it.key }) { i, view ->
+                            CustomListItem(view, expanded = (view.key in toggled) != view.autoExpand, divider = i > 0,
+                                modifier = Modifier.groupedItem(i, rows),
+                                onToggle = { toggled = toggled.toggle(view.key) },
+                                onEdit = { view.list.id?.let(onEditList) },
+                                onOpenCard = onOpenCard)
+                        }
+                        if (showNew) {
+                            item(key = "custom:new") {
+                                NewListRow(divider = custom.isNotEmpty(), modifier = Modifier.groupedItem(rows - 1, rows), onClick = onNewList)
+                            }
                         }
                     }
                 }

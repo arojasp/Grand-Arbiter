@@ -85,6 +85,7 @@ fun SettingsScreen(
     val cardData by viewModel.cardData.collectAsState()
     val updateState by viewModel.updateState.collectAsState()
     val rulesUpdateState by viewModel.rulesUpdateState.collectAsState()
+    val autoOnline by viewModel.autoOnlineSearch.collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -110,6 +111,14 @@ fun SettingsScreen(
         ) {
             item { AccessibilitySection(display, viewModel::setTextScale, viewModel::setThemeMode, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
             item { DocumentsSection(documents) }
+            item {
+                SettingsSection(stringResource(R.string.settings_card_search)) {
+                    SettingsPanel {
+                        SwitchRow(stringResource(R.string.settings_auto_online), stringResource(R.string.settings_auto_online_hint),
+                            autoOnline, viewModel::setAutoOnlineSearch)
+                    }
+                }
+            }
             item { CardDatabaseSection(cardData, updateState, rulesUpdateState, viewModel::checkForUpdates) }
             item { AboutSection() }
         }

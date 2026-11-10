@@ -44,7 +44,6 @@
     <string name="cards_title">Oracle Search</string>
     <string name="cards_details">Card details</string>
     <string name="cards_settings">Settings</string>
-    <string name="cards_filter">Search options</string>
     <plurals name="cards_found">
         <item quantity="one">%1$d card found</item>
         <item quantity="other">%1$d cards found</item>
@@ -66,8 +65,56 @@
     <string name="cards_art_credit">Illustrated by %1$s · © Wizards of the Coast</string>
     <string name="cards_art_copyright">© Wizards of the Coast</string>
     <string name="cards_search_placeholder">Card name…</string>
-    <string name="cards_search_text_placeholder">Words in name, type or rules text…</string>
-    <string name="cards_search_in_text">Search rules text</string>
+    <string name="cards_syntax_hint">Supports Scryfall search syntax.</string>
+    <string name="cards_syntax_hint_online">Supports Scryfall search syntax. Searches the app can\'t do offline are sent to Scryfall.</string>
+    <string name="cards_ask_online_title">This search needs Scryfall</string>
+    <string name="cards_ask_online_body">Only Scryfall understands %1$s. Remove it to search the cards on your phone.</string>
+    <string name="cards_search_on_scryfall">Search on Scryfall</string>
+    <string name="cards_online_waiting">Close the quotes or parentheses to search on Scryfall.</string>
+    <string name="cards_searching_online">Searching Scryfall…</string>
+    <string name="cards_online_partial">Showing the first %1$d of %2$d. Narrow the search to see the rest.</string>
+    <string name="cards_online_warnings">Scryfall ignored part of this search</string>
+    <string name="cards_needs_connection">This search needs a connection</string>
+    <string name="cards_needs_connection_body">Only Scryfall understands %1$s. Remove it to search the cards on your phone, or try again when you\'re online.</string>
+    <string name="cards_online_unavailable">Scryfall didn\'t answer</string>
+    <string name="cards_online_unavailable_body">Try again in a moment.</string>
+    <string name="cards_online_rejected">Scryfall couldn\'t read this search</string>
+    <!-- Advanced search (canvas Busqueda2_avanzada_revisada) -->
+    <string name="cards_adv_open">Advanced search</string>
+    <string name="cards_adv_title">Advanced search</string>
+    <string name="cards_adv_clear">Clear all</string>
+    <string name="cards_adv_discard_title">Discard changes?</string>
+    <string name="cards_adv_discard">Discard</string>
+    <string name="cards_adv_keep_editing">Keep editing</string>
+    <string name="cards_adv_name">Name</string>
+    <string name="cards_adv_rules_text">Rules text</string>
+    <string name="cards_adv_type">Type</string>
+    <string name="cards_adv_card_colors">Card colors</string>
+    <string name="cards_adv_identity">Color identity</string>
+    <string name="cards_adv_white">White</string>
+    <string name="cards_adv_blue">Blue</string>
+    <string name="cards_adv_black">Black</string>
+    <string name="cards_adv_red">Red</string>
+    <string name="cards_adv_green">Green</string>
+    <string name="cards_adv_colorless">Colorless</string>
+    <string name="cards_adv_includes">Includes</string>
+    <string name="cards_adv_exactly">Exactly</string>
+    <string name="cards_adv_at_most">At most</string>
+    <string name="cards_adv_mana_value">Mana value</string>
+    <string name="cards_adv_power">Power</string>
+    <string name="cards_adv_toughness">Toughness</string>
+    <string name="cards_adv_any">Any</string>
+    <string name="cards_adv_operator">%1$s, %2$s</string>
+    <string name="cards_adv_set">Set code</string>
+    <string name="cards_adv_number">Collector number</string>
+    <string name="cards_adv_other">Other filters</string>
+    <string name="cards_adv_syntax">Search syntax</string>
+    <string name="cards_adv_search">Search</string>
+    <string name="cards_try_again">Try again</string>
+    <plurals name="cards_found_online">
+        <item quantity="one">%d card on Scryfall · online</item>
+        <item quantity="other">%d cards on Scryfall · online</item>
+    </plurals>
     <string name="cards_preparing">Preparing card data… This only takes a while the first time.</string>
     <string name="cards_preparing_count">%1$s cards ready</string>
     <string name="cards_count">%1$s cards</string>
@@ -129,6 +176,9 @@
     <string name="settings_high_contrast_hint">Increase legibility</string>
     <string name="settings_keep_screen_on">Keep screen on</string>
     <string name="settings_keep_screen_on_hint">While the app is open</string>
+    <string name="settings_card_search">Card search</string>
+    <string name="settings_auto_online">Search Scryfall automatically</string>
+    <string name="settings_auto_online_hint">Searches the app can\'t do offline go to Scryfall as you type.</string>
     <string name="settings_documents">Documents</string>
     <string name="settings_open_pdf">Open the official PDF</string>
     <string name="settings_version">Version %1$s</string>
@@ -161,6 +211,58 @@
     <string name="banned_category_un">Un-cards (acorn, stickers, attractions)</string>
     <string name="banned_category_conspiracy">Conspiracy cards</string>
     <string name="banned_category_ante">Cards that play for ante</string>
+    <string name="custom_lists">Custom lists</string>
+    <string name="custom_new_list">New list</string>
+    <string name="custom_edit">Edit</string>
+    <string name="custom_share">Share</string>
+    <plurals name="custom_points">
+        <item quantity="one">%d point</item>
+        <item quantity="other">%d points</item>
+    </plurals>
+    <plurals name="custom_cards">
+        <item quantity="one">%d card</item>
+        <item quantity="other">%d cards</item>
+    </plurals>
+    <string name="custom_name">Name</string>
+    <string name="custom_note">Note</string>
+    <string name="custom_add_card">Add card</string>
+    <string name="custom_save">Save</string>
+    <string name="custom_more">More options</string>
+    <string name="custom_delete_list">Delete list</string>
+    <string name="custom_delete_title">Delete %1$s?</string>
+    <string name="custom_delete">Delete</string>
+    <string name="custom_cancel">Cancel</string>
+    <string name="custom_discard_title">Discard changes?</string>
+    <string name="custom_discard">Discard</string>
+    <string name="custom_keep_editing">Keep editing</string>
+    <string name="custom_status_of">%1$s, %2$s</string>
+    <string name="custom_points_label">Points</string>
+    <string name="custom_points_menu">Points…</string>
+    <string name="custom_remove">Remove from list</string>
+    <string name="custom_set">Set</string>
+    <string name="custom_search_placeholder">Card name</string>
+    <string name="custom_add">Add</string>
+    <string name="custom_update">Update</string>
+    <string name="custom_paste_list">Paste list</string>
+    <string name="custom_paste_field">Cards</string>
+    <string name="custom_paste_format">One card per line. A number before or after the name sets its points; “banned” or “restricted” after the name sets that. A name alone counts as banned.</string>
+    <string name="custom_add_cards">Add cards</string>
+    <plurals name="custom_detected">
+        <item quantity="one">%d card detected</item>
+        <item quantity="other">%d cards detected</item>
+    </plurals>
+    <plurals name="custom_added">
+        <item quantity="one">%d card added</item>
+        <item quantity="other">%d cards added</item>
+    </plurals>
+    <plurals name="custom_not_found">
+        <item quantity="one">%d line not found.</item>
+        <item quantity="other">%d lines not found.</item>
+    </plurals>
+    <plurals name="custom_rest_added">
+        <item quantity="one">The other card is already in the list.</item>
+        <item quantity="other">The other %d cards are already in the list.</item>
+    </plurals>
     <string name="tools_quick_references_desc">Layers, stack order, combat steps and more</string>
 
     <!-- Head Judge announcement -->
@@ -213,6 +315,15 @@
     <string name="deck_reset">Reset</string>
     <string name="deck_reset_done">Count reset</string>
     <string name="deck_undo">Undo</string>
+    <string name="deck_other_number">Other number…</string>
+    <string name="deck_again">again</string>
+    <string name="deck_add_again">Add %1$d again</string>
+    <string name="deck_other_number_desc">Add another number</string>
+    <string name="deck_custom_title">Add cards</string>
+    <string name="deck_custom_label">Number of cards</string>
+    <string name="deck_custom_range">From 1 to %1$d</string>
+    <string name="deck_custom_add">Add</string>
+    <string name="deck_custom_cancel">Cancel</string>
 
 
     <!-- Quick references -->
@@ -246,7 +357,7 @@
     <string name="qr_delete">Delete reference</string>
     <string name="qr_delete_title">Delete \u201c%1$s\u201d?</string>
     <string name="qr_delete_message">The reference and your notes will be deleted. Built-in references can be restored later, but without your notes.</string>
-    <string name="qr_discard_title">Discard your changes?</string>
+    <string name="qr_discard_title">Discard changes?</string>
     <string name="qr_discard">Discard</string>
     <string name="qr_keep_editing">Keep editing</string>
 

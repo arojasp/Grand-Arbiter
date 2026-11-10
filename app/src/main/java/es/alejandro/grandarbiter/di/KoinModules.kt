@@ -52,6 +52,8 @@ import es.alejandro.grandarbiter.data.cards.update.RoomInstalledCards
 import es.alejandro.grandarbiter.data.rules.update.RoomInstalledRules
 import es.alejandro.grandarbiter.data.quickrefs.QuickReferenceRepositoryImpl
 import es.alejandro.grandarbiter.domain.repository.QuickReferenceRepository
+import es.alejandro.grandarbiter.data.customlists.CustomListRepositoryImpl
+import es.alejandro.grandarbiter.domain.repository.CustomListRepository
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceDetailViewModel
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceEditViewModel
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferencesViewModel
@@ -90,7 +92,7 @@ val databaseModule = module {
             AppDatabase::class.java,
             "judge_companion_db"
         )
-            .addMigrations(AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8)
+            .addMigrations(AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8, AppDatabase.MIGRATION_8_9)
             .addCallback(AppDatabase.SEED_PRESETS)
             // No destructive fallback: this database holds the judge's own data.
             .build()
@@ -98,6 +100,7 @@ val databaseModule = module {
 
     single { get<AppDatabase>().cardDao() }
     single { get<AppDatabase>().quickReferenceDao() }
+    single { get<AppDatabase>().customListDao() }
     
     single { SettingsDataStore(androidContext()) }
 }
@@ -137,6 +140,7 @@ val repositoryModule = module {
     single { ScryfallSearchClient(get()) }
     single<CardRepository> { CardRepositoryImpl(get(), get(), get()) }
     single<QuickReferenceRepository> { QuickReferenceRepositoryImpl(get(), get(), get()) }
+    single<CustomListRepository> { CustomListRepositoryImpl(get()) }
 }
 
 val appModule = module {

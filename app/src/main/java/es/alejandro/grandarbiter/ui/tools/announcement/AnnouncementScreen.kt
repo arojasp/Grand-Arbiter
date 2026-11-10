@@ -161,7 +161,8 @@ private fun AnnouncementTopic.label(): Int = when (this) {
 private fun RelCard(rel: Rel?, onSelect: (Rel) -> Unit) {
     AnnouncementPanel {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Label(stringResource(R.string.hj_rel))
+            // Titles inside a panel take the text color; the gray Label is for labels outside one.
+            Label(stringResource(R.string.hj_rel), color = MaterialTheme.colorScheme.onSurface)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Rel.entries.forEach { r -> SelectChip(stringResource(r.label()), selected = r == rel) { onSelect(r) } }
             }
@@ -183,7 +184,7 @@ private fun TimeCard(rel: Rel?) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Icon(Icons.Outlined.Schedule, null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Label(stringResource(R.string.hj_round_time))
+                    Label(stringResource(R.string.hj_round_time), color = colors.onSurface)
                     Text(stringResource(R.string.hj_round_time_rule), style = MaterialTheme.typography.bodyMedium, color = colors.onSurface)
                 }
             }
@@ -288,7 +289,7 @@ private fun VenueReminder() {
         Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Icon(Icons.Outlined.Info, null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Label(stringResource(R.string.hj_venue))
+                Label(stringResource(R.string.hj_venue), color = colors.onSurface)
                 Text(stringResource(R.string.hj_venue_reminder), style = MaterialTheme.typography.bodyMedium, color = colors.onSurface)
             }
         }

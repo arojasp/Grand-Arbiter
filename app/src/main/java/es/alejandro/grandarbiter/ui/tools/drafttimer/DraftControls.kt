@@ -5,10 +5,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -145,30 +148,37 @@ private fun NumberDialog(title: String, value: Int, range: IntRange, unit: Strin
     )
 }
 
-/** Pick one of a few values (Two-Headed Giant booster size: 14 | 15; Rochester: Team 1 | Team 2). */
+/**
+ * Pick one of a few values (Two-Headed Giant booster size: 14 | 15; Rochester: Team 1 | Team 2).
+ * [width] fixes each segment; null shares the row's width equally (give [modifier] a width).
+ * Segments grow taller when the text wraps at large text sizes.
+ */
 @Composable
 internal fun Choice(
     values: List<Int>,
     selected: Int,
     onSelect: (Int) -> Unit,
-    width: Int = 56,
+    width: Int? = 56,
+    modifier: Modifier = Modifier,
     label: @Composable (Int) -> String = { it.toString() },
 ) {
     val colors = MaterialTheme.colorScheme
     Row(
-        Modifier.clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
+        modifier.height(IntrinsicSize.Min).clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         values.forEach { value ->
             val on = value == selected
             Box(
-                Modifier.width(width.dp).height(36.dp).clip(CircleShape)
+                (if (width != null) Modifier.width(width.dp) else Modifier.weight(1f))
+                    .fillMaxHeight().heightIn(min = 36.dp).clip(CircleShape)
                     .background(if (on) colors.primary else colors.surfaceContainerHighest)
                     .clickable(role = Role.RadioButton) { onSelect(value) },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(label(value), style = MaterialTheme.typography.labelLarge,
-                    color = if (on) colors.onPrimary else colors.onSurfaceVariant)
+                Text(label(value), style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center,
+                    color = if (on) colors.onPrimary else colors.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
             }
         }
     }

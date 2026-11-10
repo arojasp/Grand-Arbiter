@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.components.Label
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftPosition
 import es.alejandro.grandarbiter.domain.draft.DraftSnapshot
@@ -72,7 +73,7 @@ fun DraftFormatScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { DraftLabel(stringResource(R.string.draft_choose_format)) }
+            item { Label(stringResource(R.string.draft_choose_format), Modifier.padding(start = 4.dp)) }
             items(DraftFormat.entries) { format -> FormatCard(format) { onOpenFormat(format) } }
         }
     }

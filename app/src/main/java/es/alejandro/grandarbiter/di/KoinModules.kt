@@ -3,6 +3,7 @@ package es.alejandro.grandarbiter.di
 import androidx.room.Room
 import es.alejandro.grandarbiter.data.updates.SectionVersions
 import es.alejandro.grandarbiter.data.cards.CardRepositoryImpl
+import es.alejandro.grandarbiter.data.cards.search.ScryfallSearchClient
 import es.alejandro.grandarbiter.data.cards.local.AssetCardDataSource
 import es.alejandro.grandarbiter.data.cards.local.CardImporter
 import es.alejandro.grandarbiter.data.cards.local.CardsDatabase
@@ -25,12 +26,14 @@ import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import es.alejandro.grandarbiter.domain.timer.TimerManager
 import es.alejandro.grandarbiter.ui.cardsearch.CardDetailViewModel
 import es.alejandro.grandarbiter.ui.cardsearch.CardSearchViewModel
+import es.alejandro.grandarbiter.ui.cardsearch.AdvancedSearchViewModel
 import es.alejandro.grandarbiter.ui.home.HomeViewModel
 import es.alejandro.grandarbiter.ui.main.MainViewModel
 import es.alejandro.grandarbiter.ui.reader.ReaderContentsViewModel
 import es.alejandro.grandarbiter.ui.reader.ReaderPageViewModel
 import es.alejandro.grandarbiter.ui.settings.SettingsViewModel
 import es.alejandro.grandarbiter.ui.tools.banned.BannedListsViewModel
+import es.alejandro.grandarbiter.ui.tools.banned.CustomListEditViewModel
 import es.alejandro.grandarbiter.ui.tools.announcement.AnnouncementViewModel
 import es.alejandro.grandarbiter.ui.tools.deckcounter.DeckCounterViewModel
 import okhttp3.OkHttpClient
@@ -50,6 +53,9 @@ import es.alejandro.grandarbiter.data.cards.update.RoomInstalledCards
 import es.alejandro.grandarbiter.data.rules.update.RoomInstalledRules
 import es.alejandro.grandarbiter.data.quickrefs.QuickReferenceRepositoryImpl
 import es.alejandro.grandarbiter.domain.repository.QuickReferenceRepository
+import es.alejandro.grandarbiter.data.customlists.CustomListRepositoryImpl
+import es.alejandro.grandarbiter.domain.repository.CustomListRepository
+import es.alejandro.grandarbiter.domain.repository.SearchPreferences
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceDetailViewModel
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceEditViewModel
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferencesViewModel
@@ -88,7 +94,7 @@ val databaseModule = module {
             AppDatabase::class.java,
             "judge_companion_db"
         )
-            .addMigrations(AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8)
+            .addMigrations(AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8, AppDatabase.MIGRATION_8_9)
             .addCallback(AppDatabase.SEED_PRESETS)
             // No destructive fallback: this database holds the judge's own data.
             .build()
@@ -96,8 +102,10 @@ val databaseModule = module {
 
     single { get<AppDatabase>().cardDao() }
     single { get<AppDatabase>().quickReferenceDao() }
+    single { get<AppDatabase>().customListDao() }
     
     single { SettingsDataStore(androidContext()) }
+    single<SearchPreferences> { get<SettingsDataStore>() }
 }
 
 /** Rules content: a separate, disposable DB rebuilt from the bundle (see RulesDatabase.kt). */
@@ -132,8 +140,10 @@ val cardsModule = module {
 }
 
 val repositoryModule = module {
-    single<CardRepository> { CardRepositoryImpl(get(), get()) }
+    single { ScryfallSearchClient(get()) }
+    single<CardRepository> { CardRepositoryImpl(get(), get(), get()) }
     single<QuickReferenceRepository> { QuickReferenceRepositoryImpl(get(), get(), get()) }
+    single<CustomListRepository> { CustomListRepositoryImpl(get()) }
 }
 
 val appModule = module {
@@ -151,9 +161,11 @@ val viewModelModule = module {
     viewModelOf(::ReaderContentsViewModel)
     viewModelOf(::ReaderPageViewModel)
     viewModelOf(::CardSearchViewModel)
+    viewModelOf(::AdvancedSearchViewModel)
     viewModelOf(::CardDetailViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::BannedListsViewModel)
+    viewModelOf(::CustomListEditViewModel)
     viewModelOf(::AnnouncementViewModel)
     viewModelOf(::DeckCounterViewModel)
     viewModelOf(::QuickReferencesViewModel)

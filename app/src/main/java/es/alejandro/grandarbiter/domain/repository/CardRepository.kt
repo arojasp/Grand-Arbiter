@@ -2,14 +2,23 @@ package es.alejandro.grandarbiter.domain.repository
 
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
+import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.domain.model.cards.FormatBanList
 import kotlinx.coroutines.flow.Flow
 
-/** Offline card data (Scryfall snapshot in cards.db). Images are the only online part. */
+/**
+ * Card data: an offline Scryfall snapshot in cards.db. Online only for images and for searches
+ * the offline syntax can't answer (on request).
+ */
 interface CardRepository {
-    suspend fun search(query: String, inText: Boolean = false, limit: Int = 100): List<CardSummary>
+    /** [query]: card names and a subset of Scryfall's syntax (data/cards/search/CardQuery.kt). */
+    suspend fun search(query: String, limit: Int = 100): CardSearchResult
+    /** The whole [query] on Scryfall: Online or OnlineFailed. */
+    suspend fun searchOnline(query: String): CardSearchResult
     suspend fun card(oracleId: String): CardDetail?
+    /** The card with exactly this name (any case), or whose front face has it ("Fire" → "Fire // Ice"). No tokens. */
+    suspend fun findByName(name: String): CardSummary?
     fun observeDataInfo(): Flow<CardDataInfo?>
     /** Cards written so far by an import in progress; null when none runs. */
     fun observeImportProgress(): Flow<Int?>

@@ -16,7 +16,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -27,24 +26,24 @@ import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.ui.theme.softened
 
 /*
- * Building blocks of the Figma design (card detail, settings…): uppercase section labels,
- * bordered panels and small tags. Colors come from the theme.
+ * Building blocks of the Figma design (card detail, settings…): section labels, bordered panels
+ * and small tags. Colors come from the theme.
  */
 
-/** Section label: labelSmall (11 sp Medium) with wider tracking, uppercase. */
-val LabelStyle: TextStyle
-    @Composable @ReadOnlyComposable get() = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.1.sp)
-
+/**
+ * Section label above a block: titleSmall (14 sp Medium) in sentence case, as written in the
+ * string. Not uppercase: tracked uppercase overlines read as a template (design-decisions §5).
+ * Goes outside a Panel; a title inside a block uses the text color, not this gray.
+ */
 @Composable
 fun Label(text: String, modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.onSurfaceVariant) {
-    Text(text.uppercase(), style = LabelStyle, color = color, modifier = modifier)
+    Text(text, style = MaterialTheme.typography.titleSmall, color = color, modifier = modifier)
 }
 
 /**

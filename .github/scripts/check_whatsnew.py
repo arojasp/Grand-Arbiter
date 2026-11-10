@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 LIMIT = 500
-LOCALES = ("en-US", "es-ES")
+LOCALES = ("en-US",)   # the app is English only; Play shows en-US to every language
 root = Path(__file__).resolve().parents[2] / "distribution" / "whatsnew"
 errors = []
 for locale in LOCALES:

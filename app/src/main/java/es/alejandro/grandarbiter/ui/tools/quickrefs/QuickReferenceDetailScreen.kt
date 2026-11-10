@@ -226,7 +226,7 @@ private fun NoteCard(note: String) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Outlined.EditNote, null, tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Label(stringResource(R.string.qr_your_note))
+                Label(stringResource(R.string.qr_your_note), color = colors.onSurface)
             }
             Text(note, style = MaterialTheme.typography.bodyMedium, color = colors.onSurface)
         }

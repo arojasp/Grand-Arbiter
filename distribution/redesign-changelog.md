@@ -4,7 +4,7 @@ Running log of user-visible changes made during the redesign, one entry per step
 Plan: `claude/home-redesign-plan.md` in the Claude project.
 
 When the redesign is released: copy the **Play draft** below into
-`whatsnew/whatsnew-en-US` and `whatsnew/whatsnew-es-ES` (max 500 characters each, CI checks it)
+`whatsnew/whatsnew-en-US` (max 500 characters, CI checks it; Spanish dropped from 1.5, the app is English only)
 together with the versionCode/versionName bump, as usual. The `whatsnew` files are not touched on
 this branch, so it does not conflict with releases made from develop in the meantime.
 
@@ -109,3 +109,28 @@ Draft Timer: tus propios tiempos. Para drafts casuales, la nueva pantalla Times 
 | Times screen; Times section in the setup; tappable edge to edge; "Duration" | Booster and Two-Headed Giant: a Times section in the setup says whether the draft uses the MTR's times, custom ones or untimed picks, and opens the new Times screen: timed picks on or off, all picks ±5 s, one list per pack size with every pick editable, reviews and deck construction, and "Reset to MTR". | Booster y Two-Headed Giant: una sección Times en el setup indica si el draft usa los tiempos del MTR, unos propios o picks sin tiempo, y abre la nueva pantalla Times: picks con o sin tiempo, todos los picks ±5 s, una lista por tamaño de sobre con cada pick editable, revisiones, construcción y «Reset to MTR». |
 | Running an untimed draft | Untimed picks and reviews show the time spent and move on with one tap ("Next pick", "Start pack 2", "Start deck construction"); going back still needs a hold. Deck construction keeps its countdown. | Los picks y revisiones sin tiempo muestran el tiempo que llevan y avanzan con un toque («Next pick», «Start pack 2», «Start deck construction»); volver atrás sigue pidiendo mantener pulsado. La construcción mantiene su cuenta atrás. |
 | The setup keeps its changes without starting a draft | The setup remembers each format's packs and cards per pack as soon as you change them, even if you go back without starting a draft. | El setup recuerda los sobres y las cartas por sobre de cada formato en cuanto los cambias, aunque vuelvas atrás sin empezar el draft. |
+
+
+### Judge feedback (branch `feature/judge-feedback`)
+
+Feedback from judges after 1.4. Plan: `claude/judge-feedback-plan.md` in the Claude project.
+Release **1.5.0001 (versionCode 13)**. From this release the app's texts and notes are English only
+(one `whatsnew-en-US`; the rows below have no Spanish column). Play text, copied to `whatsnew/`:
+
+**en-US** (464 characters)
+
+Card Search understands Scryfall syntax (t:goblin o:haste…), and the new Advanced search builds it for you. Searches the app can't do offline go to Scryfall; turn off "Search Scryfall automatically" in Settings to send them only when you ask. Results show the mana cost. New in Banned & Restricted: your own lists for store or community formats, with each card banned, restricted or worth points. Paste a list as text or share it. Deck Counter now adds any number.
+
+| Commit | English |
+|---|---|
+| `c721bce` | Screens change with a short fade instead of the slow default animation. |
+| `93159b7` | Card Search: each result shows its mana cost on the right. |
+| `44f00ec`, `8d4c404`, `57bc493`, `0f333c4`, `5b6d1aa` | Card Search: the field takes Scryfall syntax (t:, o:, c:, mv and more), searched offline on the installed cards. The field waits until the cards are ready. |
+| `1eb23f5`, `f47cefa` | Card Search: what the offline search can't do (prints by set and number, and other Scryfall-only filters) is searched on Scryfall, in the same list. |
+| `d84fec9`, `add6567`, `3e767ca`, `3efa860` | Card Search: a new Advanced search form (name, rules text, type, colors, mana value, power, toughness, set and number) writes the syntax into the search field. Leaving it with changes asks first. |
+| `9a248f3`, `eda2734` | Settings › Card search: "Search Scryfall automatically". Off: searches that need Scryfall wait for a "Search on Scryfall" button. |
+| `26754e4`, `4094d01` | Deck Counter: add any number ("Other number…", up to 999) and repeat it with "+N again". |
+| `0f1d7b0`, `c3c8997`, `a0a0009`, `1201028` | Banned & Restricted: custom lists for your own formats, with each card banned, restricted or worth points. Create and edit them from the Banned & Restricted screen. |
+| `1510209`, `c248542`, `7867361` | Custom lists: paste a list as text ("3 Sol Ring", "Black Lotus restricted"…) and share a list in the same format. |
+| `e5805c8` | One "Discard changes?" dialog everywhere; no icons on the online search buttons. |
+| `ba63a42` | Section labels in sentence case instead of small capitals (Settings, card details, Banned, Draft Timer, HJ Announcement); in the Draft Timer setup and Times each label now sits above its card. Card details: "Pauper Commander" was shown as a second "Pauper" in the legality list. Banned: the loading message no longer touches the screen edges. |

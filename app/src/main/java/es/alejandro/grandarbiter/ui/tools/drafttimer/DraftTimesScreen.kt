@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.components.Section
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftTimes
 import org.koin.androidx.compose.koinViewModel
@@ -55,10 +56,10 @@ fun DraftTimesScreen(
     ) { innerPadding ->
         Column(
             Modifier.padding(innerPadding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            // Each card under its Label, outside it (as in Settings); 24 dp between groups.
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            DraftCard {
-                DraftLabel(stringResource(R.string.draft_times_section_picks))
+            Section(stringResource(R.string.draft_times_section_picks)) { DraftCard {
                 SettingRow(stringResource(R.string.draft_times_timed), stringResource(R.string.draft_times_timed_hint)) {
                     Switch(
                         checked = m.timedPicks, onCheckedChange = viewModel::setTimedPicks,
@@ -77,11 +78,10 @@ fun DraftTimesScreen(
                         Text(stringResource(R.string.draft_times_lists_hint), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                     }
                 }
-            }
+            } }
             if (m.timedPicks) {
                 m.lists.forEach { list ->
-                    DraftCard(Modifier, verticalSpacing = 4) {
-                        DraftLabel(stringResource(R.string.draft_times_list, list.packSize))
+                    Section(stringResource(R.string.draft_times_list, list.packSize)) { DraftCard(Modifier, verticalSpacing = 4) {
                         list.rows.forEach { row ->
                             val value = m.times.secondsFor(row)
                             val cards = stringResource(if (m.cardsPerPick > 1) R.string.draft_times_row_cards_take else R.string.draft_times_row_cards, row.cardsLeft)
@@ -91,11 +91,10 @@ fun DraftTimesScreen(
                                 StepperControl(label, value, DraftTimes.SECONDS, { viewModel.setPick(row, it) }, STEP_SECONDS, seconds)
                             }
                         }
-                    }
+                    } }
                 }
                 if (m.reviews.isNotEmpty()) {
-                    DraftCard(Modifier, verticalSpacing = 4) {
-                        DraftLabel(stringResource(R.string.draft_times_section_review))
+                    Section(stringResource(R.string.draft_times_section_review)) { DraftCard(Modifier, verticalSpacing = 4) {
                         m.reviews.forEach { review ->
                             val label = if (review.pack == DraftTimes.EVERY_REVIEW) stringResource(R.string.draft_times_review_every)
                                 else stringResource(R.string.draft_times_review_after, review.pack)
@@ -104,11 +103,10 @@ fun DraftTimesScreen(
                                 StepperControl(label, review.seconds, DraftTimes.SECONDS, { viewModel.setReview(review, it) }, REVIEW_STEP_SECONDS, seconds)
                             }
                         }
-                    }
+                    } }
                 }
             }
-            DraftCard(Modifier, verticalSpacing = 4) {
-                DraftLabel(stringResource(R.string.draft_construction))
+            Section(stringResource(R.string.draft_construction)) { DraftCard(Modifier, verticalSpacing = 4) {
                 val minutes = stringResource(R.string.draft_unit_minutes)
                 val label = stringResource(R.string.draft_times_construction_duration)
                 TimeRow(label,
@@ -117,7 +115,7 @@ fun DraftTimesScreen(
                     changed = m.constructionChanged) {
                     StepperControl(label, m.constructionMinutes, DraftConfig.CONSTRUCTION_MINUTES, viewModel::setConstructionMinutes, 1, minutes)
                 }
-            }
+            } }
             OutlinedButton(onClick = viewModel::resetToMtr, enabled = !m.isMtr, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.draft_times_reset))
             }

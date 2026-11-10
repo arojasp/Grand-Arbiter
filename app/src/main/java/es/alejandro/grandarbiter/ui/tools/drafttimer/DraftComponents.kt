@@ -29,7 +29,6 @@ import es.alejandro.grandarbiter.R
 import java.util.Locale
 import kotlin.math.ceil
 import es.alejandro.grandarbiter.ui.theme.softened
-import es.alejandro.grandarbiter.ui.components.LabelStyle
 
 /* Shared pieces of the Draft Timer screens (Figma section "Draft Timer", node 206:2). */
 
@@ -65,12 +64,6 @@ internal fun DraftCard(
         verticalArrangement = Arrangement.spacedBy(verticalSpacing.dp),
         content = content,
     )
-}
-
-/** Small uppercase label: "FORMAT", "UP NEXT"... Same style as the app's section labels. */
-@Composable
-internal fun DraftLabel(text: String, color: Color = MaterialTheme.colorScheme.primary) {
-    Text(text.uppercase(), style = LabelStyle, color = color)
 }
 
 /** Pill: "PACK 1 OF 3", "COMING SOON". */

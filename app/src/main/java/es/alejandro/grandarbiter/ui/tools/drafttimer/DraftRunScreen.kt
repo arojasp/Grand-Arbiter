@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.components.Label
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftPosition
 import es.alejandro.grandarbiter.domain.draft.DraftSnapshot
@@ -175,7 +176,7 @@ private fun LayOutContent(s: DraftSnapshot, p: DraftPosition.Running, step: Draf
     Countdown(stringResource(R.string.draft_layout_label), p, s.isRunning, waiting,
         stringResource(R.string.draft_layout_sub, formatDuration(step.durationMs)))
     DraftCard {
-        DraftLabel(stringResource(R.string.draft_up_next))
+        Label(stringResource(R.string.draft_up_next), color = colors.onSurface)
         Text(stringResource(R.string.draft_picks_first, step.opener), style = MaterialTheme.typography.titleLarge,
             color = colors.onSurface)
         // The way around the table: the other five seats; the last one takes two and the picks come back.
@@ -207,7 +208,7 @@ private fun RochesterPickContent(s: DraftSnapshot, p: DraftPosition.Running, ste
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        DraftLabel(stringResource(R.string.draft_now_picking), colors.onSurfaceVariant)
+        Label(stringResource(R.string.draft_now_picking))
         // Huge numerals: displayLarge sized per use, the one exception to literal sizes (design-decisions §9).
         Text(actor, style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp, lineHeight = 80.sp), color = colors.primary)
         Text(stringResource(R.string.draft_card_of, step.pick, s.config.cardsPerPack),
@@ -253,7 +254,7 @@ private fun PickContent(s: DraftSnapshot, p: DraftPosition.Running, step: DraftS
         step.durationMs?.let { stringResource(R.string.draft_of, formatDuration(it)) } ?: stringResource(R.string.draft_untimed_pick_sub))
     DraftCard {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            DraftLabel(stringResource(R.string.draft_pack_progress))
+            Label(stringResource(R.string.draft_pack_progress), color = MaterialTheme.colorScheme.onSurface)
             Text(stringResource(R.string.draft_pick_of, step.pick, picksInPack),
                 style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -272,7 +273,7 @@ private fun ReviewContent(s: DraftSnapshot, p: DraftPosition.Running, step: Draf
     Countdown(stringResource(R.string.draft_review_label), p, s.isRunning, waiting,
         step.durationMs?.let { stringResource(R.string.draft_of, formatDuration(it)) } ?: stringResource(R.string.draft_untimed_review_sub))
     DraftCard {
-        DraftLabel(stringResource(R.string.draft_up_next))
+        Label(stringResource(R.string.draft_up_next), color = colors.onSurface)
         Text(stringResource(R.string.draft_pack_n, step.nextPack), style = MaterialTheme.typography.titleLarge,
             color = colors.onSurface)
         Text(directionText(step.nextDirection), style = MaterialTheme.typography.titleSmall, color = colors.primary)
@@ -296,7 +297,7 @@ private fun ConstructionContent(s: DraftSnapshot, p: DraftPosition.Running, wait
     )
     Countdown(stringResource(R.string.draft_construction), p, s.isRunning, waiting, stringResource(R.string.draft_of, formatClock(s.config.constructionMinutes * 60_000L)), size = 80)
     DraftCard {
-        DraftLabel(stringResource(R.string.draft_when_time_is_up))
+        Label(stringResource(R.string.draft_when_time_is_up), color = colors.onSurface)
         Text(stringResource(R.string.draft_when_time_is_up_text), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
     }
 }
@@ -314,7 +315,7 @@ private fun TimeUpContent(s: DraftSnapshot) {
     // Rochester picks end on "Picked": the timeline counts each at its 5 s maximum, so these are upper bounds.
     val bound = if (s.config.format == DraftFormat.ROCHESTER) "≤ " else ""
     DraftCard {
-        DraftLabel(stringResource(R.string.draft_summary))
+        Label(stringResource(R.string.draft_summary), color = colors.onSurface)
         // Untimed picks: the app doesn't know how long they took.
         val untimed = !s.config.times.timedPicks
         SummaryRow(pluralStringResource(R.plurals.draft_summary_draft, s.config.totalPacks, s.config.totalPacks),
@@ -414,7 +415,7 @@ private fun CountdownFrame(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        DraftLabel(label, labelColor)
+        Label(label, color = labelColor)
         Text(time, style = MaterialTheme.typography.displayLarge.copy(fontSize = size.sp, lineHeight = (size + 8).sp, letterSpacing = (-2).sp, fontFeatureSettings = "tnum"), color = color)
         if (fraction != null) DraftProgress(fraction)
         Text(sub, style = MaterialTheme.typography.bodySmall, color = subColor, textAlign = TextAlign.Center)

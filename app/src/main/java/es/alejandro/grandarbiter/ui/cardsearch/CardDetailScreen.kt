@@ -8,6 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -289,8 +291,9 @@ private fun LegalityBlock(legalities: List<FormatLegality>) {
     Section(stringResource(R.string.cards_legality)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             legalities.chunked(2).forEach { pair ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    pair.forEach { LegalityItem(it, Modifier.weight(1f)) }
+                // Both cells as tall as the taller one when a name wraps (Pauper Commander).
+                Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    pair.forEach { LegalityItem(it, Modifier.weight(1f).fillMaxHeight()) }
                     if (pair.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
@@ -319,9 +322,10 @@ private fun LegalityItem(item: FormatLegality, modifier: Modifier) {
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // Wraps, never clipped: with maxLines = 1 and no ellipsis, "Pauper Commander" read as "Pauper".
         Text(CardText.formatName(item.format),
             style = MaterialTheme.typography.labelLarge,
-            color = colors.onSurface, maxLines = 1, modifier = Modifier.weight(1f))
+            color = colors.onSurface, modifier = Modifier.weight(1f).padding(top = 8.dp, bottom = 8.dp, end = 4.dp))
         Tag(stringResource(label), container, content)
     }
 }

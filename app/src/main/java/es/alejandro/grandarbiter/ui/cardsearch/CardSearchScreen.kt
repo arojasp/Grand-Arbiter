@@ -47,7 +47,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
@@ -277,12 +276,12 @@ private fun offlineLabel(count: Int): String =
     if (count >= CardSearchViewModel.LIMIT) stringResource(R.string.cards_found_many, CardSearchViewModel.LIMIT)
     else pluralStringResource(R.plurals.cards_found, count, count)
 
-/** "4 CARDS FOUND" / "23 CARDS ON SCRYFALL · ONLINE". */
+/** "4 cards found" / "23 cards on Scryfall · online": a plain caption, as the string reads. */
 @Composable
 private fun ResultsMeta(label: String) {
     Text(
-        label.uppercase(),
-        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.55.sp),
+        label,
+        style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,   // was onSurface at 0.6 alpha (no alpha on text)
         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp),
     )
@@ -421,8 +420,8 @@ private fun EndOfRecords(text: String, modifier: Modifier = Modifier) {
     ) {
         Icon(Icons.AutoMirrored.Outlined.MenuBook, null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(56.dp))
         Text(
-            text.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.5.sp),
+            text,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp),

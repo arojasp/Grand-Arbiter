@@ -53,6 +53,7 @@ import es.alejandro.grandarbiter.ui.components.Tag
 import es.alejandro.grandarbiter.ui.components.groupedItem
 import es.alejandro.grandarbiter.ui.reader.ReaderSearchField
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.ui.text.style.TextAlign
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -113,9 +114,11 @@ fun BannedListsScreen(
             val list = views
             when {
                 list == null -> Box(Modifier.fillMaxSize().padding(bottom = 48.dp), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Same as Card Search's: 32 dp from the edges, centered.
+                    Column(Modifier.padding(horizontal = 32.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         CircularProgressIndicator()
-                        Text(stringResource(R.string.cards_preparing), color = colors.onSurfaceVariant)
+                        Text(stringResource(R.string.cards_preparing), color = colors.onSurfaceVariant, textAlign = TextAlign.Center)
                     }
                 }
                 list.isEmpty() && custom.isEmpty() -> Text(stringResource(R.string.cards_no_results), color = colors.onSurfaceVariant,

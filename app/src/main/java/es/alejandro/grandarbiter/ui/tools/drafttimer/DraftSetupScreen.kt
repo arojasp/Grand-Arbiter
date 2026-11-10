@@ -37,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.components.Section
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftEstimate
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
@@ -75,10 +76,10 @@ fun DraftSetupScreen(
     ) { innerPadding ->
         Column(
             Modifier.padding(innerPadding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            // Each card under its Label, outside it (as in Settings); 24 dp between groups.
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            DraftCard {
-                DraftLabel(stringResource(R.string.draft_section_format))
+            Section(stringResource(R.string.draft_section_format)) { DraftCard {
                 val rochester = viewModel.format == DraftFormat.ROCHESTER
                 if (rochester) {
                     // MTR 8.5: Player B of the team that picks first lays out the first pack.
@@ -119,24 +120,24 @@ fun DraftSetupScreen(
                         config.constructionMinutes, DraftConfig.CONSTRUCTION_MINUTES, viewModel::setConstructionMinutes,
                         unit = stringResource(R.string.draft_unit_minutes))
                 }
-            }
+            } }
             times?.let { t ->
-                TimesCard(t, onOpen = { onOpenTimes(viewModel.format, (1..config.packs).map(config::cardsInPack)) }, onReset = viewModel::resetTimes)
+                Section(stringResource(R.string.draft_section_times)) {
+                    TimesCard(t, onOpen = { onOpenTimes(viewModel.format, (1..config.packs).map(config::cardsInPack)) }, onReset = viewModel::resetTimes)
+                }
             }
             // Untimed picks: "Manual start" would only affect the end of deck construction, the last step.
             if (times?.timedPicks != false) {
-                DraftCard {
-                    DraftLabel(stringResource(R.string.draft_section_timer))
+                Section(stringResource(R.string.draft_section_timer)) { DraftCard {
                     SettingRow(stringResource(R.string.draft_manual_start), stringResource(R.string.draft_manual_start_hint)) {
                         Switch(
                             checked = config.manualStart, onCheckedChange = { viewModel.setManualStart(it) },
                             colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                         )
                     }
-                }
+                } }
             }
-            DraftCard {
-                DraftLabel(stringResource(R.string.draft_section_alerts))
+            Section(stringResource(R.string.draft_section_alerts)) { DraftCard {
                 SettingRow(stringResource(R.string.draft_vibrate), stringResource(R.string.draft_vibrate_hint)) {
                     Switch(
                         checked = vibrate, onCheckedChange = { viewModel.setVibrate(it) },
@@ -150,8 +151,10 @@ fun DraftSetupScreen(
                         colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                     )
                 }
+            } }
+            estimate?.let { e ->
+                Section(stringResource(if (e.atMost) R.string.draft_section_estimate_at_most else R.string.draft_section_estimate)) { EstimateCard(e) }
             }
-            estimate?.let { EstimateCard(it) }
         }
     }
 }
@@ -187,7 +190,6 @@ private fun TimesCard(t: DraftTimesModel, onOpen: () -> Unit, onReset: () -> Uni
             Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onOpen).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            DraftLabel(stringResource(R.string.draft_section_times))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(title, style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
@@ -216,7 +218,6 @@ private fun PackSize(label: String, hint: String?, value: Int, range: IntRange, 
 private fun EstimateCard(e: DraftEstimate) {
     val colors = MaterialTheme.colorScheme
     DraftCard {
-        DraftLabel(stringResource(if (e.atMost) R.string.draft_section_estimate_at_most else R.string.draft_section_estimate))
         if (e.layOutSeconds.isNotEmpty()) {
             // Rochester: every pack reviewed once laid out, then picks of 5 s AT MOST (they end on "Picked").
             EstimateRow(stringResource(R.string.draft_estimate_layout, e.layOutSeconds.size, e.layOutSeconds.first()),

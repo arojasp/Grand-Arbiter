@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -83,6 +85,11 @@ internal fun CustomListItem(
                     TextButton(onClick = onEdit, modifier = Modifier.heightIn(min = 48.dp)) {
                         Icon(Icons.Outlined.Edit, null, Modifier.size(18.dp))
                         Text(stringResource(R.string.custom_edit), Modifier.padding(start = 8.dp))
+                    }
+                    val context = LocalContext.current
+                    TextButton(onClick = { shareCustomList(context, list) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                        Icon(Icons.Outlined.Share, null, Modifier.size(18.dp))
+                        Text(stringResource(R.string.custom_share), Modifier.padding(start = 8.dp))
                     }
                 }
             }

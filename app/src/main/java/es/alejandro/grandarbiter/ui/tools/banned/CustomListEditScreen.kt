@@ -71,6 +71,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
+import es.alejandro.grandarbiter.domain.model.customlists.CustomList
 import es.alejandro.grandarbiter.domain.model.customlists.CustomListEntry
 import es.alejandro.grandarbiter.domain.model.customlists.ListStatus
 import es.alejandro.grandarbiter.ui.cardsearch.ManaCostSymbols
@@ -160,6 +161,7 @@ private fun EditContent(
     val colors = MaterialTheme.colorScheme
     var menu by remember { mutableStateOf(false) }
     var pointsFor by remember { mutableStateOf<CustomListEntry?>(null) }
+    val context = LocalContext.current
     Scaffold(
         containerColor = colors.background,
         snackbarHost = { SnackbarHost(snackbar) },
@@ -178,6 +180,11 @@ private fun EditContent(
                     if (!isNew) Box {
                         IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, stringResource(R.string.custom_more)) }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                            // What's on screen, saved or not: the judge sees what gets sent.
+                            DropdownMenuItem(text = { Text(stringResource(R.string.custom_share)) }, onClick = {
+                                menu = false
+                                shareCustomList(context, CustomList(null, form.name, form.note, form.entries))
+                            })
                             DropdownMenuItem(text = { Text(stringResource(R.string.custom_delete_list)) }, onClick = { menu = false; onDelete() })
                         }
                     }

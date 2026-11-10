@@ -207,6 +207,7 @@
     <string name="custom_lists">Custom lists</string>
     <string name="custom_new_list">New list</string>
     <string name="custom_edit">Edit</string>
+    <string name="custom_share">Share</string>
     <plurals name="custom_points">
         <item quantity="one">%d point</item>
         <item quantity="other">%d points</item>

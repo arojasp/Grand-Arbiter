@@ -53,7 +53,6 @@ import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.ui.components.Tag
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.runtime.LaunchedEffect
@@ -301,8 +300,6 @@ private fun InfoPanel(title: String, body: String?, action: String? = null, onAc
                 body?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 if (action != null) {
                     OutlinedButton(onClick = onAction, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                        Icon(Icons.Outlined.Language, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
                         Text(action, style = MaterialTheme.typography.labelLarge)
                     }
                 }

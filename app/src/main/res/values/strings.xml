@@ -357,7 +357,7 @@
     <string name="qr_delete">Delete reference</string>
     <string name="qr_delete_title">Delete \u201c%1$s\u201d?</string>
     <string name="qr_delete_message">The reference and your notes will be deleted. Built-in references can be restored later, but without your notes.</string>
-    <string name="qr_discard_title">Discard your changes?</string>
+    <string name="qr_discard_title">Discard changes?</string>
     <string name="qr_discard">Discard</string>
     <string name="qr_keep_editing">Keep editing</string>
 

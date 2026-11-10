@@ -18,8 +18,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -67,6 +65,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
@@ -180,7 +179,7 @@ private fun EditContent(
                     if (!isNew) Box {
                         IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, stringResource(R.string.custom_more)) }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                            // What's on screen, saved or not: the judge sees what gets sent.
+                            // Shares the form as it is now, saved or not.
                             DropdownMenuItem(text = { Text(stringResource(R.string.custom_share)) }, onClick = {
                                 menu = false
                                 shareCustomList(context, CustomList(null, form.name, form.note, form.entries))
@@ -223,12 +222,10 @@ private fun EditContent(
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = onAdd, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                        Icon(Icons.Outlined.Add, null)
-                        Text(stringResource(R.string.custom_add_card), Modifier.padding(start = 8.dp))
+                        Text(stringResource(R.string.custom_add_card))
                     }
                     OutlinedButton(onClick = onPaste, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                        Icon(Icons.Outlined.ContentPaste, null)
-                        Text(stringResource(R.string.custom_paste_list), Modifier.padding(start = 8.dp))
+                        Text(stringResource(R.string.custom_paste_list))
                     }
                 }
             }
@@ -266,7 +263,7 @@ private fun EntryEditRow(entry: CustomListEntry, onStatus: (ListStatus) -> Unit,
         Text(entry.name, style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f))
         Box {
-            OutlinedButton(onClick = { menu = true }, contentPadding = PaddingValues(start = 12.dp, end = 8.dp),
+            TextButton(onClick = { menu = true }, contentPadding = PaddingValues(start = 12.dp, end = 4.dp),
                 modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = description }) {
                 Text(label, style = MaterialTheme.typography.labelLarge)
                 Icon(Icons.Filled.ArrowDropDown, null)
@@ -327,12 +324,17 @@ private fun AddCardContent(viewModel: CustomListEditViewModel, form: CustomListF
             LaunchedEffect(Unit) { focus.requestFocus() }
             ReaderSearchField(query, viewModel::setQuery, Modifier.padding(horizontal = 16.dp, vertical = 8.dp).focusRequester(focus),
                 placeholder = stringResource(R.string.custom_search_placeholder))
+            val answered = results.query == query.trim() && query.trim().length >= CustomListEditViewModel.MIN_QUERY
+            if (answered && results.cards.isEmpty()) {
+                Text(stringResource(R.string.cards_no_results), color = colors.onSurfaceVariant,
+                    textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(32.dp))
+            }
             LazyColumn(Modifier.fillMaxSize().imePadding()) {
-                items(results, key = { it.oracleId }) { card ->
+                items(results.cards, key = { it.oracleId }) { card ->
                     Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button) { picking = card }
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(card.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        Text(card.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f))
                         inList[card.oracleId]?.let { StatusTag(it.status) }
                         card.manaCost?.takeIf { it.isNotBlank() }?.let { ManaCostSymbols(it, size = 16.dp) }

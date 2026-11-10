@@ -37,6 +37,8 @@ data class CustomListForm(val name: String = "", val note: String = "", val entr
     val canSave: Boolean get() = name.isNotBlank()
 }
 
+data class AddCardResults(val query: String, val cards: List<CardSummary>)
+
 sealed interface CustomListEvent {
     data object Done : CustomListEvent
 }
@@ -62,11 +64,20 @@ class CustomListEditViewModel(
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
 
-    /** Cards on the phone whose name matches [query] (tokens left out: lists are about real cards). */
-    val results: StateFlow<List<CardSummary>> = _query.debounce(150).mapLatest { q ->
-        if (q.trim().length < 2) emptyList()
-        else (cards.search(q.trim(), limit = 50) as? CardSearchResult.Offline)?.cards.orEmpty().filterNot { it.isToken }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    /**
+     * Cards on the phone whose name matches [query] (tokens left out: lists are about real cards),
+     * with the query they answer: "no cards" is only shown once the current query has an answer.
+     */
+    val results: StateFlow<AddCardResults> = _query.debounce(150).mapLatest { q ->
+        val trimmed = q.trim()
+        val cards = if (trimmed.length < MIN_QUERY) emptyList()
+        else (cards.search(trimmed, limit = 50) as? CardSearchResult.Offline)?.cards.orEmpty().filterNot { it.isToken }
+        AddCardResults(trimmed, cards)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AddCardResults("", emptyList()))
+
+    companion object {
+        const val MIN_QUERY = 2
+    }
 
     init {
         viewModelScope.launch {

@@ -63,6 +63,7 @@ class CardSearchViewModelTest {
         }
 
         override suspend fun card(oracleId: String): CardDetail? = null
+        override suspend fun findByName(name: String): CardSummary? = null
         override fun observeDataInfo(): Flow<CardDataInfo?> = info
         override fun observeImportProgress(): Flow<Int?> = importing
         override fun observeBanLists(): Flow<List<FormatBanList>> = flowOf(emptyList())

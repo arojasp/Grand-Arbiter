@@ -128,6 +128,16 @@ interface CardsDao {
     @Query("SELECT * FROM cards_meta WHERE id = 0")
     suspend fun meta(): CardsMetaEntity?
 
+    /** Exact name, any case; else the card whose first face has that name. A full-name match wins. */
+    @Query(
+        """
+        SELECT oracleId, name, manaCost, typeLine, isToken FROM card
+        WHERE isToken = 0 AND (name = :name COLLATE NOCASE OR name LIKE :name || ' // %')
+        ORDER BY (name = :name COLLATE NOCASE) DESC, name LIMIT 1
+        """
+    )
+    suspend fun findByName(name: String): CardHit?
+
     /** Cards banned or restricted in at least one paper format (a few hundred rows). */
     @Query(
         "SELECT oracleId, name, legalities, typeLine, oracleText, setType FROM card " +

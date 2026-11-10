@@ -7,6 +7,7 @@ import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.domain.model.customlists.CustomList
 import es.alejandro.grandarbiter.domain.model.customlists.CustomListEntry
+import es.alejandro.grandarbiter.domain.model.customlists.CustomListImport
 import es.alejandro.grandarbiter.domain.model.customlists.ListStatus
 import es.alejandro.grandarbiter.domain.repository.CardRepository
 import es.alejandro.grandarbiter.domain.repository.CustomListRepository
@@ -90,6 +91,16 @@ class CustomListEditViewModel(
     }
 
     fun remove(oracleId: String) = change { f -> f.copy(entries = f.entries.filterNot { it.oracleId == oracleId }) }
+
+    /** Adds the pasted cards that exist (a card already in the list is updated); [onDone] gets the rest. */
+    fun paste(text: String, onDone: (added: Int, notFound: List<String>) -> Unit) {
+        viewModelScope.launch {
+            val result = CustomListImport.resolve(text) { cards.findByName(it) }
+            val ids = result.found.map { it.oracleId }.toSet()
+            change { f -> f.copy(entries = f.entries.filterNot { it.oracleId in ids } + result.found) }
+            onDone(result.found.size, result.notFound)
+        }
+    }
 
     fun save() {
         val f = _form.value?.takeIf { it.canSave } ?: return

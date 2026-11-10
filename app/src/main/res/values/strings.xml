@@ -235,6 +235,26 @@
     <string name="custom_search_placeholder">Card name</string>
     <string name="custom_add">Add</string>
     <string name="custom_update">Update</string>
+    <string name="custom_paste_list">Paste list</string>
+    <string name="custom_paste_field">Cards</string>
+    <string name="custom_paste_format">One card per line. A number before or after the name sets its points; “banned” or “restricted” after the name sets that. A name alone counts as banned.</string>
+    <string name="custom_add_cards">Add cards</string>
+    <plurals name="custom_detected">
+        <item quantity="one">%d card detected</item>
+        <item quantity="other">%d cards detected</item>
+    </plurals>
+    <plurals name="custom_added">
+        <item quantity="one">%d card added</item>
+        <item quantity="other">%d cards added</item>
+    </plurals>
+    <plurals name="custom_not_found">
+        <item quantity="one">%d line not found.</item>
+        <item quantity="other">%d lines not found.</item>
+    </plurals>
+    <plurals name="custom_rest_added">
+        <item quantity="one">The other card is already in the list.</item>
+        <item quantity="other">The other %d cards are already in the list.</item>
+    </plurals>
     <string name="tools_quick_references_desc">Layers, stack order, combat steps and more</string>
 
     <!-- Head Judge announcement -->

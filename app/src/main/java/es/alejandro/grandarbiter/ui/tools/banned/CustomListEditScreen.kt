@@ -19,7 +19,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.rememberCoroutineScope
+import es.alejandro.grandarbiter.domain.model.customlists.CustomListText
+import kotlinx.coroutines.launch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -49,6 +57,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
@@ -80,25 +89,35 @@ fun CustomListEditScreen(
     val form by viewModel.form.collectAsState()
     val initial by viewModel.initial.collectAsState()
     var adding by rememberSaveable { mutableStateOf(false) }
+    var pasting by rememberSaveable { mutableStateOf(false) }
     var confirmDiscard by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     val changed = form != null && form != initial
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val resources = LocalContext.current.resources
 
     LaunchedEffect(viewModel) { viewModel.eventFlow.collect { onClose() } }
     BackHandler(enabled = adding) { adding = false }
-    BackHandler(enabled = !adding && changed) { confirmDiscard = true }
+    BackHandler(enabled = pasting) { pasting = false }
+    BackHandler(enabled = !adding && !pasting && changed) { confirmDiscard = true }
 
     val current = form ?: return
-    if (adding) {
-        AddCardContent(viewModel, current, onBack = { adding = false }, onAdded = { adding = false })
-    } else {
-        EditContent(
+    when {
+        adding -> AddCardContent(viewModel, current, onBack = { adding = false }, onAdded = { adding = false })
+        pasting -> PasteContent(viewModel, snackbar, onBack = { pasting = false }, onAllAdded = { added ->
+            pasting = false
+            scope.launch { snackbar.showSnackbar(resources.getQuantityString(R.plurals.custom_added, added, added)) }
+        })
+        else -> EditContent(
             form = current,
             isNew = viewModel.id == null,
             title = initial?.name?.takeIf { it.isNotBlank() },
+            snackbar = snackbar,
             onBack = { if (changed) confirmDiscard = true else onClose() },
             onDelete = { confirmDelete = true },
             onAdd = { viewModel.setQuery(""); adding = true },
+            onPaste = { pasting = true },
             viewModel = viewModel,
         )
     }
@@ -131,9 +150,11 @@ private fun EditContent(
     form: CustomListForm,
     isNew: Boolean,
     title: String?,
+    snackbar: SnackbarHostState,
     onBack: () -> Unit,
     onDelete: () -> Unit,
     onAdd: () -> Unit,
+    onPaste: () -> Unit,
     viewModel: CustomListEditViewModel,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -141,6 +162,7 @@ private fun EditContent(
     var pointsFor by remember { mutableStateOf<CustomListEntry?>(null) }
     Scaffold(
         containerColor = colors.background,
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 navigationIcon = {
@@ -192,9 +214,15 @@ private fun EditContent(
                     style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant, modifier = Modifier.padding(top = 12.dp))
             }
             item {
-                OutlinedButton(onClick = onAdd, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                    Icon(Icons.Outlined.Add, null)
-                    Text(stringResource(R.string.custom_add_card), Modifier.padding(start = 8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = onAdd, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                        Icon(Icons.Outlined.Add, null)
+                        Text(stringResource(R.string.custom_add_card), Modifier.padding(start = 8.dp))
+                    }
+                    OutlinedButton(onClick = onPaste, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                        Icon(Icons.Outlined.ContentPaste, null)
+                        Text(stringResource(R.string.custom_paste_list), Modifier.padding(start = 8.dp))
+                    }
                 }
             }
             items(form.sorted, key = { it.oracleId }) { entry ->
@@ -313,6 +341,102 @@ private fun AddCardContent(viewModel: CustomListEditViewModel, form: CustomListF
             viewModel.put(card.oracleId, card.name, status)
             picking = null
             onAdded()
+        }
+    }
+}
+
+/**
+ * Paste a list. What's found goes into the list at once; lines that match no card stay in the
+ * field (marked as an error) to fix and add again. All found: back to the editor with a snackbar.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PasteContent(
+    viewModel: CustomListEditViewModel,
+    snackbar: SnackbarHostState,
+    onBack: () -> Unit,
+    onAllAdded: (Int) -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val scope = rememberCoroutineScope()
+    val resources = LocalContext.current.resources
+    var text by rememberSaveable { mutableStateOf("") }
+    /** After an Add with lines left: how many cards that Add put in the list (null = no Add yet). */
+    var addedBefore by rememberSaveable { mutableStateOf<Int?>(null) }
+    var notFoundCount by rememberSaveable { mutableStateOf(0) }
+    var busy by remember { mutableStateOf(false) }
+    val detected = remember(text) { CustomListText.parse(text).size }
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focus.requestFocus() }
+
+    Scaffold(
+        containerColor = colors.background,
+        snackbarHost = { SnackbarHost(snackbar) },
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.reader_back), tint = colors.primary)
+                    }
+                },
+                title = { Text(stringResource(R.string.custom_paste_list), style = MaterialTheme.typography.titleLarge, color = colors.primary) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background),
+            )
+        },
+        bottomBar = {
+            Surface(color = colors.surfaceContainerLow, border = highContrastBorder(), modifier = Modifier.imePadding()) {
+                Button(
+                    onClick = {
+                        busy = true
+                        viewModel.paste(text) { added, notFound ->
+                            busy = false
+                            if (notFound.isEmpty()) {
+                                onAllAdded(added)
+                            } else {
+                                text = notFound.joinToString("\n")
+                                addedBefore = added
+                                notFoundCount = notFound.size
+                                if (added > 0) scope.launch {
+                                    snackbar.showSnackbar(resources.getQuantityString(R.plurals.custom_added, added, added))
+                                }
+                            }
+                        }
+                    },
+                    enabled = detected > 0 && !busy,
+                    modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp).heightIn(min = 56.dp),
+                ) {
+                    Text(stringResource(R.string.custom_add_cards), style = MaterialTheme.typography.titleMedium)
+                }
+            }
+        },
+    ) { padding ->
+        Column(
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        ) {
+            val failed = addedBefore != null
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text(stringResource(R.string.custom_paste_field)) },
+                isError = failed,
+                minLines = 8,
+                // Card names aren't dictionary words: the keyboard must not "fix" them.
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false),
+                modifier = Modifier.fillMaxWidth().focusRequester(focus),
+                supportingText = {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        if (failed) {
+                            Text(buildString {
+                                append(pluralStringResource(R.plurals.custom_not_found, notFoundCount, notFoundCount))
+                                addedBefore?.takeIf { it > 0 }?.let { append(' ').append(pluralStringResource(R.plurals.custom_rest_added, it, it)) }
+                            })
+                        } else {
+                            Text(stringResource(R.string.custom_paste_format))
+                        }
+                        Text(pluralStringResource(R.plurals.custom_detected, detected, detected), color = colors.onSurface)
+                    }
+                },
+            )
         }
     }
 }

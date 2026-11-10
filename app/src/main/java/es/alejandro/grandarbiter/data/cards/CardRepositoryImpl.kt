@@ -45,6 +45,11 @@ class CardRepositoryImpl(
         }
     }
 
+    override suspend fun findByName(name: String): CardSummary? =
+        name.trim().takeIf { it.isNotEmpty() }?.let { n ->
+            dao.findByName(n)?.let { CardSummary(it.oracleId, it.name, it.manaCost, it.typeLine, it.isToken) }
+        }
+
     override suspend fun card(oracleId: String): CardDetail? {
         val entity = dao.card(oracleId) ?: return null
         return CardMapper.toDetail(entity, dao.rulings(oracleId))

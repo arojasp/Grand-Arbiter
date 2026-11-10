@@ -64,6 +64,7 @@ import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.domain.model.customlists.CustomListEntry
 import es.alejandro.grandarbiter.domain.model.customlists.ListStatus
+import es.alejandro.grandarbiter.ui.cardsearch.ManaCostSymbols
 import es.alejandro.grandarbiter.ui.reader.ReaderSearchField
 import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 import es.alejandro.grandarbiter.ui.tools.drafttimer.Choice
@@ -296,8 +297,10 @@ private fun AddCardContent(viewModel: CustomListEditViewModel, form: CustomListF
                     Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button) { picking = card }
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(card.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                        Text(card.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f))
                         inList[card.oracleId]?.let { StatusTag(it.status) }
+                        card.manaCost?.takeIf { it.isNotBlank() }?.let { ManaCostSymbols(it, size = 16.dp) }
                     }
                     HorizontalDivider(color = colors.outlineVariant)
                 }

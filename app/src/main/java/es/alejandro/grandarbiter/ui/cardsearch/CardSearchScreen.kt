@@ -36,7 +36,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
@@ -411,18 +410,21 @@ private fun IdleState(ready: CardDataState.Ready) {
     EndOfRecords(text, Modifier.padding(top = 48.dp))
 }
 
-/** Figma "Decorative Authority Element": open book + caption, 20% opacity. */
+/**
+ * Open book + caption, under the results and on the empty state. The book is decoration, in the
+ * faint outlineVariant; the caption is information (card count, data date) and stays readable.
+ */
 @Composable
 private fun EndOfRecords(text: String, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.fillMaxWidth().alpha(0.2f).padding(horizontal = 16.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(Icons.AutoMirrored.Outlined.MenuBook, null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(56.dp))
+        Icon(Icons.AutoMirrored.Outlined.MenuBook, null, tint = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.size(56.dp))
         Text(
             text,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp),
         )

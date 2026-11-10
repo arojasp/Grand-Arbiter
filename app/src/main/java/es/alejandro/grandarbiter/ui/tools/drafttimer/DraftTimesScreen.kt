@@ -33,6 +33,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.ui.components.Section
+import es.alejandro.grandarbiter.ui.components.SettingRow
+import es.alejandro.grandarbiter.ui.components.StepperControl
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftTimes
 import org.koin.androidx.compose.koinViewModel

@@ -1,4 +1,4 @@
-package es.alejandro.grandarbiter.ui.tools.drafttimer
+package es.alejandro.grandarbiter.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,7 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 
-/* Setting rows and value controls of the Draft Timer setup and Times screens. */
+/* Setting rows and value controls: Draft Timer setup and Times, Advanced search, custom list points. */
 
 /** A setting: label, optional hint below it, and its control on the right. */
 @Composable
@@ -94,11 +94,11 @@ internal fun StepperControl(
         Modifier.clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        StepButton("−", stringResource(R.string.draft_decrease, label), enabled = value > range.first) {
+        StepButton("−", stringResource(R.string.value_decrease, label), enabled = value > range.first) {
             onChange((value - step).coerceIn(range))
         }
         val text = if (unit != null) "$value $unit" else value.toString()
-        val typeLabel = stringResource(R.string.draft_type_value, label)
+        val typeLabel = stringResource(R.string.value_type, label)
         Box(
             Modifier.width(if (unit != null) 64.dp else 56.dp).height(36.dp)
                 .then(if (unit != null) Modifier.clip(CircleShape).clickable(role = Role.Button, onClickLabel = typeLabel) { typing = true } else Modifier),
@@ -107,7 +107,7 @@ internal fun StepperControl(
             Text(text, textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleSmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurface)
         }
-        StepButton("+", stringResource(R.string.draft_increase, label), enabled = value < range.last) {
+        StepButton("+", stringResource(R.string.value_increase, label), enabled = value < range.last) {
             onChange((value + step).coerceIn(range))
         }
     }
@@ -136,15 +136,15 @@ private fun NumberDialog(title: String, value: Int, range: IntRange, unit: Strin
                 modifier = Modifier.focusRequester(focus),
                 singleLine = true,
                 suffix = { Text(unit) },
-                supportingText = { Text(stringResource(R.string.draft_value_range, range.first, range.last, unit)) },
+                supportingText = { Text(stringResource(R.string.value_range, range.first, range.last, unit)) },
                 isError = parsed == null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
             )
         },
         confirmButton = {
-            TextButton(onClick = { parsed?.let(onSet) }, enabled = parsed != null) { Text(stringResource(R.string.draft_set)) }
+            TextButton(onClick = { parsed?.let(onSet) }, enabled = parsed != null) { Text(stringResource(R.string.value_set)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.draft_cancel)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.value_cancel)) } },
     )
 }
 

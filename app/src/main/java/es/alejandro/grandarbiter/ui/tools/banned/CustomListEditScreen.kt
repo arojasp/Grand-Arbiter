@@ -76,8 +76,8 @@ import es.alejandro.grandarbiter.domain.model.customlists.ListStatus
 import es.alejandro.grandarbiter.ui.cardsearch.ManaCostSymbols
 import es.alejandro.grandarbiter.ui.reader.ReaderSearchField
 import es.alejandro.grandarbiter.ui.theme.highContrastBorder
-import es.alejandro.grandarbiter.ui.tools.drafttimer.Choice
-import es.alejandro.grandarbiter.ui.tools.drafttimer.StepperControl
+import es.alejandro.grandarbiter.ui.components.Choice
+import es.alejandro.grandarbiter.ui.components.StepperControl
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

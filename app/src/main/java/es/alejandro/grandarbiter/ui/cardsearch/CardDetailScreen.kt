@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.tools.banned.StatusTag
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
 import es.alejandro.grandarbiter.domain.model.cards.CardFace
 import es.alejandro.grandarbiter.domain.model.cards.CardRuling
@@ -122,14 +123,14 @@ fun CardDetailScreen(
                 CardDetailState.NotFound -> Centered {
                     Text(stringResource(R.string.cards_not_found), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                is CardDetailState.Loaded -> CardDetailContent(s.card)
+                is CardDetailState.Loaded -> CardDetailContent(s.card, s.lists)
             }
         }
     }
 }
 
 @Composable
-private fun CardDetailContent(card: CardDetail) {
+private fun CardDetailContent(card: CardDetail, lists: List<ListOnCard>) {
     LazyColumn(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -138,6 +139,7 @@ private fun CardDetailContent(card: CardDetail) {
         item { OracleBlock(card) }
         item { RulingsBlock(card.rulings) }
         if (!card.isToken) item { LegalityBlock(card.legalities) }
+        if (lists.isNotEmpty()) item { CustomListsBlock(lists) }
         val arts = artsOf(card)
         if (arts.isNotEmpty()) item { ArtBlock(arts) }
         item { Attribution(card.scryfallUrl) }
@@ -329,23 +331,52 @@ private fun LegalityItem(item: FormatLegality, modifier: Modifier) {
         Legality.BANNED -> bannedTagColors().let { (bg, fg) -> Triple(bg, fg, R.string.legality_banned) }
         Legality.NOT_LEGAL -> Triple(colors.errorContainer, colors.error, R.string.legality_not_legal)
     }
+    // Banned stays at full strength: it matters more than "not legal" to a judge. The "Not legal"
+    // tag tells the state; dimming is extra, so high contrast drops it (design-decisions 1).
+    StatusCell(CardText.formatName(item.format), modifier, dimmed = item.legality == Legality.NOT_LEGAL) {
+        Tag(stringResource(label), container, content)
+    }
+}
+
+/** One cell of the legality grid: a name and its status tag. Also used by the custom lists block. */
+@Composable
+private fun StatusCell(name: String, modifier: Modifier, dimmed: Boolean = false, tag: @Composable () -> Unit) {
+    val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(8.dp)
     Row(
         modifier = modifier
-            .heightIn(min = 40.dp)   // grows with Settings › Text size
-            // Banned stays at full strength: it matters more than "not legal" to a judge. The "Not legal"
-            // tag tells the state; dimming is extra, so high contrast drops it (design-decisions §1).
-            .alpha(if (item.legality == Legality.NOT_LEGAL && !LocalHighContrast.current) 0.6f else 1f)
+            .heightIn(min = 40.dp)   // grows with Settings > Text size
+            .alpha(if (dimmed && !LocalHighContrast.current) 0.6f else 1f)
             .background(colors.surfaceContainerHighest.copy(alpha = 0.3f), shape)
             .outlined(shape, colors.outlineVariant)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // Wraps, never clipped: with maxLines = 1 and no ellipsis, "Pauper Commander" read as "Pauper".
-        Text(CardText.formatName(item.format),
-            style = MaterialTheme.typography.labelLarge,
+        Text(name, style = MaterialTheme.typography.labelLarge,
             color = colors.onSurface, modifier = Modifier.weight(1f).padding(top = 8.dp, bottom = 8.dp, end = 4.dp))
-        Tag(stringResource(label), container, content)
+        tag()
+    }
+}
+
+// ---------------------------------------------------------------- custom lists
+
+/**
+ * The judge's own lists that have this card (7 Point Highlander points, a cube's bans), under the
+ * official legality and in the same grid. Lists without the card are left out: for a ban list that
+ * means legal, for a points list 0 points.
+ */
+@Composable
+private fun CustomListsBlock(lists: List<ListOnCard>) {
+    Section(stringResource(R.string.custom_lists)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            lists.chunked(2).forEach { pair ->
+                Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    pair.forEach { StatusCell(it.listName, Modifier.weight(1f).fillMaxHeight()) { StatusTag(it.status) } }
+                    if (pair.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+        }
     }
 }
 

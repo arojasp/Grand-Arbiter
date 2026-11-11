@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
 import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
+import es.alejandro.grandarbiter.domain.model.customlists.CustomList
+import es.alejandro.grandarbiter.domain.model.customlists.ListStatus
 import es.alejandro.grandarbiter.domain.repository.CardRepository
+import es.alejandro.grandarbiter.domain.repository.CustomListRepository
 import es.alejandro.grandarbiter.domain.repository.SearchPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.transformLatest
@@ -151,16 +154,31 @@ sealed interface SearchState {
 sealed interface CardDetailState {
     data object Loading : CardDetailState
     data object NotFound : CardDetailState
-    data class Loaded(val card: CardDetail) : CardDetailState
+    /** [lists]: the judge's custom lists that have this card, in their order; empty if none. */
+    data class Loaded(val card: CardDetail, val lists: List<ListOnCard> = emptyList()) : CardDetailState
 }
+
+/** A custom list that has the card, and what it says about it. */
+data class ListOnCard(val listName: String, val status: ListStatus)
 
 class CardDetailViewModel(
     savedStateHandle: SavedStateHandle,
     repository: CardRepository,
+    customLists: CustomListRepository,
 ) : ViewModel() {
     private val oracleId: String = savedStateHandle.get<String>(ARG_CARD).orEmpty()
 
-    val state: StateFlow<CardDetailState> = flow {
-        emit(repository.card(oracleId)?.let { CardDetailState.Loaded(it) } ?: CardDetailState.NotFound)
+    val state: StateFlow<CardDetailState> = combine(
+        flow { emit(repository.card(oracleId)) },
+        customLists.observeAll(),
+    ) { card, lists ->
+        if (card == null) CardDetailState.NotFound
+        else CardDetailState.Loaded(card, listsWith(oracleId, lists))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardDetailState.Loading)
+
+    companion object {
+        /** Only the lists that have the card: absent from a list means legal / 0 points, which needs no row. */
+        fun listsWith(oracleId: String, lists: List<CustomList>): List<ListOnCard> =
+            lists.mapNotNull { list -> list.entries.firstOrNull { it.oracleId == oracleId }?.let { ListOnCard(list.name, it.status) } }
+    }
 }

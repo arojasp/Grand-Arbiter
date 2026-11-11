@@ -138,7 +138,11 @@ private fun CardDetailContent(card: CardDetail, lists: List<ListOnCard>) {
         item { HeaderBlock(card) }
         item { OracleBlock(card) }
         item { RulingsBlock(card.rulings) }
-        if (!card.isToken) item { LegalityBlock(card.legalities) }
+        if (!card.isToken) {
+            val (official, community) = card.legalities.partition { it.official }
+            item { LegalityBlock(stringResource(R.string.cards_legality), official) }
+            if (community.isNotEmpty()) item { LegalityBlock(stringResource(R.string.banned_community), community) }
+        }
         if (lists.isNotEmpty()) item { CustomListsBlock(lists) }
         val arts = artsOf(card)
         if (arts.isNotEmpty()) item { ArtBlock(arts) }
@@ -308,8 +312,8 @@ private fun RulingRow(ruling: CardRuling) {
 // ---------------------------------------------------------------- legality
 
 @Composable
-private fun LegalityBlock(legalities: List<FormatLegality>) {
-    Section(stringResource(R.string.cards_legality)) {
+private fun LegalityBlock(title: String, legalities: List<FormatLegality>) {
+    Section(title) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             legalities.chunked(2).forEach { pair ->
                 // Both cells as tall as the taller one when a name wraps (Pauper Commander).

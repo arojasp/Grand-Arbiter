@@ -132,6 +132,7 @@ dependencies {
 
     // Google Play In-App Updates (only works for installs from Play)
     implementation(libs.play.app.update.ktx)
+    implementation(libs.play.review.ktx)
 
 
     testImplementation(libs.junit)

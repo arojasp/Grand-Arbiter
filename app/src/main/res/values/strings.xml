@@ -187,6 +187,8 @@
     <string name="settings_community_formats">Community formats in card details</string>
     <string name="settings_community_formats_hint">Official formats are always shown.</string>
     <string name="settings_community_formats_count">%1$d of %2$d shown</string>
+    <string name="settings_rate">Rate Grand Arbiter</string>
+    <string name="settings_rate_hint">Opens the app\'s page on Google Play</string>
     <string name="settings_documents">Documents</string>
     <string name="settings_open_pdf">Open the official PDF</string>
     <string name="settings_version">Version %1$s</string>

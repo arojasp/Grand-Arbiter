@@ -1,5 +1,9 @@
 package es.alejandro.grandarbiter.ui.settings
 
+import androidx.core.net.toUri
+import android.content.Intent
+import android.content.Context
+import android.content.ActivityNotFoundException
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -509,6 +513,16 @@ private fun AboutSection() {
                     Text(stringResource(R.string.settings_scryfall_credit), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                 }
             }
+            PanelDivider()
+            // Always the Play page: the in-app review card can't sit behind a button (Play may
+            // not show it, and the button would look broken).
+            Row(
+                Modifier.fillMaxWidth().clickable(role = Role.Button) { openPlayListing(context) }.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TitleAndSubtitle(stringResource(R.string.settings_rate), stringResource(R.string.settings_rate_hint), Modifier.weight(1f))
+                Icon(Icons.AutoMirrored.Filled.OpenInNew, null, tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
+            }
         }
         // Wording required by the Wizards of the Coast Fan Content Policy. Kept legible on purpose:
         // no alpha (the Figma's #4D4637 on the old navy was ~2:1, and a 0.7 alpha undid the fix).
@@ -565,3 +579,11 @@ private fun formatInstant(millis: Long): String =
         .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT))
 
 private fun mb(bytes: Long): String = String.format(Locale.getDefault(), "%.1f", bytes / 1_000_000.0)
+
+/** The app's page in the Play Store app, or on the web if there's no Play Store. */
+private fun openPlayListing(context: Context) {
+    val id = context.packageName
+    val market = Intent(Intent.ACTION_VIEW, "market://details?id=$id".toUri())
+    val web = Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$id".toUri())
+    try { context.startActivity(market) } catch (_: ActivityNotFoundException) { runCatching { context.startActivity(web) } }
+}

@@ -94,6 +94,16 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
 }
 
+/**
+ * Screens where the judge looks something up: a card, a rule page, the glossary, a Quick Reference,
+ * a release-note card. Opening one counts for the review prompt; coming back from one is when
+ * it may be asked (ui/main/review).
+ */
+val LOOKUP_ROUTES = setOf(
+    Screen.CardDetail.route, ReaderRoutes.PAGE, GlossaryRoutes.GLOSSARY,
+    QuickReferenceRoutes.DETAIL, Screen.ReleaseNoteCard.route,
+)
+
 /** Cross-fade between screens. Navigation's default (700 ms) felt slow; 0 would remove it. */
 private const val SCREEN_FADE_MS = 150
 

@@ -1,5 +1,13 @@
 package es.alejandro.grandarbiter.ui.main
 
+import org.koin.compose.koinInject
+import kotlinx.coroutines.launch
+import es.alejandro.grandarbiter.ui.main.review.ReviewPrompter
+import es.alejandro.grandarbiter.ui.navigation.LOOKUP_ROUTES
+import androidx.navigation.NavHostController
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -51,15 +59,17 @@ import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
 
 @Composable
 fun MainScreen(snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }) {
-    MainScreenContent(startDestination = Screen.Home.route, snackbarHostState = snackbarHostState)
+    MainScreenContent(startDestination = Screen.Home.route, snackbarHostState = snackbarHostState, reviews = koinInject())
 }
 
 @Composable
 fun MainScreenContent(
     startDestination: String,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    reviews: ReviewPrompter? = null,
 ) {
     val navController = rememberNavController()
+    if (reviews != null) ReviewOnLookups(navController, reviews)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
@@ -159,5 +169,29 @@ fun MainScreenDarkPreview() {
 fun MainScreenLightPreview() {
     GrandArbiterTheme(themeMode = ThemeMode.LIGHT) {
         MainScreenContent(startDestination = Screen.Home.route)
+    }
+}
+
+/**
+ * Counts each lookup screen opened (once per visit, not when coming back to it) and, when the
+ * judge goes back from one, lets [reviews] decide whether to ask for a review. A screen opened
+ * from a lookup (a rule linked from a card) doesn't count as leaving it.
+ */
+@Composable
+private fun ReviewOnLookups(navController: NavHostController, reviews: ReviewPrompter) {
+    val activity = LocalActivity.current
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(navController) {
+        val seen = mutableSetOf<String>()
+        var previous: String? = null
+        navController.currentBackStackEntryFlow.collect { entry ->
+            val isNew = seen.add(entry.id)
+            val route = entry.destination.route
+            when {
+                route in LOOKUP_ROUTES -> if (isNew) scope.launch { reviews.lookupOpened() }
+                previous in LOOKUP_ROUTES && !isNew && activity != null -> scope.launch { reviews.lookupClosed(activity) }
+            }
+            previous = route
+        }
     }
 }

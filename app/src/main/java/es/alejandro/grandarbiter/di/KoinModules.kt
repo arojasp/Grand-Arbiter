@@ -1,5 +1,7 @@
 package es.alejandro.grandarbiter.di
 
+import es.alejandro.grandarbiter.ui.main.review.ReviewPrompter
+import es.alejandro.grandarbiter.domain.review.ReviewStatsStore
 import androidx.room.Room
 import es.alejandro.grandarbiter.data.updates.SectionVersions
 import es.alejandro.grandarbiter.data.cards.CardRepositoryImpl
@@ -108,6 +110,8 @@ val databaseModule = module {
     single { SettingsDataStore(androidContext()) }
     single<SearchPreferences> { get<SettingsDataStore>() }
     single<CardDisplayPreferences> { get<SettingsDataStore>() }
+    single<ReviewStatsStore> { get<SettingsDataStore>() }
+    single { ReviewPrompter(androidContext(), get(), get()) }
 }
 
 /** Rules content: a separate, disposable DB rebuilt from the bundle (see RulesDatabase.kt). */

@@ -53,11 +53,16 @@ class CardSearchViewModel(
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardDataState.Checking)
 
-    private val offline: StateFlow<CardSearchResult> = combine(query.debounce(200), dataState) { q, d -> q to d }
+    /**
+     * The phone's answer and the query it answers; null while there is none (blank query, cards
+     * not ready). Tagged so the screen never shows an answer to another query as this one's
+     * ("0 cards found" for a query that hasn't been searched yet).
+     */
+    private val offline: StateFlow<Pair<String, CardSearchResult>?> = combine(query.debounce(200), dataState) { q, d -> q to d }
         .mapLatest { (q, d) ->
-            if (q.isBlank() || d !is CardDataState.Ready) CardSearchResult.Empty else repository.search(q, limit = LIMIT)
+            if (q.isBlank() || d !is CardDataState.Ready) null else q to repository.search(q, limit = LIMIT)
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardSearchResult.Empty)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Bumped by "Try again": runs the same online search once more. */
     private val retries = MutableStateFlow(0)
@@ -91,18 +96,23 @@ class CardSearchViewModel(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /**
-     * What the screen shows. An online answer only stands while the query is the one searched;
-     * while it's on its way (or the judge is still typing) the screen says it's searching Scryfall.
+     * What the screen shows. An answer only stands for the query it answers: while the current one
+     * is being searched, the previous cards stay (or nothing, if there were none), never a "0 cards
+     * found" that nobody searched. Online answers likewise: while one is on its way (or the judge is
+     * still typing) the screen says it's searching Scryfall.
      */
-    val results: StateFlow<SearchState> = combine(offline, online, query, autoOnline, requested) { off, on, q, auto, asked ->
+    val results: StateFlow<SearchState> = combine(offline, online, query, autoOnline, requested) { searched, on, q, auto, asked ->
+        val off = searched?.takeIf { it.first == q }?.second
         when {
+            off == null -> (searched?.second as? CardSearchResult.Offline)?.takeIf { it.cards.isNotEmpty() }
+                ?.let { SearchState.Shown(it) } ?: SearchState.Pending
             off !is CardSearchResult.NeedsOnline -> SearchState.Shown(off)
             !off.complete -> SearchState.Shown(off)                       // quotes/parentheses still open
             !auto && asked != q -> SearchState.AskToSearchOnline(off.parts)
             on != null && on.first == q && on.second != null -> SearchState.Shown(on.second!!)
             else -> SearchState.SearchingOnline
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchState.Shown(CardSearchResult.Empty))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchState.Pending)
 
     fun onQueryChange(value: String) { savedStateHandle[KEY_QUERY] = value }
 
@@ -114,7 +124,7 @@ class CardSearchViewModel(
         when (val r = results.value) {
             is SearchState.AskToSearchOnline -> requested.value = query.value
             is SearchState.Shown -> if (r.result is CardSearchResult.OnlineFailed) retries.value++
-            SearchState.SearchingOnline -> Unit
+            SearchState.SearchingOnline, SearchState.Pending -> Unit
         }
     }
 
@@ -131,6 +141,8 @@ class CardSearchViewModel(
 
 sealed interface SearchState {
     data class Shown(val result: CardSearchResult) : SearchState
+    /** The query has no answer yet (searching, or cards not ready): nothing to show. */
+    data object Pending : SearchState
     data object SearchingOnline : SearchState
     /** Automatic search off: [parts] need Scryfall, and nothing is sent until the judge asks. */
     data class AskToSearchOnline(val parts: List<String>) : SearchState

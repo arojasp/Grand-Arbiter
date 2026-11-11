@@ -134,6 +134,7 @@ fun CardSearchScreen(
                 }
                 query.isBlank() -> (dataState as? CardDataState.Ready)?.let { IdleState(it) }
                 else -> when (val s = results) {
+                    SearchState.Pending -> Unit
                     SearchState.SearchingOnline -> SearchingOnline()
                     is SearchState.AskToSearchOnline -> InfoPanel(
                         stringResource(R.string.cards_ask_online_title),

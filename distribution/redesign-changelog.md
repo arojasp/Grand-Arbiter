@@ -153,4 +153,4 @@ From Donald Sutherland and Andrew Anastasi on the judges' forum. Not released ye
 | Commit | English |
 |---|---|
 | Card detail: rulings start collapsed | Card details: rulings start collapsed, so you can show a player the Oracle text without them. Tap "Show 5 rulings" to open them; the count is in that row ("5 Total" is gone). |
-| Card search: never "0 cards found" before searching | Card Search: "0 cards found" only appears once the search you typed has really been run. Before, it could show for a moment while you typed, or while the card data was getting ready, as if the card didn't exist. |
+| Card search: never "0 cards found" before searching | Card Search: "0 cards found" only appears once the search you typed has really been run. Before, it could show for a moment while you typed, or while the card data was getting ready, as if the card didn't exist. If an answer takes longer than usual, it says "Searching…" instead of a blank screen. |

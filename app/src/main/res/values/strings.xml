@@ -76,6 +76,7 @@
     <string name="cards_search_on_scryfall">Search on Scryfall</string>
     <string name="cards_online_waiting">Close the quotes or parentheses to search on Scryfall.</string>
     <string name="cards_searching_online">Searching Scryfall…</string>
+    <string name="cards_searching">Searching…</string>
     <string name="cards_online_partial">Showing the first %1$d of %2$d. Narrow the search to see the rest.</string>
     <string name="cards_online_warnings">Scryfall ignored part of this search</string>
     <string name="cards_needs_connection">This search needs a connection</string>

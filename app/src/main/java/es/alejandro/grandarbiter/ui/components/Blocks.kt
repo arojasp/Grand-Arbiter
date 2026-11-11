@@ -2,19 +2,16 @@ package es.alejandro.grandarbiter.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +22,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,25 +41,6 @@ import es.alejandro.grandarbiter.ui.theme.softened
 @Composable
 fun Label(text: String, modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.onSurfaceVariant) {
     Text(text, style = MaterialTheme.typography.titleSmall, color = color, modifier = modifier)
-}
-
-/**
- * A choice among a few options (Deck Counter format, Announcement REL and round time): a pill with
- * labelLarge text, ~32 dp tall with a 48 dp touch target. Selected: primary / onPrimary.
- */
-@Composable
-fun SelectChip(text: String, selected: Boolean, onClick: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Box(
-        Modifier.minimumInteractiveComponentSize()
-            .clip(CircleShape)
-            .background(if (selected) colors.primary else colors.surfaceContainerHighest)
-            .border(1.dp, if (selected) colors.primary else colors.outlineVariant, CircleShape)
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 6.dp)
-    ) {
-        Text(text, style = MaterialTheme.typography.labelLarge, color = if (selected) colors.onPrimary else colors.onSurfaceVariant)
-    }
 }
 
 /** A section heading above its content. */

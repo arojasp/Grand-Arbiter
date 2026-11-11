@@ -190,7 +190,6 @@
     <!-- Tools -->
     <string name="tools_in_tournament">In tournament</string>
     <string name="tools_references">References</string>
-    <string name="tools_coming_soon">Coming soon</string>
     <string name="tools_deck_counter">Deck Counter</string>
     <string name="tools_deck_counter_desc">Validate deck and sideboard composition</string>
     <string name="tools_announcement">Head Judge Announcement</string>
@@ -413,11 +412,12 @@
     <string name="draft_mixed_sizes">Different size per pack</string>
     <string name="draft_mixed_sizes_hint">For drafts mixing sets, e.g. one 15-card pack and two of 14</string>
     <string name="draft_construction">Deck construction</string>
-    <string name="draft_decrease">Decrease %1$s</string>
-    <string name="draft_increase">Increase %1$s</string>
-    <string name="draft_type_value">Type %1$s</string>
-    <string name="draft_value_range">From %1$d to %2$d %3$s</string>
-    <string name="draft_set">Set</string>
+    <string name="value_decrease">Decrease %1$s</string>
+    <string name="value_increase">Increase %1$s</string>
+    <string name="value_type">Type %1$s</string>
+    <string name="value_range">From %1$d to %2$d %3$s</string>
+    <string name="value_set">Set</string>
+    <string name="value_cancel">Cancel</string>
     <string name="draft_unit_minutes">min</string>
     <string name="draft_unit_seconds">s</string>
     <string name="draft_times_title">Times</string>

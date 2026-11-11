@@ -62,8 +62,8 @@ import es.alejandro.grandarbiter.data.cards.search.ColorMatch
 import es.alejandro.grandarbiter.data.cards.search.NumberFilter
 import es.alejandro.grandarbiter.data.cards.search.NumberOp
 import es.alejandro.grandarbiter.ui.theme.highContrastBorder
-import es.alejandro.grandarbiter.ui.tools.drafttimer.Choice
-import es.alejandro.grandarbiter.ui.tools.drafttimer.StepperControl
+import es.alejandro.grandarbiter.ui.components.Choice
+import es.alejandro.grandarbiter.ui.components.StepperControl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.androidx.compose.koinViewModel

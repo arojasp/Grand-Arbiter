@@ -134,3 +134,14 @@ Card Search understands Scryfall syntax (t:goblin o:haste…), and the new Advan
 | `1510209`, `c248542`, `7867361` | Custom lists: paste a list as text ("3 Sol Ring", "Black Lotus restricted"…) and share a list in the same format. |
 | `e5805c8` | One "Discard changes?" dialog everywhere; no icons on the online search buttons. |
 | `ba63a42` | Section labels in sentence case instead of small capitals (Settings, card details, Banned, Draft Timer, HJ Announcement); in the Draft Timer setup and Times each label now sits above its card. Card details: "Pauper Commander" was shown as a second "Pauper" in the legality list. Banned: the loading message no longer touches the screen edges. |
+
+### UI debt (branch `feature/ui-debt`)
+
+Plan: `claude/ui-debt-plan.md` in the Claude project. Not released yet.
+
+| Commit | English |
+|---|---|
+| Card search: readable end-of-results caption | Card Search: the card count and data date on the empty search, and "End of results", are readable now (they were drawn at 20 % opacity). |
+| Quick References: the editor works like the other editors | Quick References: the editor works like Advanced search and custom lists — a back arrow, Save at the bottom (above the keyboard) and "Delete reference" in the ⋮ menu instead of at the end of the page. |
+| Status tags: one color for Restricted, a shape that does not look tappable | Banned & Restricted, custom lists and card legality: Restricted is amber on every screen (it was solid black in the lists, louder than Banned). The draft labels (Pack 1 of 3, Pass left) and Home's "Updated" are square-cornered tags instead of pills, so they no longer look like buttons. Ruling dates and Release Notes set codes are plain text. |
+| One control for choosing one option | Deck Counter (format, Main deck / Sideboard) and HJ Announcement (REL) use the same segmented control as the rest of the app. When an option doesn't fit on one line (long names, large text sizes) the options stack one per row: at large text sizes "Commander" no longer breaks letter by letter. Screen readers now hear which option is selected. |

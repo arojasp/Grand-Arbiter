@@ -5,8 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,7 +47,7 @@ import es.alejandro.grandarbiter.domain.model.rules.PageRef
 import es.alejandro.grandarbiter.ui.components.Label
 import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
-import es.alejandro.grandarbiter.ui.components.SelectChip
+import es.alejandro.grandarbiter.ui.components.Choice
 import es.alejandro.grandarbiter.ui.reader.BlockView
 import es.alejandro.grandarbiter.ui.theme.softened
 import org.koin.androidx.compose.koinViewModel
@@ -156,16 +154,19 @@ private fun AnnouncementTopic.label(): Int = when (this) {
 
 // ---------------------------------------------------------------- REL + time
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun RelCard(rel: Rel?, onSelect: (Rel) -> Unit) {
     AnnouncementPanel {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             // Titles inside a panel take the text color; the gray Label is for labels outside one.
             Label(stringResource(R.string.hj_rel), color = MaterialTheme.colorScheme.onSurface)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Rel.entries.forEach { r -> SelectChip(stringResource(r.label()), selected = r == rel) { onSelect(r) } }
-            }
+            Choice(
+                values = Rel.entries.map { it.ordinal },
+                selected = rel?.ordinal ?: -1,
+                onSelect = { onSelect(Rel.entries[it]) },
+                width = null,
+                modifier = Modifier.fillMaxWidth(),
+            ) { stringResource(Rel.entries[it].label()) }
         }
     }
 }

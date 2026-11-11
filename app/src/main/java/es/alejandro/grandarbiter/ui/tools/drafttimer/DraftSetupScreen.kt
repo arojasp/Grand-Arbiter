@@ -37,7 +37,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.components.Choice
 import es.alejandro.grandarbiter.ui.components.Section
+import es.alejandro.grandarbiter.ui.components.SettingRow
+import es.alejandro.grandarbiter.ui.components.Stepper
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftEstimate
 import es.alejandro.grandarbiter.domain.draft.DraftFormat

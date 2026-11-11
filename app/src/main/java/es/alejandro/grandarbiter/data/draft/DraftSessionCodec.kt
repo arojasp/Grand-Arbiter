@@ -9,7 +9,7 @@ import es.alejandro.grandarbiter.domain.timer.TimerState
 
 /**
  * A draft session as plain values (what SharedPreferences holds) and back. Anything unreadable
- * (a format renamed or not available in this version, a value out of range) decodes to null:
+ * (a format this version doesn't know, a value out of range) decodes to null:
  * the app shows "no draft" instead of crashing. Pure: unit-tested.
  */
 object DraftSessionCodec {
@@ -72,7 +72,6 @@ object DraftSessionCodec {
     /** For the setup's last config: missing "Manual start" -> the first-time default (on). */
     fun decodeConfig(stored: Stored, manualStartIfMissing: Boolean = DraftConfig.DEFAULT_MANUAL_START): DraftConfig? {
         val format = DraftFormat.entries.firstOrNull { it.name == stored.format } ?: return null
-        if (!format.available) return null
         return runCatching {
             // A malformed list throws (NumberFormatException) like any other bad value: null.
             val packSizes = stored.packSizes?.split(",")?.map { it.trim().toInt() }

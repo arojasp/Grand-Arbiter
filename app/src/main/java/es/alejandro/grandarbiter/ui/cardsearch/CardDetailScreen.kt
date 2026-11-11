@@ -71,6 +71,8 @@ import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
 import es.alejandro.grandarbiter.ui.components.Section
 import es.alejandro.grandarbiter.ui.components.Tag
+import es.alejandro.grandarbiter.ui.components.bannedTagColors
+import es.alejandro.grandarbiter.ui.components.restrictedTagColors
 import es.alejandro.grandarbiter.ui.components.outlined
 import es.alejandro.grandarbiter.ui.theme.LocalHighContrast
 import es.alejandro.grandarbiter.ui.theme.legalColors
@@ -272,7 +274,7 @@ private fun RulingRow(ruling: CardRuling) {
     Row(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Tag(ruling.date, colors.primaryContainer, colors.primary)
+                Text(ruling.date, style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurfaceVariant)
                 if (!official) Tag(stringResource(R.string.cards_ruling_scryfall))
                 Spacer(Modifier.weight(1f))
                 if (official) {
@@ -306,8 +308,8 @@ private fun LegalityItem(item: FormatLegality, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
     val (container, content, label) = when (item.legality) {
         Legality.LEGAL -> legalColors().let { Triple(it.container, it.content, R.string.legality_legal) }
-        Legality.RESTRICTED -> Triple(colors.primaryContainer, colors.primary, CardText.restrictedLabel(item.format))
-        Legality.BANNED -> Triple(colors.errorContainer, colors.error, R.string.legality_banned)
+        Legality.RESTRICTED -> restrictedTagColors().let { (bg, fg) -> Triple(bg, fg, CardText.restrictedLabel(item.format)) }
+        Legality.BANNED -> bannedTagColors().let { (bg, fg) -> Triple(bg, fg, R.string.legality_banned) }
         Legality.NOT_LEGAL -> Triple(colors.errorContainer, colors.error, R.string.legality_not_legal)
     }
     val shape = RoundedCornerShape(8.dp)

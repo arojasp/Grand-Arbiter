@@ -1,5 +1,7 @@
 package es.alejandro.grandarbiter.data.cards.scryfall
 
+import es.alejandro.grandarbiter.domain.model.cards.FormatLegality
+
 /**
  * Which Scryfall oracle cards belong in a PAPER judge app. The single source of truth: the seed
  * builder doesn't filter, so the seed and a Scryfall update always produce the same card set.
@@ -9,8 +11,7 @@ object CardFilter {
     /** Formats shown in the app. Digital-only formats (alchemy, historic, timeless, brawl…) are out. */
     val PAPER_FORMATS = listOf(
         "standard", "pioneer", "modern", "legacy", "vintage", "pauper", "commander",
-        "oathbreaker", "duel", "premodern", "oldschool", "predh", "paupercommander",
-    )
+    ) + FormatLegality.COMMUNITY_FORMATS
 
     /** Not game pieces: art cards and the "front card" memorabilia (no rules text). */
     private val DROPPED_LAYOUTS = setOf("art_series", "front_card")

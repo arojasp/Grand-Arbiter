@@ -1,5 +1,12 @@
 package es.alejandro.grandarbiter.ui.settings
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ModalBottomSheet
+import es.alejandro.grandarbiter.domain.model.cards.FormatLegality
 import es.alejandro.grandarbiter.domain.model.ThemeMode
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -86,6 +93,7 @@ fun SettingsScreen(
     val updateState by viewModel.updateState.collectAsState()
     val rulesUpdateState by viewModel.rulesUpdateState.collectAsState()
     val autoOnline by viewModel.autoOnlineSearch.collectAsState()
+    val hiddenFormats by viewModel.hiddenCommunityFormats.collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -116,6 +124,8 @@ fun SettingsScreen(
                     SettingsPanel {
                         SwitchRow(stringResource(R.string.settings_auto_online), stringResource(R.string.settings_auto_online_hint),
                             autoOnline, viewModel::setAutoOnlineSearch)
+                        PanelDivider()
+                        CommunityFormatsRow(hiddenFormats, viewModel::setCommunityFormatShown)
                     }
                 }
             }
@@ -235,6 +245,46 @@ private fun <T> Segmented(options: List<T>, selected: T, label: @Composable (T) 
     }
 }
 
+/**
+ * Card details: which community formats to show. One row with the count; the choice is in a sheet,
+ * so Settings stays as short as before. Official formats are always shown.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CommunityFormatsRow(hidden: Set<String>, onShown: (String, Boolean) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    var open by rememberSaveable { mutableStateOf(false) }
+    val all = FormatLegality.COMMUNITY_FORMATS
+    val title = stringResource(R.string.settings_community_formats)
+    Row(
+        Modifier.fillMaxWidth().clickable(role = Role.Button) { open = true }.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TitleAndSubtitle(title, stringResource(R.string.settings_community_formats_count, all.count { it !in hidden }, all.size),
+            Modifier.weight(1f))
+        Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
+    }
+    if (open) {
+        ModalBottomSheet(onDismissRequest = { open = false }, containerColor = colors.surfaceContainerHigh) {
+            Column(Modifier.padding(bottom = 24.dp)) {
+                Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 24.dp))
+                Text(stringResource(R.string.settings_community_formats_hint), style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant, modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 4.dp, bottom = 8.dp))
+                all.forEach { format ->
+                    val shown = format !in hidden
+                    Row(
+                        Modifier.fillMaxWidth().toggleable(shown, role = Role.Checkbox) { onShown(format, it) }
+                            .heightIn(min = 56.dp).padding(horizontal = 24.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(CardText.formatName(format), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                        Checkbox(checked = shown, onCheckedChange = null)
+                    }
+                }
+            }
+        }
+    }
+}
 @Composable
 private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     val colors = MaterialTheme.colorScheme

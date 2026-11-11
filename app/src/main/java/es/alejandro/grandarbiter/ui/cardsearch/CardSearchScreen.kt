@@ -34,6 +34,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -134,7 +138,8 @@ fun CardSearchScreen(
                 }
                 query.isBlank() -> (dataState as? CardDataState.Ready)?.let { IdleState(it) }
                 else -> when (val s = results) {
-                    SearchState.SearchingOnline -> SearchingOnline()
+                    SearchState.Pending -> SearchingAfterAPause()
+                    SearchState.SearchingOnline -> Searching(stringResource(R.string.cards_searching_online))
                     is SearchState.AskToSearchOnline -> InfoPanel(
                         stringResource(R.string.cards_ask_online_title),
                         stringResource(R.string.cards_ask_online_body, s.parts.joinToString(" ")),
@@ -314,17 +319,29 @@ private fun WaitingToClose() {
 }
 
 @Composable
-private fun SearchingOnline() {
+private fun Searching(text: String) {
     Row(
         Modifier.fillMaxWidth().padding(16.dp).semantics(mergeDescendants = true) {},
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-        Text(stringResource(R.string.cards_searching_online), style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
+
+/**
+ * A search on the phone takes milliseconds: showing "Searching" at once would flash on every
+ * keystroke. It appears only if the answer is late (cards still opening, a slow phone).
+ */
+@Composable
+private fun SearchingAfterAPause() {
+    var show by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(SEARCHING_DELAY_MS); show = true }
+    if (show) Searching(stringResource(R.string.cards_searching))
+}
+
+private const val SEARCHING_DELAY_MS = 400L
 
 /** Same rows as offline; the label says where they came from, and what Scryfall ignored. */
 @Composable

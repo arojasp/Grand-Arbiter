@@ -59,6 +59,10 @@ class SettingsViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
     fun setAutoOnlineSearch(enabled: Boolean) = viewModelScope.launch { settings.setAutoOnlineSearch(enabled) }
 
+    val hiddenCommunityFormats: StateFlow<Set<String>> = settings.hiddenCommunityFormats
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+    fun setCommunityFormatShown(format: String, shown: Boolean) =
+        viewModelScope.launch { settings.setCommunityFormatShown(format, shown) }
     private companion object {
         val ORDER = listOf(DocumentId.CR, DocumentId.IPG, DocumentId.MTR, DocumentId.JAR)
     }

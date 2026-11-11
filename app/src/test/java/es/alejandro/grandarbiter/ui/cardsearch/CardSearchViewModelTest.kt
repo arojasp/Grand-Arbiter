@@ -54,6 +54,7 @@ class CardSearchViewModelTest {
         override suspend fun search(query: String, limit: Int): CardSearchResult {
             val p = CardQueryParser.parse(query)
             return if (p.needsOnline) CardSearchResult.NeedsOnline(p.onlineParts, p.isComplete)
+            else if (query == NO_SUCH_CARD) CardSearchResult.Offline(emptyList())
             else CardSearchResult.Offline(listOf(row("local:$query")))
         }
 
@@ -70,6 +71,7 @@ class CardSearchViewModelTest {
         override fun observeBanLists(): Flow<List<FormatBanList>> = flowOf(emptyList())
 
         companion object {
+            const val NO_SUCH_CARD = "no such card"
             fun row(name: String) = CardSummary(name, name, null, null, isToken = false)
         }
     }
@@ -124,6 +126,34 @@ class CardSearchViewModelTest {
         type(vm, "t:elf -t:")
         assertEquals(listOf("local:t:elf -t:"), vm.names())
         assertTrue(repo.onlineCalls.isEmpty())
+    }
+
+    @Test fun notSearchedYet_isNeverZeroCards() = runTest(main) {
+        val vm = open()
+        type(vm, "doubling season", thenWaitMs = 100)                      // inside the 200 ms pause
+        assertEquals(SearchState.Pending, vm.results.value)
+        advanceTimeBy(200); runCurrent()
+        assertEquals(listOf("local:doubling season"), vm.names())
+    }
+
+    @Test fun whileTyping_thePreviousCardsStay() = runTest(main) {
+        val vm = open()
+        type(vm, "doubling")
+        type(vm, "doubling s", thenWaitMs = 100)
+        assertEquals(listOf("local:doubling"), vm.names())
+    }
+
+    @Test fun aRealZero_isShown() = runTest(main) {
+        val vm = open()
+        type(vm, FakeCards.NO_SUCH_CARD)
+        assertEquals(CardSearchResult.Offline(emptyList()), vm.shown())
+    }
+
+    @Test fun afterAZero_typingIsPending_notZeroAgain() = runTest(main) {
+        val vm = open()
+        type(vm, FakeCards.NO_SUCH_CARD)
+        type(vm, "doubling", thenWaitMs = 100)
+        assertEquals(SearchState.Pending, vm.results.value)
     }
 
     // ---- online, automatic
@@ -288,7 +318,7 @@ class CardSearchViewModelTest {
         repo.importing.value = 1_000                                       // first run: Preparing
         val vm = open()
         type(vm, "t:elf -t:goblin")
-        assertEquals(CardSearchResult.Empty, vm.shown())
+        assertEquals(SearchState.Pending, vm.results.value)
         assertTrue(repo.onlineCalls.isEmpty())
     }
 }

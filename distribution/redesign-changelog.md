@@ -145,3 +145,16 @@ Plan: `claude/ui-debt-plan.md` in the Claude project. Not released yet.
 | Quick References: the editor works like the other editors | Quick References: the editor works like Advanced search and custom lists — a back arrow, Save at the bottom (above the keyboard) and "Delete reference" in the ⋮ menu instead of at the end of the page. |
 | Status tags: one color for Restricted, a shape that does not look tappable | Banned & Restricted, custom lists and card legality: Restricted is amber on every screen (it was solid black in the lists, louder than Banned). The draft labels (Pack 1 of 3, Pass left) and Home's "Updated" are square-cornered tags instead of pills, so they no longer look like buttons. Ruling dates and Release Notes set codes are plain text. |
 | One control for choosing one option | Deck Counter (format, Main deck / Sideboard) and HJ Announcement (REL) use the same segmented control as the rest of the app. When an option doesn't fit on one line (long names, large text sizes) the options stack one per row: at large text sizes "Commander" no longer breaks letter by letter. Screen readers now hear which option is selected. |
+
+### Judge feedback, second round (branch `feature/judge-feedback-2`)
+
+From Donald Sutherland and Andrew Anastasi on the judges' forum. Not released yet.
+
+| Commit | English |
+|---|---|
+| Card detail: rulings start collapsed | Card details: rulings start collapsed, so you can show a player the Oracle text without them. Tap "Show 5 rulings" to open them; the count is in that row ("5 Total" is gone). |
+| Card search: never "0 cards found" before searching | Card Search: "0 cards found" only appears once the search you typed has really been run. Before, it could show for a moment while you typed, or while the card data was getting ready, as if the card didn't exist. If an answer takes longer than usual, it says "Searching…" instead of a blank screen. |
+| Card detail: your custom lists | Card details: a "Custom lists" block under Legality shows what your own lists say about the card (banned, restricted or its points). Only lists that have the card appear. |
+| Card detail: official and community formats apart | Card details: legality is split like the Banned & Restricted screen: "Legality" for the formats Wizards manages, "Community formats" below, then your "Custom lists". |
+| Card detail: no bookmark icon on rulings | Card details: the small book icon next to each official ruling is gone; it said nothing the absence of the "Scryfall note" tag didn't already say. |
+| Settings: choose the community formats on cards | Settings > Card search: "Community formats in card details" opens a list to pick which community formats appear on cards (all by default). Official formats always appear; Banned & Restricted shows every list as before. Advanced search color chips are rounded like every other control you tap. |

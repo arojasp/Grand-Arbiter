@@ -58,7 +58,11 @@
     <string name="cards_oracle_text">Oracle text</string>
     <string name="cards_no_text">This card has no rules text.</string>
     <string name="cards_official_rulings">Official rulings</string>
-    <string name="cards_rulings_total" tools:ignore="PluralsCandidate">%1$d Total</string>
+    <plurals name="cards_show_rulings">
+        <item quantity="one">Show %1$d ruling</item>
+        <item quantity="other">Show %1$d rulings</item>
+    </plurals>
+    <string name="cards_hide_rulings">Hide rulings</string>
     <string name="cards_card_image">Card art</string>
     <string name="cards_show_image">Show card art</string>
     <string name="cards_hide_image">Hide card art</string>
@@ -72,6 +76,7 @@
     <string name="cards_search_on_scryfall">Search on Scryfall</string>
     <string name="cards_online_waiting">Close the quotes or parentheses to search on Scryfall.</string>
     <string name="cards_searching_online">Searching Scryfall…</string>
+    <string name="cards_searching">Searching…</string>
     <string name="cards_online_partial">Showing the first %1$d of %2$d. Narrow the search to see the rest.</string>
     <string name="cards_online_warnings">Scryfall ignored part of this search</string>
     <string name="cards_needs_connection">This search needs a connection</string>
@@ -179,6 +184,9 @@
     <string name="settings_card_search">Card search</string>
     <string name="settings_auto_online">Search Scryfall automatically</string>
     <string name="settings_auto_online_hint">Searches the app can\'t do offline go to Scryfall as you type.</string>
+    <string name="settings_community_formats">Community formats in card details</string>
+    <string name="settings_community_formats_hint">Official formats are always shown.</string>
+    <string name="settings_community_formats_count">%1$d of %2$d shown</string>
     <string name="settings_documents">Documents</string>
     <string name="settings_open_pdf">Open the official PDF</string>
     <string name="settings_version">Version %1$s</string>

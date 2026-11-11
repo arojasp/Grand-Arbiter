@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,12 +56,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.tools.banned.StatusTag
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
 import es.alejandro.grandarbiter.domain.model.cards.CardFace
 import es.alejandro.grandarbiter.domain.model.cards.CardRuling
@@ -120,14 +123,14 @@ fun CardDetailScreen(
                 CardDetailState.NotFound -> Centered {
                     Text(stringResource(R.string.cards_not_found), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                is CardDetailState.Loaded -> CardDetailContent(s.card)
+                is CardDetailState.Loaded -> CardDetailContent(s.card, s.lists)
             }
         }
     }
 }
 
 @Composable
-private fun CardDetailContent(card: CardDetail) {
+private fun CardDetailContent(card: CardDetail, lists: List<ListOnCard>) {
     LazyColumn(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -135,7 +138,12 @@ private fun CardDetailContent(card: CardDetail) {
         item { HeaderBlock(card) }
         item { OracleBlock(card) }
         item { RulingsBlock(card.rulings) }
-        if (!card.isToken) item { LegalityBlock(card.legalities) }
+        if (!card.isToken) {
+            val (official, community) = card.legalities.partition { it.official }
+            item { LegalityBlock(stringResource(R.string.cards_legality), official) }
+            if (community.isNotEmpty()) item { LegalityBlock(stringResource(R.string.banned_community), community) }
+        }
+        if (lists.isNotEmpty()) item { CustomListsBlock(lists) }
         val arts = artsOf(card)
         if (arts.isNotEmpty()) item { ArtBlock(arts) }
         item { Attribution(card.scryfallUrl) }
@@ -240,27 +248,43 @@ private fun FaceText(face: CardFace) {
 
 // ---------------------------------------------------------------- rulings
 
+/**
+ * Collapsed on every card: a judge can show the Oracle text to a player without the rulings.
+ * The row to open them has the same shape as "Show card art" below.
+ */
 @Composable
 private fun RulingsBlock(rulings: List<CardRuling>) {
     val colors = MaterialTheme.colorScheme
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Label(stringResource(R.string.cards_official_rulings), Modifier.weight(1f))
-            if (rulings.isNotEmpty()) {
-                Text(stringResource(R.string.cards_rulings_total, rulings.size),
-                    style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurfaceVariant)
-            }
-        }
+    Section(stringResource(R.string.cards_official_rulings)) {
         if (rulings.isEmpty()) {
             Text(stringResource(R.string.cards_no_rulings), style = MaterialTheme.typography.bodyMedium,
                 color = colors.onSurfaceVariant, modifier = Modifier.padding(horizontal = 4.dp))
+            return@Section
         }
-        // One grouped list (design-decisions §3); official vs Scryfall is told by the tag and icon, not a stripe.
-        if (rulings.isNotEmpty()) {
-            Panel(colors.surfaceContainer, RoundedCornerShape(12.dp)) {
-                rulings.forEachIndexed { i, ruling ->
-                    if (i > 0) ListDivider()
-                    RulingRow(ruling)
+        var expanded by rememberSaveable { mutableStateOf(false) }
+        val rotation by animateFloatAsState(if (expanded) 180f else 0f, label = "chevron")
+        Panel(colors.surfaceContainerHigh, RoundedCornerShape(12.dp)) {
+            Row(
+                Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(Icons.Outlined.Gavel, null, tint = colors.primary, modifier = Modifier.size(18.dp))
+                Text(
+                    if (expanded) stringResource(R.string.cards_hide_rulings)
+                    else pluralStringResource(R.plurals.cards_show_rulings, rulings.size, rulings.size),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.onSurface, modifier = Modifier.weight(1f),
+                )
+                Icon(painterResource(R.drawable.ic_expand_more), null, tint = colors.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp).rotate(rotation))
+            }
+            AnimatedVisibility(expanded) {
+                Column {
+                    rulings.forEach { ruling ->
+                        ListDivider()
+                        RulingRow(ruling)
+                    }
                 }
             }
         }
@@ -275,11 +299,8 @@ private fun RulingRow(ruling: CardRuling) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(ruling.date, style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurfaceVariant)
+                // Official is the norm; only Scryfall's own notes are marked.
                 if (!official) Tag(stringResource(R.string.cards_ruling_scryfall))
-                Spacer(Modifier.weight(1f))
-                if (official) {
-                    Icon(painterResource(R.drawable.ic_book), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(12.dp))
-                }
             }
             OracleText(ruling.text, MaterialTheme.typography.bodyMedium, colors.onSurface)
         }
@@ -289,8 +310,8 @@ private fun RulingRow(ruling: CardRuling) {
 // ---------------------------------------------------------------- legality
 
 @Composable
-private fun LegalityBlock(legalities: List<FormatLegality>) {
-    Section(stringResource(R.string.cards_legality)) {
+private fun LegalityBlock(title: String, legalities: List<FormatLegality>) {
+    Section(title) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             legalities.chunked(2).forEach { pair ->
                 // Both cells as tall as the taller one when a name wraps (Pauper Commander).
@@ -312,23 +333,52 @@ private fun LegalityItem(item: FormatLegality, modifier: Modifier) {
         Legality.BANNED -> bannedTagColors().let { (bg, fg) -> Triple(bg, fg, R.string.legality_banned) }
         Legality.NOT_LEGAL -> Triple(colors.errorContainer, colors.error, R.string.legality_not_legal)
     }
+    // Banned stays at full strength: it matters more than "not legal" to a judge. The "Not legal"
+    // tag tells the state; dimming is extra, so high contrast drops it (design-decisions 1).
+    StatusCell(CardText.formatName(item.format), modifier, dimmed = item.legality == Legality.NOT_LEGAL) {
+        Tag(stringResource(label), container, content)
+    }
+}
+
+/** One cell of the legality grid: a name and its status tag. Also used by the custom lists block. */
+@Composable
+private fun StatusCell(name: String, modifier: Modifier, dimmed: Boolean = false, tag: @Composable () -> Unit) {
+    val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(8.dp)
     Row(
         modifier = modifier
-            .heightIn(min = 40.dp)   // grows with Settings › Text size
-            // Banned stays at full strength: it matters more than "not legal" to a judge. The "Not legal"
-            // tag tells the state; dimming is extra, so high contrast drops it (design-decisions §1).
-            .alpha(if (item.legality == Legality.NOT_LEGAL && !LocalHighContrast.current) 0.6f else 1f)
+            .heightIn(min = 40.dp)   // grows with Settings > Text size
+            .alpha(if (dimmed && !LocalHighContrast.current) 0.6f else 1f)
             .background(colors.surfaceContainerHighest.copy(alpha = 0.3f), shape)
             .outlined(shape, colors.outlineVariant)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // Wraps, never clipped: with maxLines = 1 and no ellipsis, "Pauper Commander" read as "Pauper".
-        Text(CardText.formatName(item.format),
-            style = MaterialTheme.typography.labelLarge,
+        Text(name, style = MaterialTheme.typography.labelLarge,
             color = colors.onSurface, modifier = Modifier.weight(1f).padding(top = 8.dp, bottom = 8.dp, end = 4.dp))
-        Tag(stringResource(label), container, content)
+        tag()
+    }
+}
+
+// ---------------------------------------------------------------- custom lists
+
+/**
+ * The judge's own lists that have this card (7 Point Highlander points, a cube's bans), under the
+ * official legality and in the same grid. Lists without the card are left out: for a ban list that
+ * means legal, for a points list 0 points.
+ */
+@Composable
+private fun CustomListsBlock(lists: List<ListOnCard>) {
+    Section(stringResource(R.string.custom_lists)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            lists.chunked(2).forEach { pair ->
+                Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    pair.forEach { StatusCell(it.listName, Modifier.weight(1f).fillMaxHeight()) { StatusTag(it.status) } }
+                    if (pair.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+        }
     }
 }
 

@@ -21,6 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -241,4 +243,30 @@ private fun StepButton(symbol: String, description: String, enabled: Boolean, on
     ) {
         Text(symbol, style = MaterialTheme.typography.titleMedium, color = colors.primary)
     }
+}
+
+/**
+ * One of several options that can be on at once (Advanced search colors): a filter chip, outlined
+ * when off, filled primary when on, 48 dp tall. A pill, like every control you tap (M3's default
+ * 8 dp corners read as a status tag).
+ */
+@Composable
+internal fun ToggleChip(text: String, selected: Boolean, onClick: () -> Unit, leadingIcon: (@Composable () -> Unit)? = null) {
+    val colors = MaterialTheme.colorScheme
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(text, style = MaterialTheme.typography.labelLarge) },
+        leadingIcon = leadingIcon,
+        shape = CircleShape,
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = colors.primary,
+            selectedLabelColor = colors.onPrimary,
+        ),
+        border = FilterChipDefaults.filterChipBorder(
+            enabled = true, selected = selected,
+            borderColor = colors.outline, selectedBorderColor = colors.primary,
+        ),
+        modifier = Modifier.heightIn(min = 48.dp),
+    )
 }

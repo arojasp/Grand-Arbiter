@@ -59,6 +59,9 @@ data class FormatLegality(val format: String, val legality: Legality) {
 
     companion object {
         val OFFICIAL_FORMATS = setOf("standard", "pioneer", "modern", "legacy", "vintage", "pauper", "commander")
+
+        /** The community formats the app keeps, in display order (Scryfall keys). */
+        val COMMUNITY_FORMATS = listOf("oathbreaker", "duel", "premodern", "oldschool", "predh", "paupercommander")
     }
 }
 

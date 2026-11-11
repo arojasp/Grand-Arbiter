@@ -184,6 +184,9 @@
     <string name="settings_card_search">Card search</string>
     <string name="settings_auto_online">Search Scryfall automatically</string>
     <string name="settings_auto_online_hint">Searches the app can\'t do offline go to Scryfall as you type.</string>
+    <string name="settings_community_formats">Community formats in card details</string>
+    <string name="settings_community_formats_hint">Official formats are always shown.</string>
+    <string name="settings_community_formats_count">%1$d of %2$d shown</string>
     <string name="settings_documents">Documents</string>
     <string name="settings_open_pdf">Open the official PDF</string>
     <string name="settings_version">Version %1$s</string>

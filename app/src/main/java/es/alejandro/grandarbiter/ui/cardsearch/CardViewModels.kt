@@ -8,6 +8,8 @@ import es.alejandro.grandarbiter.domain.model.cards.CardDetail
 import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.customlists.CustomList
 import es.alejandro.grandarbiter.domain.model.customlists.ListStatus
+import es.alejandro.grandarbiter.domain.model.cards.FormatLegality
+import es.alejandro.grandarbiter.domain.repository.CardDisplayPreferences
 import es.alejandro.grandarbiter.domain.repository.CardRepository
 import es.alejandro.grandarbiter.domain.repository.CustomListRepository
 import es.alejandro.grandarbiter.domain.repository.SearchPreferences
@@ -165,18 +167,24 @@ class CardDetailViewModel(
     savedStateHandle: SavedStateHandle,
     repository: CardRepository,
     customLists: CustomListRepository,
+    display: CardDisplayPreferences,
 ) : ViewModel() {
     private val oracleId: String = savedStateHandle.get<String>(ARG_CARD).orEmpty()
 
     val state: StateFlow<CardDetailState> = combine(
         flow { emit(repository.card(oracleId)) },
         customLists.observeAll(),
-    ) { card, lists ->
+        display.hiddenCommunityFormats,
+    ) { card, lists, hidden ->
         if (card == null) CardDetailState.NotFound
-        else CardDetailState.Loaded(card, listsWith(oracleId, lists))
+        else CardDetailState.Loaded(card.copy(legalities = visibleLegalities(card.legalities, hidden)), listsWith(oracleId, lists))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardDetailState.Loading)
 
     companion object {
+        /** Official formats always; community formats unless hidden in Settings. */
+        fun visibleLegalities(legalities: List<FormatLegality>, hidden: Set<String>): List<FormatLegality> =
+            legalities.filter { it.official || it.format !in hidden }
+
         /** Only the lists that have the card: absent from a list means legal / 0 points, which needs no row. */
         fun listsWith(oracleId: String, lists: List<CustomList>): List<ListOnCard> =
             lists.mapNotNull { list -> list.entries.firstOrNull { it.oracleId == oracleId }?.let { ListOnCard(list.name, it.status) } }

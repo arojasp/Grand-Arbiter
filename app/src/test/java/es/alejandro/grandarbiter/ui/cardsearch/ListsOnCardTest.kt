@@ -1,5 +1,7 @@
 package es.alejandro.grandarbiter.ui.cardsearch
 
+import es.alejandro.grandarbiter.domain.model.cards.FormatLegality
+import es.alejandro.grandarbiter.domain.model.cards.Legality
 import es.alejandro.grandarbiter.domain.model.customlists.CustomList
 import es.alejandro.grandarbiter.domain.model.customlists.CustomListEntry
 import es.alejandro.grandarbiter.domain.model.customlists.ListStatus
@@ -23,6 +25,12 @@ class ListsOnCardTest {
             listOf(ListOnCard("7 Point Highlander", ListStatus.Points(3)), ListOnCard("Old School", ListStatus.Restricted)),
             CardDetailViewModel.listsWith("sol", lists),
         )
+    }
+
+    @Test fun hiddenCommunityFormats_leave_officialsNeverDo() {
+        val all = listOf("standard", "commander", "oldschool", "predh").map { FormatLegality(it, Legality.LEGAL) }
+        val shown = CardDetailViewModel.visibleLegalities(all, hidden = setOf("oldschool", "standard"))
+        assertEquals(listOf("standard", "commander", "predh"), shown.map { it.format })
     }
 
     @Test fun noListHasIt_nothingToShow() {

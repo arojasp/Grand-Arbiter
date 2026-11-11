@@ -290,6 +290,7 @@ private fun RulingsBlock(rulings: List<CardRuling>) {
         }
     }
 }
+
 @Composable
 private fun RulingRow(ruling: CardRuling) {
     val colors = MaterialTheme.colorScheme
@@ -298,11 +299,8 @@ private fun RulingRow(ruling: CardRuling) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(ruling.date, style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurfaceVariant)
+                // Official is the norm; only Scryfall's own notes are marked.
                 if (!official) Tag(stringResource(R.string.cards_ruling_scryfall))
-                Spacer(Modifier.weight(1f))
-                if (official) {
-                    Icon(painterResource(R.drawable.ic_book), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(12.dp))
-                }
             }
             OracleText(ruling.text, MaterialTheme.typography.bodyMedium, colors.onSurface)
         }

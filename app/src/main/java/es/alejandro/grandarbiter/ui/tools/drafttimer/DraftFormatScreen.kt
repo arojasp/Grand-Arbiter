@@ -26,7 +26,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -41,7 +40,7 @@ import org.koin.androidx.compose.koinViewModel
 import es.alejandro.grandarbiter.ui.theme.softened
 
 /**
- * Figma "Draft Timer - Format picker": the formats, only the available ones can be opened.
+ * Figma "Draft Timer - Format picker": the formats; each one opens its setup.
  * With a draft still in progress it asks first: resume it, or discard it to set up a new one.
  */
 @Composable
@@ -83,24 +82,20 @@ fun DraftFormatScreen(
 private fun FormatCard(format: DraftFormat, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(12.dp)
-    val enabled = format.available
     Row(
         Modifier.fillMaxWidth()
-            .alpha(if (enabled) 1f else 0.6f)
             .clip(shape)
             .background(colors.surfaceContainer)
-            .border(1.dp, if (enabled) colors.primary.softened(0.6f) else colors.outlineVariant, shape)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .border(1.dp, colors.primary.softened(0.6f), shape)
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(format.title()), style = MaterialTheme.typography.titleSmall,
-                color = if (enabled) colors.onSurface else colors.onSurfaceVariant)
+            Text(stringResource(format.title()), style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
             Text(stringResource(format.description()), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-            if (!enabled) DraftChip(stringResource(R.string.tools_coming_soon))
         }
-        if (enabled) Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
+        Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
     }
 }
 

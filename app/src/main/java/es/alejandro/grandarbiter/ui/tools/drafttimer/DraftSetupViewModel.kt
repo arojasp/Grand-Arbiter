@@ -88,9 +88,9 @@ class DraftSetupViewModel(
     /** Allowed cards per pack: Two-Headed Giant only 14 or 15 (the sizes the MTR has times for). */
     val cardsRange: IntRange = DraftConfig.cardsRange(format)
 
-    /** Draft time with this config: picks + reviews + construction. Null for formats not available. */
+    /** Draft time with this config: picks + reviews + construction. Null until the first value. */
     val estimate: StateFlow<DraftEstimate?> = combine(config, timings) { c, t ->
-        if (c.format.available) DraftEstimate.of(DraftPlans.create(c, t)) else null
+        DraftEstimate.of(DraftPlans.create(c, t))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val beep: StateFlow<Boolean> = settings.draftBeep
@@ -130,7 +130,6 @@ class DraftSetupViewModel(
 
     /** Starts the draft now (the first pick's time runs from this moment). */
     fun start() {
-        if (!format.available) return
         store.save(DraftSession(config.value).started(System.currentTimeMillis()))
     }
 

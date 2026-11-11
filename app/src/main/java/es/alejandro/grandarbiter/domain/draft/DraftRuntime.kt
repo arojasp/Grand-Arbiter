@@ -25,7 +25,7 @@ interface DraftAlerts {
     fun stepEnded(vibrate: Boolean, beep: Boolean)
 }
 
-/** Picks the plan factory for a format. Only available formats have one. */
+/** Picks the plan factory for a format. */
 object DraftPlans {
     fun create(config: DraftConfig, timings: DraftTimings): DraftPlan = when (config.format) {
         DraftFormat.BOOSTER -> BoosterDraftPlanFactory.create(config, timings.booster)

@@ -190,7 +190,6 @@
     <!-- Tools -->
     <string name="tools_in_tournament">In tournament</string>
     <string name="tools_references">References</string>
-    <string name="tools_coming_soon">Coming soon</string>
     <string name="tools_deck_counter">Deck Counter</string>
     <string name="tools_deck_counter_desc">Validate deck and sideboard composition</string>
     <string name="tools_announcement">Head Judge Announcement</string>

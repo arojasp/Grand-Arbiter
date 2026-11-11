@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,6 +56,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -240,33 +242,48 @@ private fun FaceText(face: CardFace) {
 
 // ---------------------------------------------------------------- rulings
 
+/**
+ * Collapsed on every card: a judge can show the Oracle text to a player without the rulings.
+ * The row to open them has the same shape as "Show card art" below.
+ */
 @Composable
 private fun RulingsBlock(rulings: List<CardRuling>) {
     val colors = MaterialTheme.colorScheme
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Label(stringResource(R.string.cards_official_rulings), Modifier.weight(1f))
-            if (rulings.isNotEmpty()) {
-                Text(stringResource(R.string.cards_rulings_total, rulings.size),
-                    style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurfaceVariant)
-            }
-        }
+    Section(stringResource(R.string.cards_official_rulings)) {
         if (rulings.isEmpty()) {
             Text(stringResource(R.string.cards_no_rulings), style = MaterialTheme.typography.bodyMedium,
                 color = colors.onSurfaceVariant, modifier = Modifier.padding(horizontal = 4.dp))
+            return@Section
         }
-        // One grouped list (design-decisions §3); official vs Scryfall is told by the tag and icon, not a stripe.
-        if (rulings.isNotEmpty()) {
-            Panel(colors.surfaceContainer, RoundedCornerShape(12.dp)) {
-                rulings.forEachIndexed { i, ruling ->
-                    if (i > 0) ListDivider()
-                    RulingRow(ruling)
+        var expanded by rememberSaveable { mutableStateOf(false) }
+        val rotation by animateFloatAsState(if (expanded) 180f else 0f, label = "chevron")
+        Panel(colors.surfaceContainerHigh, RoundedCornerShape(12.dp)) {
+            Row(
+                Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(Icons.Outlined.Gavel, null, tint = colors.primary, modifier = Modifier.size(18.dp))
+                Text(
+                    if (expanded) stringResource(R.string.cards_hide_rulings)
+                    else pluralStringResource(R.plurals.cards_show_rulings, rulings.size, rulings.size),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.onSurface, modifier = Modifier.weight(1f),
+                )
+                Icon(painterResource(R.drawable.ic_expand_more), null, tint = colors.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp).rotate(rotation))
+            }
+            AnimatedVisibility(expanded) {
+                Column {
+                    rulings.forEach { ruling ->
+                        ListDivider()
+                        RulingRow(ruling)
+                    }
                 }
             }
         }
     }
 }
-
 @Composable
 private fun RulingRow(ruling: CardRuling) {
     val colors = MaterialTheme.colorScheme

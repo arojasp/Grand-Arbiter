@@ -58,7 +58,11 @@
     <string name="cards_oracle_text">Oracle text</string>
     <string name="cards_no_text">This card has no rules text.</string>
     <string name="cards_official_rulings">Official rulings</string>
-    <string name="cards_rulings_total" tools:ignore="PluralsCandidate">%1$d Total</string>
+    <plurals name="cards_show_rulings">
+        <item quantity="one">Show %1$d ruling</item>
+        <item quantity="other">Show %1$d rulings</item>
+    </plurals>
+    <string name="cards_hide_rulings">Hide rulings</string>
     <string name="cards_card_image">Card art</string>
     <string name="cards_show_image">Show card art</string>
     <string name="cards_hide_image">Hide card art</string>

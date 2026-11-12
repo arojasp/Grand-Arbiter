@@ -137,7 +137,7 @@ Card Search understands Scryfall syntax (t:goblin o:haste…), and the new Advan
 
 ### UI debt (branch `feature/ui-debt`)
 
-Plan: `claude/ui-debt-plan.md` in the Claude project. Not released yet.
+Plan: `claude/ui-debt-plan.md` in the Claude project. Released in **1.6.0 (versionCode 14)**.
 
 | Commit | English |
 |---|---|
@@ -148,7 +148,10 @@ Plan: `claude/ui-debt-plan.md` in the Claude project. Not released yet.
 
 ### Judge feedback, second round (branch `feature/judge-feedback-2`)
 
-From Donald Sutherland and Andrew Anastasi on the judges' forum. Not released yet.
+From Donald Sutherland and Andrew Anastasi on the judges' forum. Released in **1.6.0 (versionCode 14)**,
+along with the security hardening (no visible change). Play text, copied to `whatsnew/`:
+
+> Card details: rulings now start collapsed, so you can show a player the Oracle text without them; tap "Show rulings" to open them. Official and community formats are listed apart, Settings lets you pick which community formats to see, and your custom lists show what they say about the card. Card Search no longer says "0 cards found" before it has searched. Restricted has its own color everywhere, and option controls fit large text sizes. Settings > About has "Rate Grand Arbiter".
 
 | Commit | English |
 |---|---|

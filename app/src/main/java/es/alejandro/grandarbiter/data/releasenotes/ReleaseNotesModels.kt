@@ -50,10 +50,13 @@ object ReleaseNotesParser {
     private const val OFFICIAL_PREFIX = "https://magic.wizards.com/"
     private val json = Json { ignoreUnknownKeys = true }
 
+    /** A set code is also a file name (`<code>.json`), so it can't hold a path. */
+    private val SET_CODE = Regex("^[A-Z0-9]{2,6}$")
+
     fun parse(text: String): List<ReleaseNoteSet>? {
         val index = runCatching { json.decodeFromString<ReleaseNotesIndex>(text) }.getOrNull() ?: return null
         if (index.schemaVersion > SUPPORTED_SCHEMA_VERSION) return null
-        val sets = index.sets.filter { it.code.isNotBlank() && it.name.isNotBlank() && it.url.startsWith(OFFICIAL_PREFIX) }
+        val sets = index.sets.filter { SET_CODE.matches(it.code) && it.name.isNotBlank() && it.url.startsWith(OFFICIAL_PREFIX) }
         return sets.takeIf { it.isNotEmpty() && it.size == index.sets.size }
     }
 

@@ -183,9 +183,16 @@ private fun isOnline(context: Context): Boolean {
     return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
 
+private val EXTERNAL_SCHEMES = setOf("http", "https", "mailto")
+
+/** Schemes a page may hand to another app; intent:, file:, content: and the rest are dropped. */
+internal fun mayOpenExternally(url: String): Boolean =
+    url.trim().substringBefore(':', missingDelimiterValue = "").lowercase() in EXTERNAL_SCHEMES
+
 private fun openExternally(context: Context, url: String) {
+    if (!mayOpenExternally(url)) return
     try {
-        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        context.startActivity(Intent(Intent.ACTION_VIEW, url.trim().toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     } catch (_: ActivityNotFoundException) {
         // No browser installed: nothing sensible to do.
     }

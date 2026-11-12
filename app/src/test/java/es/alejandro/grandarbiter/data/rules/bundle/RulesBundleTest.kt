@@ -90,6 +90,14 @@ class RulesBundleTest {
         assertTrue(errors.toString(), errors.any { "bad effectiveDate" in it })
     }
 
+    @Test
+    fun sourceUrl_mustBeHttps() {
+        for (url in listOf("http://media.wizards.com/x.pdf", "intent://x#Intent;end", "file:///sdcard/x", "")) {
+            val errors = errorsFor(sampleText().replace("https://media.wizards.com/ContentResources/WPN/MTG_IPG_2024Sep23_EN.pdf", url))
+            assertTrue(url, errors.any { "sourceUrl must be https://" in it })
+        }
+    }
+
     @Test(expected = SerializationException::class)
     fun unknownBlockType_failsEvenInLenientMode() {
         // Documents the compatibility rule: a new Block type is a breaking change.

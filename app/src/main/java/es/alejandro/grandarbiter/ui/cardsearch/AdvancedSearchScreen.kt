@@ -24,8 +24,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,8 +60,9 @@ import es.alejandro.grandarbiter.data.cards.search.ColorMatch
 import es.alejandro.grandarbiter.data.cards.search.NumberFilter
 import es.alejandro.grandarbiter.data.cards.search.NumberOp
 import es.alejandro.grandarbiter.ui.theme.highContrastBorder
-import es.alejandro.grandarbiter.ui.tools.drafttimer.Choice
-import es.alejandro.grandarbiter.ui.tools.drafttimer.StepperControl
+import es.alejandro.grandarbiter.ui.components.Choice
+import es.alejandro.grandarbiter.ui.components.ToggleChip
+import es.alejandro.grandarbiter.ui.components.StepperControl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.androidx.compose.koinViewModel
@@ -195,7 +194,8 @@ private fun ColorGroup(form: AdvancedSearchForm, update: Update) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             COLOR_CHOICES.forEach { (letter, name) ->
                 val on = letter in form.colors
-                FilterChip(
+                ToggleChip(
+                    text = stringResource(name),
                     selected = on,
                     onClick = {
                         update {
@@ -208,17 +208,7 @@ private fun ColorGroup(form: AdvancedSearchForm, update: Update) {
                             it.copy(colors = next)
                         }
                     },
-                    label = { Text(stringResource(name), style = MaterialTheme.typography.labelLarge) },
                     leadingIcon = { ManaSymbol(letter.toString(), Modifier.size(18.dp)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = colors.primary,
-                        selectedLabelColor = colors.onPrimary,
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        enabled = true, selected = on,
-                        borderColor = colors.outline, selectedBorderColor = colors.primary,
-                    ),
-                    modifier = Modifier.heightIn(min = 48.dp),
                 )
             }
         }

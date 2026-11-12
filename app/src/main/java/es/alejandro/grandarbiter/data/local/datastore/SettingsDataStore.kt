@@ -4,11 +4,17 @@ import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import es.alejandro.grandarbiter.domain.model.DisplaySettings
 import es.alejandro.grandarbiter.domain.model.TextScale
 import es.alejandro.grandarbiter.domain.model.ThemeMode
+import es.alejandro.grandarbiter.domain.repository.CardDisplayPreferences
+import es.alejandro.grandarbiter.domain.review.ReviewStats
+import es.alejandro.grandarbiter.domain.review.ReviewStatsStore
 import es.alejandro.grandarbiter.domain.repository.SearchPreferences
 import es.alejandro.grandarbiter.domain.updates.SectionUpdates
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +23,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
-class SettingsDataStore(private val context: Context) : SearchPreferences {
+class SettingsDataStore(private val context: Context) : SearchPreferences, CardDisplayPreferences, ReviewStatsStore {
     private val THEME_MODE = stringPreferencesKey("theme_mode")
     private val TEXT_SCALE = stringPreferencesKey("text_scale")
     private val HIGH_CONTRAST = booleanPreferencesKey("high_contrast")
@@ -25,6 +31,12 @@ class SettingsDataStore(private val context: Context) : SearchPreferences {
     private val DRAFT_BEEP = booleanPreferencesKey("draft_beep")
     private val DRAFT_VIBRATE = booleanPreferencesKey("draft_vibrate")
     private val AUTO_ONLINE_SEARCH = booleanPreferencesKey("auto_online_search")
+    private val HIDDEN_COMMUNITY_FORMATS = stringSetPreferencesKey("hidden_community_formats")
+    private val REVIEW_FIRST_DAY = longPreferencesKey("review_first_day")
+    private val REVIEW_LOOKUPS = intPreferencesKey("review_lookups")
+    private val REVIEW_DAYS_USED = intPreferencesKey("review_days_used")
+    private val REVIEW_LAST_LOOKUP_DAY = longPreferencesKey("review_last_lookup_day")
+    private val REVIEW_ASKED_DAY = longPreferencesKey("review_asked_day")
     private val SEEN_PREFIX = "seen_version_"   // + section id: "seen_version_cr" = "2026-09-25"
 
     val displaySettings: Flow<DisplaySettings> = context.dataStore.data.map { p ->
@@ -50,6 +62,40 @@ class SettingsDataStore(private val context: Context) : SearchPreferences {
     override val autoOnlineSearch: Flow<Boolean> = context.dataStore.data.map { it[AUTO_ONLINE_SEARCH] ?: true }.distinctUntilChanged()
     suspend fun setAutoOnlineSearch(enabled: Boolean) = set(AUTO_ONLINE_SEARCH, enabled)
 
+    /** Card details: community formats hidden in Settings. None by default (all shown). */
+    override val hiddenCommunityFormats: Flow<Set<String>> =
+        context.dataStore.data.map { it[HIDDEN_COMMUNITY_FORMATS].orEmpty() }.distinctUntilChanged()
+
+    suspend fun setCommunityFormatShown(format: String, shown: Boolean) {
+        context.dataStore.edit { p ->
+            val hidden = p[HIDDEN_COMMUNITY_FORMATS].orEmpty()
+            p[HIDDEN_COMMUNITY_FORMATS] = if (shown) hidden - format else hidden + format
+        }
+    }
+
+    /** Play review: what's counted to decide when to ask (ReviewPolicy). Only on the phone. */
+    override val reviewStats: Flow<ReviewStats> = context.dataStore.data.map(::reviewStatsOf).distinctUntilChanged()
+
+    /** One edit reads and writes, so two lookups at once never lose a count. */
+    override suspend fun updateReviewStats(transform: (ReviewStats) -> ReviewStats) {
+        context.dataStore.edit { p ->
+            val s = transform(reviewStatsOf(p))
+            fun <T> put(key: Preferences.Key<T>, value: T?) { if (value == null) p.remove(key) else p[key] = value }
+            put(REVIEW_FIRST_DAY, s.firstDay)
+            p[REVIEW_LOOKUPS] = s.lookups
+            p[REVIEW_DAYS_USED] = s.daysUsed
+            put(REVIEW_LAST_LOOKUP_DAY, s.lastLookupDay)
+            put(REVIEW_ASKED_DAY, s.askedDay)
+        }
+    }
+
+    private fun reviewStatsOf(p: Preferences) = ReviewStats(
+        firstDay = p[REVIEW_FIRST_DAY],
+        lookups = p[REVIEW_LOOKUPS] ?: 0,
+        daysUsed = p[REVIEW_DAYS_USED] ?: 0,
+        lastLookupDay = p[REVIEW_LAST_LOOKUP_DAY],
+        askedDay = p[REVIEW_ASKED_DAY],
+    )
     /** «Updated» label: the version of each section the user last entered, by section id (see [SectionUpdates]). */
     val seenSectionVersions: Flow<Map<String, String>> = context.dataStore.data.map(::seenVersions).distinctUntilChanged()
 

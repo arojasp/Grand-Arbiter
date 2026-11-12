@@ -53,7 +53,17 @@ data class CardFace(
 
 enum class Legality { LEGAL, RESTRICTED, BANNED, NOT_LEGAL }
 
-data class FormatLegality(val format: String, val legality: Legality)
+data class FormatLegality(val format: String, val legality: Legality) {
+    /** Managed by Wizards; the other paper formats are community formats. */
+    val official: Boolean get() = format in OFFICIAL_FORMATS
+
+    companion object {
+        val OFFICIAL_FORMATS = setOf("standard", "pioneer", "modern", "legacy", "vintage", "pauper", "commander")
+
+        /** The community formats the app keeps, in display order (Scryfall keys). */
+        val COMMUNITY_FORMATS = listOf("oathbreaker", "duel", "premodern", "oldschool", "predh", "paupercommander")
+    }
+}
 
 /** Cards banned as a whole category rather than by name. NONE = an actual, named ban. */
 enum class BanCategory { NONE, UN_CARD, CONSPIRACY, ANTE }

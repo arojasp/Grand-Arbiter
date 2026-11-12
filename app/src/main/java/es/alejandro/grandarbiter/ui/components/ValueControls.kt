@@ -1,9 +1,10 @@
-package es.alejandro.grandarbiter.ui.tools.drafttimer
+package es.alejandro.grandarbiter.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -15,9 +16,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -35,17 +40,20 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 
-/* Setting rows and value controls of the Draft Timer setup and Times screens. */
+/* Setting rows and value controls: Draft Timer setup and Times, Advanced search, custom list points. */
 
 /** A setting: label, optional hint below it, and its control on the right. */
 @Composable
@@ -94,11 +102,11 @@ internal fun StepperControl(
         Modifier.clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        StepButton("−", stringResource(R.string.draft_decrease, label), enabled = value > range.first) {
+        StepButton("−", stringResource(R.string.value_decrease, label), enabled = value > range.first) {
             onChange((value - step).coerceIn(range))
         }
         val text = if (unit != null) "$value $unit" else value.toString()
-        val typeLabel = stringResource(R.string.draft_type_value, label)
+        val typeLabel = stringResource(R.string.value_type, label)
         Box(
             Modifier.width(if (unit != null) 64.dp else 56.dp).height(36.dp)
                 .then(if (unit != null) Modifier.clip(CircleShape).clickable(role = Role.Button, onClickLabel = typeLabel) { typing = true } else Modifier),
@@ -107,7 +115,7 @@ internal fun StepperControl(
             Text(text, textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleSmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurface)
         }
-        StepButton("+", stringResource(R.string.draft_increase, label), enabled = value < range.last) {
+        StepButton("+", stringResource(R.string.value_increase, label), enabled = value < range.last) {
             onChange((value + step).coerceIn(range))
         }
     }
@@ -136,22 +144,25 @@ private fun NumberDialog(title: String, value: Int, range: IntRange, unit: Strin
                 modifier = Modifier.focusRequester(focus),
                 singleLine = true,
                 suffix = { Text(unit) },
-                supportingText = { Text(stringResource(R.string.draft_value_range, range.first, range.last, unit)) },
+                supportingText = { Text(stringResource(R.string.value_range, range.first, range.last, unit)) },
                 isError = parsed == null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
             )
         },
         confirmButton = {
-            TextButton(onClick = { parsed?.let(onSet) }, enabled = parsed != null) { Text(stringResource(R.string.draft_set)) }
+            TextButton(onClick = { parsed?.let(onSet) }, enabled = parsed != null) { Text(stringResource(R.string.value_set)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.draft_cancel)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.value_cancel)) } },
     )
 }
 
 /**
- * Pick one of a few values (Two-Headed Giant booster size: 14 | 15; Rochester: Team 1 | Team 2).
+ * Pick one of a few values: the app's only single-choice control (Deck Counter format and pile,
+ * HJ Announcement REL, Advanced search color options, custom list status, Draft 14 | 15, Team 1 | 2).
  * [width] fixes each segment; null shares the row's width equally (give [modifier] a width).
- * Segments grow taller when the text wraps at large text sizes.
+ * When a label does not fit its segment on one line (long labels, large text sizes) the segments
+ * stack, one per row: a pill two or three lines tall clips its text at the round ends.
+ * [selected] may match no value (nothing chosen yet).
  */
 @Composable
 internal fun Choice(
@@ -162,23 +173,61 @@ internal fun Choice(
     modifier: Modifier = Modifier,
     label: @Composable (Int) -> String = { it.toString() },
 ) {
+    val labels = values.map { label(it) }
+    if (width != null) {
+        ChoiceTrack(values, labels, selected, onSelect, stacked = false, segmentWidth = width.dp, modifier = modifier)
+        return
+    }
+    BoxWithConstraints(modifier) {
+        val measurer = rememberTextMeasurer()
+        val style = MaterialTheme.typography.labelLarge
+        val density = LocalDensity.current
+        // Track padding 4 + 4, gaps 4 dp, text padding 8 + 8 inside each segment.
+        val room = (maxWidth - 8.dp - 4.dp * (values.size - 1)) / values.size - 16.dp
+        val fits = labels.all { text -> with(density) { measurer.measure(text, style).size.width.toDp() } <= room }
+        ChoiceTrack(values, labels, selected, onSelect, stacked = !fits, segmentWidth = null, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+private fun ChoiceTrack(
+    values: List<Int>,
+    labels: List<String>,
+    selected: Int,
+    onSelect: (Int) -> Unit,
+    stacked: Boolean,
+    segmentWidth: Dp?,
+    modifier: Modifier,
+) {
     val colors = MaterialTheme.colorScheme
-    Row(
-        modifier.height(IntrinsicSize.Min).clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        values.forEach { value ->
-            val on = value == selected
-            Box(
-                (if (width != null) Modifier.width(width.dp) else Modifier.weight(1f))
-                    .fillMaxHeight().heightIn(min = 36.dp).clip(CircleShape)
-                    .background(if (on) colors.primary else colors.surfaceContainerHighest)
-                    .clickable(role = Role.RadioButton) { onSelect(value) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(label(value), style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center,
-                    color = if (on) colors.onPrimary else colors.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+    val shape = if (stacked) RoundedCornerShape(18.dp) else CircleShape
+    val segment: @Composable (Modifier, Int) -> Unit = { m, i ->
+        val on = values[i] == selected
+        Box(
+            m.heightIn(min = 36.dp).clip(shape)
+                .background(if (on) colors.primary else colors.surfaceContainerHighest)
+                .selectable(selected = on, role = Role.RadioButton) { onSelect(values[i]) },
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(labels[i], style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center,
+                color = if (on) colors.onPrimary else colors.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+        }
+    }
+    if (stacked) {
+        Column(
+            modifier.clip(RoundedCornerShape(22.dp)).background(colors.surfaceContainerHighest).padding(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            values.indices.forEach { segment(Modifier.fillMaxWidth(), it) }
+        }
+    } else {
+        Row(
+            modifier.height(IntrinsicSize.Min).clip(CircleShape).background(colors.surfaceContainerHighest).padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            values.indices.forEach {
+                segment((if (segmentWidth != null) Modifier.width(segmentWidth) else Modifier.weight(1f)).fillMaxHeight(), it)
             }
         }
     }
@@ -194,4 +243,30 @@ private fun StepButton(symbol: String, description: String, enabled: Boolean, on
     ) {
         Text(symbol, style = MaterialTheme.typography.titleMedium, color = colors.primary)
     }
+}
+
+/**
+ * One of several options that can be on at once (Advanced search colors): a filter chip, outlined
+ * when off, filled primary when on, 48 dp tall. A pill, like every control you tap (M3's default
+ * 8 dp corners read as a status tag).
+ */
+@Composable
+internal fun ToggleChip(text: String, selected: Boolean, onClick: () -> Unit, leadingIcon: (@Composable () -> Unit)? = null) {
+    val colors = MaterialTheme.colorScheme
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(text, style = MaterialTheme.typography.labelLarge) },
+        leadingIcon = leadingIcon,
+        shape = CircleShape,
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = colors.primary,
+            selectedLabelColor = colors.onPrimary,
+        ),
+        border = FilterChipDefaults.filterChipBorder(
+            enabled = true, selected = selected,
+            borderColor = colors.outline, selectedBorderColor = colors.primary,
+        ),
+        modifier = Modifier.heightIn(min = 48.dp),
+    )
 }

@@ -89,7 +89,7 @@ object CardMapper {
     }
 
     /** Formats Wizards manages; the rest of CardFilter.PAPER_FORMATS are community formats. */
-    val OFFICIAL_FORMATS = setOf("standard", "pioneer", "modern", "legacy", "vintage", "pauper", "commander")
+    val OFFICIAL_FORMATS = FormatLegality.OFFICIAL_FORMATS
 
     /**
      * Per-format banned/restricted lists from the stored legalities. Every paper format appears,

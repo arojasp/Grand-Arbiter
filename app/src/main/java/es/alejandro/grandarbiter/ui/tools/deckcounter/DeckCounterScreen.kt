@@ -64,7 +64,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -78,7 +77,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
-import es.alejandro.grandarbiter.ui.components.SelectChip
+import es.alejandro.grandarbiter.ui.components.Choice
 import es.alejandro.grandarbiter.ui.theme.legalColors
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -132,11 +131,13 @@ fun DeckCounterScreen(
         val total = groups.sum()
         val header: @Composable () -> Unit = {
             // Format + pile
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DeckFormat.entries.forEach { f ->
-                    SelectChip(stringResource(f.label()), selected = f == format) { viewModel.selectFormat(f) }
-                }
-            }
+            Choice(
+                values = DeckFormat.entries.map { it.ordinal },
+                selected = format.ordinal,
+                onSelect = { viewModel.selectFormat(DeckFormat.entries[it]) },
+                width = null,
+                modifier = Modifier.fillMaxWidth(),
+            ) { stringResource(DeckFormat.entries[it].label()) }
             if (format.hasSideboard) {
                 PileTabs(pile, main.sum(), side.sum(), viewModel::selectPile)
             }
@@ -253,28 +254,16 @@ private fun DeckFormat.label(): Int = when (this) {
 /** Main deck / Sideboard, each with its own running total. */
 @Composable
 private fun PileTabs(pile: Pile, mainTotal: Int, sideTotal: Int, onSelect: (Pile) -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(colors.surfaceContainerHighest).padding(4.dp)
-    ) {
-        listOf(Pile.MAIN to mainTotal, Pile.SIDEBOARD to sideTotal).forEach { (p, total) ->
-            val selected = p == pile
-            Row(
-                Modifier.weight(1f).clip(RoundedCornerShape(6.dp))
-                    .background(if (selected) colors.primary else Color.Transparent)
-                    .clickable(role = Role.Tab) { onSelect(p) }
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(stringResource(if (p == Pile.MAIN) R.string.deck_pile_main else R.string.deck_pile_side),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (selected) colors.onPrimary else colors.onSurfaceVariant)
-                Spacer(Modifier.width(8.dp))
-                Text(total.toString(), style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
-                    color = if (selected) colors.onPrimary else colors.onSurface)
-            }
-        }
+    val piles = listOf(Pile.MAIN to mainTotal, Pile.SIDEBOARD to sideTotal)
+    Choice(
+        values = piles.indices.toList(),
+        selected = piles.indexOfFirst { it.first == pile },
+        onSelect = { onSelect(piles[it].first) },
+        width = null,
+        modifier = Modifier.fillMaxWidth(),
+    ) { i ->
+        val (p, total) = piles[i]
+        "${stringResource(if (p == Pile.MAIN) R.string.deck_pile_main else R.string.deck_pile_side)}  $total"
     }
 }
 

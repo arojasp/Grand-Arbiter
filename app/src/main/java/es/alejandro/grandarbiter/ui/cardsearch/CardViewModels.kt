@@ -6,7 +6,12 @@ import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail
 import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
+import es.alejandro.grandarbiter.domain.model.customlists.CustomList
+import es.alejandro.grandarbiter.domain.model.customlists.ListStatus
+import es.alejandro.grandarbiter.domain.model.cards.FormatLegality
+import es.alejandro.grandarbiter.domain.repository.CardDisplayPreferences
 import es.alejandro.grandarbiter.domain.repository.CardRepository
+import es.alejandro.grandarbiter.domain.repository.CustomListRepository
 import es.alejandro.grandarbiter.domain.repository.SearchPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.transformLatest
@@ -53,11 +58,16 @@ class CardSearchViewModel(
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardDataState.Checking)
 
-    private val offline: StateFlow<CardSearchResult> = combine(query.debounce(200), dataState) { q, d -> q to d }
+    /**
+     * The phone's answer and the query it answers; null while there is none (blank query, cards
+     * not ready). Tagged so the screen never shows an answer to another query as this one's
+     * ("0 cards found" for a query that hasn't been searched yet).
+     */
+    private val offline: StateFlow<Pair<String, CardSearchResult>?> = combine(query.debounce(200), dataState) { q, d -> q to d }
         .mapLatest { (q, d) ->
-            if (q.isBlank() || d !is CardDataState.Ready) CardSearchResult.Empty else repository.search(q, limit = LIMIT)
+            if (q.isBlank() || d !is CardDataState.Ready) null else q to repository.search(q, limit = LIMIT)
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardSearchResult.Empty)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Bumped by "Try again": runs the same online search once more. */
     private val retries = MutableStateFlow(0)
@@ -91,18 +101,23 @@ class CardSearchViewModel(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /**
-     * What the screen shows. An online answer only stands while the query is the one searched;
-     * while it's on its way (or the judge is still typing) the screen says it's searching Scryfall.
+     * What the screen shows. An answer only stands for the query it answers: while the current one
+     * is being searched, the previous cards stay (or nothing, if there were none), never a "0 cards
+     * found" that nobody searched. Online answers likewise: while one is on its way (or the judge is
+     * still typing) the screen says it's searching Scryfall.
      */
-    val results: StateFlow<SearchState> = combine(offline, online, query, autoOnline, requested) { off, on, q, auto, asked ->
+    val results: StateFlow<SearchState> = combine(offline, online, query, autoOnline, requested) { searched, on, q, auto, asked ->
+        val off = searched?.takeIf { it.first == q }?.second
         when {
+            off == null -> (searched?.second as? CardSearchResult.Offline)?.takeIf { it.cards.isNotEmpty() }
+                ?.let { SearchState.Shown(it) } ?: SearchState.Pending
             off !is CardSearchResult.NeedsOnline -> SearchState.Shown(off)
             !off.complete -> SearchState.Shown(off)                       // quotes/parentheses still open
             !auto && asked != q -> SearchState.AskToSearchOnline(off.parts)
             on != null && on.first == q && on.second != null -> SearchState.Shown(on.second!!)
             else -> SearchState.SearchingOnline
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchState.Shown(CardSearchResult.Empty))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchState.Pending)
 
     fun onQueryChange(value: String) { savedStateHandle[KEY_QUERY] = value }
 
@@ -114,7 +129,7 @@ class CardSearchViewModel(
         when (val r = results.value) {
             is SearchState.AskToSearchOnline -> requested.value = query.value
             is SearchState.Shown -> if (r.result is CardSearchResult.OnlineFailed) retries.value++
-            SearchState.SearchingOnline -> Unit
+            SearchState.SearchingOnline, SearchState.Pending -> Unit
         }
     }
 
@@ -131,6 +146,8 @@ class CardSearchViewModel(
 
 sealed interface SearchState {
     data class Shown(val result: CardSearchResult) : SearchState
+    /** The query has no answer yet (searching, or cards not ready): nothing to show. */
+    data object Pending : SearchState
     data object SearchingOnline : SearchState
     /** Automatic search off: [parts] need Scryfall, and nothing is sent until the judge asks. */
     data class AskToSearchOnline(val parts: List<String>) : SearchState
@@ -139,16 +156,37 @@ sealed interface SearchState {
 sealed interface CardDetailState {
     data object Loading : CardDetailState
     data object NotFound : CardDetailState
-    data class Loaded(val card: CardDetail) : CardDetailState
+    /** [lists]: the judge's custom lists that have this card, in their order; empty if none. */
+    data class Loaded(val card: CardDetail, val lists: List<ListOnCard> = emptyList()) : CardDetailState
 }
+
+/** A custom list that has the card, and what it says about it. */
+data class ListOnCard(val listName: String, val status: ListStatus)
 
 class CardDetailViewModel(
     savedStateHandle: SavedStateHandle,
     repository: CardRepository,
+    customLists: CustomListRepository,
+    display: CardDisplayPreferences,
 ) : ViewModel() {
     private val oracleId: String = savedStateHandle.get<String>(ARG_CARD).orEmpty()
 
-    val state: StateFlow<CardDetailState> = flow {
-        emit(repository.card(oracleId)?.let { CardDetailState.Loaded(it) } ?: CardDetailState.NotFound)
+    val state: StateFlow<CardDetailState> = combine(
+        flow { emit(repository.card(oracleId)) },
+        customLists.observeAll(),
+        display.hiddenCommunityFormats,
+    ) { card, lists, hidden ->
+        if (card == null) CardDetailState.NotFound
+        else CardDetailState.Loaded(card.copy(legalities = visibleLegalities(card.legalities, hidden)), listsWith(oracleId, lists))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardDetailState.Loading)
+
+    companion object {
+        /** Official formats always; community formats unless hidden in Settings. */
+        fun visibleLegalities(legalities: List<FormatLegality>, hidden: Set<String>): List<FormatLegality> =
+            legalities.filter { it.official || it.format !in hidden }
+
+        /** Only the lists that have the card: absent from a list means legal / 0 points, which needs no row. */
+        fun listsWith(oracleId: String, lists: List<CustomList>): List<ListOnCard> =
+            lists.mapNotNull { list -> list.entries.firstOrNull { it.oracleId == oracleId }?.let { ListOnCard(list.name, it.status) } }
+    }
 }

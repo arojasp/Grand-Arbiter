@@ -134,3 +134,31 @@ Card Search understands Scryfall syntax (t:goblin o:haste…), and the new Advan
 | `1510209`, `c248542`, `7867361` | Custom lists: paste a list as text ("3 Sol Ring", "Black Lotus restricted"…) and share a list in the same format. |
 | `e5805c8` | One "Discard changes?" dialog everywhere; no icons on the online search buttons. |
 | `ba63a42` | Section labels in sentence case instead of small capitals (Settings, card details, Banned, Draft Timer, HJ Announcement); in the Draft Timer setup and Times each label now sits above its card. Card details: "Pauper Commander" was shown as a second "Pauper" in the legality list. Banned: the loading message no longer touches the screen edges. |
+
+### UI debt (branch `feature/ui-debt`)
+
+Plan: `claude/ui-debt-plan.md` in the Claude project. Released in **1.6.0 (versionCode 14)**.
+
+| Commit | English |
+|---|---|
+| Card search: readable end-of-results caption | Card Search: the card count and data date on the empty search, and "End of results", are readable now (they were drawn at 20 % opacity). |
+| Quick References: the editor works like the other editors | Quick References: the editor works like Advanced search and custom lists — a back arrow, Save at the bottom (above the keyboard) and "Delete reference" in the ⋮ menu instead of at the end of the page. |
+| Status tags: one color for Restricted, a shape that does not look tappable | Banned & Restricted, custom lists and card legality: Restricted is amber on every screen (it was solid black in the lists, louder than Banned). The draft labels (Pack 1 of 3, Pass left) and Home's "Updated" are square-cornered tags instead of pills, so they no longer look like buttons. Ruling dates and Release Notes set codes are plain text. |
+| One control for choosing one option | Deck Counter (format, Main deck / Sideboard) and HJ Announcement (REL) use the same segmented control as the rest of the app. When an option doesn't fit on one line (long names, large text sizes) the options stack one per row: at large text sizes "Commander" no longer breaks letter by letter. Screen readers now hear which option is selected. |
+
+### Judge feedback, second round (branch `feature/judge-feedback-2`)
+
+From Donald Sutherland and Andrew Anastasi on the judges' forum. Released in **1.6.0 (versionCode 14)**,
+along with the security hardening (no visible change). Play text, copied to `whatsnew/`:
+
+> Card details: rulings now start collapsed, so you can show a player the Oracle text without them; tap "Show rulings" to open them. Official and community formats are listed apart, Settings lets you pick which community formats to see, and your custom lists show what they say about the card. Card Search no longer says "0 cards found" before it has searched. Restricted has its own color everywhere, and option controls fit large text sizes. Settings > About has "Rate Grand Arbiter".
+
+| Commit | English |
+|---|---|
+| Card detail: rulings start collapsed | Card details: rulings start collapsed, so you can show a player the Oracle text without them. Tap "Show 5 rulings" to open them; the count is in that row ("5 Total" is gone). |
+| Card search: never "0 cards found" before searching | Card Search: "0 cards found" only appears once the search you typed has really been run. Before, it could show for a moment while you typed, or while the card data was getting ready, as if the card didn't exist. If an answer takes longer than usual, it says "Searching…" instead of a blank screen. |
+| Card detail: your custom lists | Card details: a "Custom lists" block under Legality shows what your own lists say about the card (banned, restricted or its points). Only lists that have the card appear. |
+| Card detail: official and community formats apart | Card details: legality is split like the Banned & Restricted screen: "Legality" for the formats Wizards manages, "Community formats" below, then your "Custom lists". |
+| Card detail: no bookmark icon on rulings | Card details: the small book icon next to each official ruling is gone; it said nothing the absence of the "Scryfall note" tag didn't already say. |
+| Settings: choose the community formats on cards | Settings > Card search: "Community formats in card details" opens a list to pick which community formats appear on cards (all by default). Official formats always appear; Banned & Restricted shows every list as before. Advanced search color chips are rounded like every other control you tap. |
+| Ask for a Play review, now and then | Now and then, after you've used the app for a while (looking up cards and rules on several days), Google Play may ask you to rate the app when you come back from a card or a rule. Never while a draft is running. Settings > About also has "Rate Grand Arbiter", which opens the app's Play page. |

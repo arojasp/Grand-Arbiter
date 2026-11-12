@@ -26,7 +26,7 @@ object ReviewPolicy {
     const val MIN_LOOKUPS = 10
     const val MIN_DAYS_USED = 3
     const val MIN_DAYS_SINCE_FIRST_USE = 7
-    const val DAYS_BETWEEN_ASKS = 120
+    const val DAYS_BETWEEN_ASKS = 60
 
     fun afterLookup(s: ReviewStats, today: Long): ReviewStats = s.copy(
         firstDay = s.firstDay ?: today,

@@ -36,10 +36,11 @@ class ReviewPolicyTest {
         assertFalse(ReviewPolicy.shouldAsk(ok, 106))                     // 6 days since first use
     }
 
-    @Test fun afterAsking_waits120Days() {
+    @Test fun afterAsking_waitsDaysBetweenAsks() {
         val asked = ReviewStats(firstDay = 100, lookups = 40, daysUsed = 9, lastLookupDay = 200, askedDay = 150)
-        assertFalse(ReviewPolicy.shouldAsk(asked, 269))
-        assertTrue(ReviewPolicy.shouldAsk(asked, 270))
+        val next = 150L + ReviewPolicy.DAYS_BETWEEN_ASKS
+        assertFalse(ReviewPolicy.shouldAsk(asked, next - 1))
+        assertTrue(ReviewPolicy.shouldAsk(asked, next))
     }
 
     @Test fun manyLookupsInOneDay_areOneDay() {

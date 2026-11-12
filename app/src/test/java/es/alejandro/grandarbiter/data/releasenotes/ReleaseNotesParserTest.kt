@@ -28,6 +28,14 @@ class ReleaseNotesParserTest {
         assertNull(ReleaseNotesParser.parse(file(set("BAD", url = "http://magic.wizards.com/x"))))
     }
 
+    /** The code becomes a file name: anything but a plain set code rejects the whole index. */
+    @Test fun rejectsCodesThatArentSetCodes() {
+        for (code in listOf("../x", "..", "A/B", "fra", "X", "TOOLONG7", "", "FR A")) {
+            assertNull(code, ReleaseNotesParser.parse(file(set("FRA"), set(code))))
+        }
+        assertNotNull(ReleaseNotesParser.parse(file(set("FRA"), set("40K"), set("PIP2"))))
+    }
+
     /** What ships in the APK and is published from main must parse, or the app shows nothing. */
     @Test fun bundledAsset_isValid() {
         val asset = File("src/main/assets/rules/release-notes.json")

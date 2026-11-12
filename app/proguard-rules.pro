@@ -37,3 +37,7 @@
 
 # Room, Koin (constructor DSL, no reflection), OkHttp, Coil and Play In-App Updates ship their
 # own consumer rules: nothing to add here.
+
+# Play In-App Review (review-ktx 2.0.2) refers to this Play services annotation without
+# depending on the library that has it. An annotation only: nothing runs without it.
+-dontwarn com.google.android.gms.common.annotation.NoNullnessRewrite

@@ -28,6 +28,8 @@ object RulesBundleValidator {
             val where = doc.id.key
             runCatching { LocalDate.parse(doc.effectiveDate) }
                 .onFailure { add("$where: bad effectiveDate '${doc.effectiveDate}'") }
+            // Settings opens it in the browser: only an https page, never another scheme.
+            if (!doc.sourceUrl.startsWith("https://")) add("$where: sourceUrl must be https://")
             if (doc.sections.isEmpty()) add("$where: no sections")
 
             val seen = HashSet<String>()

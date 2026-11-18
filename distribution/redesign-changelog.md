@@ -169,4 +169,4 @@ From judge feedback (Pro Tour, RCQ, World Championship). Not released yet.
 
 | Commit | English |
 |---|---|
-| Draft Timer: Pro Tour preset on the Times screen | Draft Timer > Booster Draft > Times: a "Preset" choice at the top sets MTR or Pro Tour times in one tap. Pro Tour gives the first six picks of a 14-card pack more time (50, 45, 40, 35, 30 and 25 s); everything else stays as in the MTR. If you have edited the times yourself, the app asks before replacing them. With packs other than 14 cards, Pro Tour explains that it is only for 14-card packs. |
+| Draft Timer: Pro Tour preset on the Times screen | Draft Timer > Booster Draft > Times: a "Preset" choice at the top sets MTR or Pro Tour times in one tap. Pro Tour gives the first six picks of a 14-card pack more time (50, 45, 40, 35, 30 and 25 s); everything else stays as in the MTR. If you have edited the times yourself, the app asks before replacing them. With packs other than 14 cards, Pro Tour is dimmed and a tap explains that it is only for 14-card packs. The Times card of the setup says "Pro Tour" when those are the times in use. |

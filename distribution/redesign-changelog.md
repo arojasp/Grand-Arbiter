@@ -162,3 +162,11 @@ along with the security hardening (no visible change). Play text, copied to `wha
 | Card detail: no bookmark icon on rulings | Card details: the small book icon next to each official ruling is gone; it said nothing the absence of the "Scryfall note" tag didn't already say. |
 | Settings: choose the community formats on cards | Settings > Card search: "Community formats in card details" opens a list to pick which community formats appear on cards (all by default). Official formats always appear; Banned & Restricted shows every list as before. Advanced search color chips are rounded like every other control you tap. |
 | Ask for a Play review, now and then | Now and then, after you've used the app for a while (looking up cards and rules on several days), Google Play may ask you to rate the app when you come back from a card or a rule. Never while a draft is running. Settings > About also has "Rate Grand Arbiter", which opens the app's Play page. |
+
+### Draft times: Pro Tour preset (branch `feature/draft-pt-preset`)
+
+From judge feedback (Pro Tour, RCQ, World Championship). Not released yet.
+
+| Commit | English |
+|---|---|
+| Draft Timer: Pro Tour preset on the Times screen | Draft Timer > Booster Draft > Times: a "Preset" choice at the top sets MTR or Pro Tour times in one tap. Pro Tour gives the first six picks of a 14-card pack more time (50, 45, 40, 35, 30 and 25 s); everything else stays as in the MTR. If you have edited the times yourself, the app asks before replacing them. With packs other than 14 cards, Pro Tour explains that it is only for 14-card packs. |

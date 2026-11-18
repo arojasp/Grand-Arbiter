@@ -24,6 +24,12 @@ enum class DraftTimesPreset(val times: DraftTimes) {
         ),
     );
 
+    /** It changes something in a draft with these [packSizes] (Pro Tour: only 14-card packs). */
+    fun appliesTo(packSizes: Collection<Int>): Boolean = when (this) {
+        MTR -> true
+        PRO_TOUR -> PRO_TOUR_PACK_SIZE in packSizes
+    }
+
     /** The [times] in use are this preset's, untouched. */
     fun matches(times: DraftTimes): Boolean = times == this.times
 

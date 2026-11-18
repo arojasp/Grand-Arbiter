@@ -431,6 +431,13 @@
     <string name="draft_unit_minutes">min</string>
     <string name="draft_unit_seconds">s</string>
     <string name="draft_times_title">Times</string>
+    <string name="draft_times_section_preset">Preset</string>
+    <string name="draft_times_preset_mtr">MTR</string>
+    <string name="draft_times_preset_pro_tour">Pro Tour</string>
+    <string name="draft_times_preset_pro_tour_14_only">Pro Tour times are only for 14-card packs</string>
+    <string name="draft_times_replace_title">Replace your custom times?</string>
+    <string name="draft_times_replace_keep">Keep</string>
+    <string name="draft_times_replace_confirm">Replace</string>
     <string name="draft_times_section_picks">Picks</string>
     <string name="draft_times_timed">Timed picks</string>
     <string name="draft_times_timed_hint">Off: no countdown. You move on to each pick and review yourself.</string>

@@ -3,6 +3,7 @@ package es.alejandro.grandarbiter.ui.tools.drafttimer
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftTimeRows
 import es.alejandro.grandarbiter.domain.draft.DraftTimes
+import es.alejandro.grandarbiter.domain.draft.DraftTimesPreset
 import es.alejandro.grandarbiter.domain.draft.DraftTimings
 import es.alejandro.grandarbiter.domain.draft.FormatTimes
 import es.alejandro.grandarbiter.domain.draft.PickRow
@@ -25,6 +26,16 @@ data class DraftTimesModel(
     data class ReviewRow(val pack: Int, val seconds: Int, val mtrSeconds: Int) {
         val isChanged: Boolean get() = seconds != mtrSeconds
     }
+
+    /** The ready-made times offered here (none, or only MTR: no choice to show). */
+    val presets: List<DraftTimesPreset> get() = DraftTimesPreset.availableFor(format)
+
+    /** The preset the picks and reviews are exactly as; null = custom times. */
+    val preset: DraftTimesPreset? get() = DraftTimesPreset.matching(times)?.takeIf { it in presets }
+
+    /** Offered but changing nothing with these packs: tapping one explains why instead. */
+    val presetsNotForThesePacks: Set<DraftTimesPreset>
+        get() = presets.filterNot { it.appliesTo(lists.map(PickList::packSize)) }.toSet()
 
     val timedPicks: Boolean get() = times.timedPicks
     val cardsPerPick: Int get() = if (format == DraftFormat.TWO_HEADED_GIANT) 2 else 1

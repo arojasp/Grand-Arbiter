@@ -8,6 +8,7 @@ import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
 import es.alejandro.grandarbiter.domain.draft.DraftTimes
+import es.alejandro.grandarbiter.domain.draft.DraftTimesPreset
 import es.alejandro.grandarbiter.domain.draft.DraftTimesStore
 import es.alejandro.grandarbiter.domain.draft.DraftTimings
 import es.alejandro.grandarbiter.domain.draft.FormatTimes
@@ -43,6 +44,9 @@ class DraftTimesViewModel(
         DraftTimesModel.of(format, packSizes, s, t, lastMinutes)
     }.stateIn(viewModelScope, SharingStarted.Eagerly,
         DraftTimesModel.of(format, packSizes, stored.value, DraftTimings.FALLBACK, lastMinutes))
+
+    /** Picks and reviews become [preset]'s; deck construction is left as it is. */
+    fun applyPreset(preset: DraftTimesPreset) = saveTimes { preset.times }
 
     fun setTimedPicks(on: Boolean) = saveTimes { it.withTimedPicks(on) }
     fun setPick(row: PickRow, seconds: Int) = saveTimes { it.withPick(row, seconds) }

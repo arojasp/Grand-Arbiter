@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.ui.tools.drafttimer
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -23,20 +25,27 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.components.Choice
 import es.alejandro.grandarbiter.ui.components.Section
 import es.alejandro.grandarbiter.ui.components.SettingRow
 import es.alejandro.grandarbiter.ui.components.StepperControl
 import es.alejandro.grandarbiter.domain.draft.DraftConfig
 import es.alejandro.grandarbiter.domain.draft.DraftTimes
+import es.alejandro.grandarbiter.domain.draft.DraftTimesPreset
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -51,6 +60,9 @@ fun DraftTimesScreen(
     val colors = MaterialTheme.colorScheme
     val m by viewModel.model.collectAsState()
     val seconds = stringResource(R.string.draft_unit_seconds)
+    var replacing by remember { mutableStateOf<DraftTimesPreset?>(null) }
+    val context = LocalContext.current
+    val notForThesePacks = stringResource(R.string.draft_times_preset_pro_tour_14_only)
 
     Scaffold(
         containerColor = colors.background,
@@ -61,6 +73,26 @@ fun DraftTimesScreen(
             // Each card under its Label, outside it (as in Settings); 24 dp between groups.
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
+            if (m.presets.size > 1) {
+                Section(stringResource(R.string.draft_times_section_preset)) {
+                    Choice(
+                        values = m.presets.map { it.ordinal },
+                        selected = m.preset?.ordinal ?: NO_PRESET,
+                        onSelect = { ordinal ->
+                            val preset = DraftTimesPreset.entries[ordinal]
+                            when {
+                                preset in m.presetsNotForThesePacks ->
+                                    Toast.makeText(context, notForThesePacks, Toast.LENGTH_SHORT).show()
+                                m.preset == null -> replacing = preset
+                                else -> viewModel.applyPreset(preset)
+                            }
+                        },
+                        width = null,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { stringResource(presetLabel(DraftTimesPreset.entries[it])) },
+                    )
+                }
+            }
             Section(stringResource(R.string.draft_times_section_picks)) { DraftCard {
                 SettingRow(stringResource(R.string.draft_times_timed), stringResource(R.string.draft_times_timed_hint)) {
                     Switch(
@@ -123,7 +155,29 @@ fun DraftTimesScreen(
             }
         }
     }
+
+    // Custom times are saved as they are edited: a preset would overwrite them with no way back.
+    replacing?.let { preset ->
+        AlertDialog(
+            onDismissRequest = { replacing = null },
+            title = { Text(stringResource(R.string.draft_times_replace_title)) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.applyPreset(preset); replacing = null }) {
+                    Text(stringResource(R.string.draft_times_replace_confirm))
+                }
+            },
+            dismissButton = { TextButton(onClick = { replacing = null }) { Text(stringResource(R.string.draft_times_replace_keep)) } },
+        )
+    }
 }
+
+private fun presetLabel(preset: DraftTimesPreset): Int = when (preset) {
+    DraftTimesPreset.MTR -> R.string.draft_times_preset_mtr
+    DraftTimesPreset.PRO_TOUR -> R.string.draft_times_preset_pro_tour
+}
+
+/** [Choice] value when the times match no preset: nothing selected. */
+private const val NO_PRESET = -1
 
 /** A time row; changed from the MTR: a dot, a tinted background and the MTR value in the hint. */
 @Composable

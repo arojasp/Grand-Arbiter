@@ -52,6 +52,16 @@ class DraftTimesModelTest {
         assertTrue(booster(listOf(14, 14, 14)).presetsNotForThesePacks.isEmpty())
     }
 
+    @Test fun presets_judgedOnThePacksInUse() {
+        // Pro Tour kept, but 15-card packs: the draft runs as the MTR, like the setup says.
+        assertEquals(DraftTimesPreset.MTR, booster(listOf(15, 15, 15), FormatTimes(DraftTimesPreset.PRO_TOUR.times)).preset)
+        // Changes only to the 14-card list, 15-card packs in use: MTR too.
+        val row14 = DraftTimeRows.booster(14, DraftTimings.FALLBACK.booster).last()
+        assertEquals(DraftTimesPreset.MTR, booster(listOf(15, 15, 15), FormatTimes(DraftTimes.MTR.withPick(row14, 10))).preset)
+        // Untimed picks are never a preset.
+        assertNull(booster(listOf(14, 14, 14), FormatTimes(DraftTimes.MTR.withTimedPicks(false))).preset)
+    }
+
     @Test fun presets_constructionDoesNotChangeWhichOneIsSelected() =
         assertEquals(DraftTimesPreset.MTR, booster(listOf(14, 14, 14), FormatTimes(constructionMinutes = 30)).preset)
 

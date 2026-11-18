@@ -81,6 +81,8 @@ fun DraftTimesScreen(
                         onSelect = { ordinal ->
                             val preset = DraftTimesPreset.entries[ordinal]
                             when {
+                                // Already in use: nothing to do (and stored times for other pack sizes stay).
+                                preset == m.preset -> Unit
                                 preset in m.presetsNotForThesePacks ->
                                     Toast.makeText(context, notForThesePacks, Toast.LENGTH_SHORT).show()
                                 m.preset == null -> replacing = preset
@@ -90,6 +92,7 @@ fun DraftTimesScreen(
                         width = null,
                         modifier = Modifier.fillMaxWidth(),
                         label = { stringResource(presetLabel(DraftTimesPreset.entries[it])) },
+                        dimmed = m.presetsNotForThesePacks.map { it.ordinal }.toSet(),
                     )
                 }
             }

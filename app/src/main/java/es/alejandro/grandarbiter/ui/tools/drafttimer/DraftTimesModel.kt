@@ -30,8 +30,17 @@ data class DraftTimesModel(
     /** The ready-made times offered here (none, or only MTR: no choice to show). */
     val presets: List<DraftTimesPreset> get() = DraftTimesPreset.availableFor(format)
 
-    /** The preset the picks and reviews are exactly as; null = custom times. */
-    val preset: DraftTimesPreset? get() = DraftTimesPreset.matching(times)?.takeIf { it in presets }
+    /**
+     * The preset this draft's picks and reviews run as; null = custom times. Judged on the packs in
+     * use, like the setup's summary: Pro Tour kept for 15-card packs, or changes only to a pack size
+     * not in use, run as the MTR. Deck construction doesn't count (no preset sets it).
+     */
+    val preset: DraftTimesPreset?
+        get() {
+            val exact = DraftTimesPreset.matching(times)?.takeIf { it in presets && it !in presetsNotForThesePacks }
+            val asMtr = timedPicks && changedPicksInUse == 0 && changedReviews == 0
+            return exact ?: DraftTimesPreset.MTR.takeIf { asMtr && it in presets }
+        }
 
     /** Offered but changing nothing with these packs: tapping one explains why instead. */
     val presetsNotForThesePacks: Set<DraftTimesPreset>

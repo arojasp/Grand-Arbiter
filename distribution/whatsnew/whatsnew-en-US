@@ -1,1 +1,4 @@
-Card details: rulings now start collapsed, so you can show a player the Oracle text without them; tap "Show rulings" to open them. Official and community formats are listed apart, Settings lets you pick which community formats to see, and your custom lists show what they say about the card. Card Search no longer says "0 cards found" before it has searched. Restricted has its own color everywhere, and option controls fit large text sizes. Settings > About has "Rate Grand Arbiter".
+Draft Timer > Times now has presets:
+• New "Pro Tour" preset.
+• Save your own times as presets, deck construction included, and switch between them before a draft. Booster and Two-Headed Giant keep their own.
+• Share a preset through any app. Whoever gets it pastes it in "Import preset" and sees what it changes before saving it.

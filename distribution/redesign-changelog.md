@@ -165,9 +165,9 @@ along with the security hardening (no visible change). Play text, copied to `wha
 
 ### Draft times: Pro Tour preset (branch `feature/draft-pt-preset`)
 
-From judge feedback (Pro Tour, RCQ, World Championship). Not released yet. Play text (330 characters,
-a list as Alejandro asked; no details of the Pro Tour times; not only for judges), to copy to
-`whatsnew/whatsnew-en-US` with the version bump:
+From judge feedback (Pro Tour, RCQ, World Championship). Released in **1.7.0 (versionCode 15)**.
+Play text (330 characters, a list as Alejandro asked; no details of the Pro Tour times; not only
+for judges), copied to `whatsnew/`:
 
 ```
 Draft Timer > Times now has presets:

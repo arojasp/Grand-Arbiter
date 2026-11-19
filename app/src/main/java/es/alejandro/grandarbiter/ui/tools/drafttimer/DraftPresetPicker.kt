@@ -103,10 +103,10 @@ internal fun PresetPicker(
     // A built-in's name asks for another; a taken one asks before replacing.
     val tryImport: (SharedDraftPreset) -> Unit = { preset ->
         importing = false
-        when {
-            UserDraftPresets.isReserved(preset.name) -> importNaming = preset
-            presetNamed(preset.format, preset.name) != null -> importReplacing = preset
-            else -> imported(preset, preset.name)
+        when (ImportPlan.step(preset, presetNamed)) {
+            ImportStep.AskName -> importNaming = preset
+            is ImportStep.AskReplace -> importReplacing = preset
+            ImportStep.Save -> imported(preset, preset.name)
         }
     }
     var replacing by remember { mutableStateOf<PresetChoice?>(null) }
@@ -174,8 +174,7 @@ internal fun PresetPicker(
             confirm = stringResource(R.string.draft_times_import_confirm),
             onDismiss = { importNaming = null },
             onConfirm = { name ->
-                val free = !UserDraftPresets.isReserved(name) && presetNamed(preset.format, name) == null
-                free.also { if (it) imported(preset, name) }
+                ImportPlan.isFree(preset, name, presetNamed).also { if (it) imported(preset, name) }
             },
             startTaken = true,
         )

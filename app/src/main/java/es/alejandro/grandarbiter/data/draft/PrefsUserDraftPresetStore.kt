@@ -18,9 +18,11 @@ import java.util.UUID
 class PrefsUserDraftPresetStore(
     context: Context,
     private val newId: () -> String = { UUID.randomUUID().toString() },
+    /** Another file only in device tests, so they never touch the judge's presets. */
+    prefsName: String = "draft_presets",
 ) : UserDraftPresetStore {
 
-    private val prefs: SharedPreferences = context.getSharedPreferences("draft_presets", Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
     private val flows = DraftConfig.CUSTOM_TIMES_FORMATS.associateWith {
         MutableStateFlow(UserDraftPresetsCodec.decode(it, prefs.getString(it.name, null)))
     }

@@ -460,6 +460,7 @@
     <string name="draft_times_import_paste">Paste</string>
     <string name="draft_times_import_confirm">Import</string>
     <string name="draft_times_import_not_preset">This isn\'t a shared Grand Arbiter preset</string>
+    <string name="draft_times_import_incomplete">Part of the preset is missing. Copy the whole message again.</string>
     <string name="draft_times_import_newer">Shared from a newer Grand Arbiter. Update the app to import it.</string>
     <string name="draft_times_import_invalid">This preset has a name or times the app can\'t use</string>
     <string name="draft_times_import_mtr">MTR times</string>

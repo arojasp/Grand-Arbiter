@@ -64,6 +64,7 @@ internal fun ImportDialog(format: DraftFormat, onDismiss: () -> Unit, onImport: 
                         null -> ({ Text(stringResource(R.string.draft_times_import_hint)) })
                         is SharedPresetResult.Read -> null
                         SharedPresetResult.NotAPreset -> ({ Text(stringResource(R.string.draft_times_import_not_preset)) })
+                        SharedPresetResult.Incomplete -> ({ Text(stringResource(R.string.draft_times_import_incomplete)) })
                         SharedPresetResult.NewerVersion -> ({ Text(stringResource(R.string.draft_times_import_newer)) })
                         SharedPresetResult.Invalid -> ({ Text(stringResource(R.string.draft_times_import_invalid)) })
                     },

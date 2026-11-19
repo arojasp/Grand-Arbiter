@@ -216,6 +216,8 @@ private fun PresetSheet(
                             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                                 DropdownMenuItem(text = { Text(stringResource(R.string.draft_times_preset_rename)) },
                                     onClick = { menu = false; onRename(preset) })
+                                DropdownMenuItem(text = { Text(stringResource(R.string.draft_times_preset_share)) },
+                                    onClick = { menu = false; shareDraftPreset(context, preset) })
                                 DropdownMenuItem(text = { Text(stringResource(R.string.draft_times_preset_delete), color = colors.error) },
                                     onClick = { menu = false; onDelete(preset) })
                             }

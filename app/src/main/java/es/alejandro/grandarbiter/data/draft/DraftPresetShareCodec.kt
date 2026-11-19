@@ -54,7 +54,8 @@ object DraftPresetShareCodec {
         val minutes: Int = 0,
     )
 
-    private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    /** Defaults left out ("timed":true, no picks or reviews): a shorter line to share. */
+    private val json = Json { ignoreUnknownKeys = true }
 
     fun encode(preset: UserDraftPreset): String = json.encodeToString(
         Shared.serializer(),

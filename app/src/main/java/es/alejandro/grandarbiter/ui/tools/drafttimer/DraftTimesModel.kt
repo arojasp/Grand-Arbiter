@@ -7,6 +7,7 @@ import es.alejandro.grandarbiter.domain.draft.DraftTimesPreset
 import es.alejandro.grandarbiter.domain.draft.DraftTimings
 import es.alejandro.grandarbiter.domain.draft.FormatTimes
 import es.alejandro.grandarbiter.domain.draft.PickRow
+import es.alejandro.grandarbiter.domain.draft.UserDraftPreset
 
 /**
  * What the Times screen shows for one format and the setup's packs: one list per pack size in use
@@ -19,6 +20,8 @@ data class DraftTimesModel(
     val reviews: List<ReviewRow>,
     val constructionMinutes: Int,
     val mtrConstructionMinutes: Int,
+    /** The judge's own presets of this format, by name. */
+    val userPresets: List<UserDraftPreset> = emptyList(),
 ) {
     data class PickList(val packSize: Int, val rows: List<PickRow>)
 
@@ -41,6 +44,9 @@ data class DraftTimesModel(
             val asMtr = timedPicks && changedPicksInUse == 0 && changedReviews == 0
             return exact ?: DraftTimesPreset.MTR.takeIf { asMtr && it in presets }
         }
+
+    /** The judge's own preset that is exactly what's in use (times and construction); it wins over [preset]. */
+    val userPreset: UserDraftPreset? get() = userPresets.firstOrNull { it.matches(times, constructionMinutes) }
 
     /** Offered but changing nothing with these packs: tapping one explains why instead. */
     val presetsNotForThesePacks: Set<DraftTimesPreset>
@@ -73,6 +79,7 @@ data class DraftTimesModel(
             stored: FormatTimes,
             timings: DraftTimings,
             lastConstructionMinutes: Int?,
+            userPresets: List<UserDraftPreset> = emptyList(),
         ): DraftTimesModel {
             val times = stored.times
             val sizes = packSizes.distinct().sortedDescending()
@@ -99,7 +106,7 @@ data class DraftTimesModel(
             }
             return DraftTimesModel(format, times, lists, reviews,
                 constructionMinutes = stored.constructionMinutes ?: lastConstructionMinutes ?: mtrMinutes,
-                mtrConstructionMinutes = mtrMinutes)
+                mtrConstructionMinutes = mtrMinutes, userPresets = userPresets)
         }
     }
 }

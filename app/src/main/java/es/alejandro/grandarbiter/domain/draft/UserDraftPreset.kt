@@ -36,6 +36,11 @@ object UserDraftPresets {
     fun isValidName(name: String): Boolean =
         name.isNotEmpty() && name.length <= MAX_NAME_LENGTH && name == cleanName(name)
 
+    /** The built-in presets' names: two "Pro Tour" in one list would be confusing. */
+    val RESERVED_NAMES = setOf("MTR", "Pro Tour")
+
+    fun isReserved(name: String): Boolean = RESERVED_NAMES.any { it.equals(cleanName(name), ignoreCase = true) }
+
     /** The preset called [name] (ignoring case), if any. */
     fun named(presets: List<UserDraftPreset>, name: String): UserDraftPreset? {
         val clean = cleanName(name)
@@ -53,10 +58,10 @@ object UserDraftPresets {
         return sorted(presets.filterNot { it.id == saved.id } + saved)
     }
 
-    /** Null when [name] isn't valid or another preset already has it. */
+    /** Null when [name] isn't valid, is a built-in's or another preset already has it. */
     fun withRenamed(presets: List<UserDraftPreset>, id: String, name: String): List<UserDraftPreset>? {
         val clean = cleanName(name)
-        if (!isValidName(clean)) return null
+        if (!isValidName(clean) || isReserved(clean)) return null
         val other = named(presets, clean)
         if (other != null && other.id != id) return null
         return sorted(presets.map { if (it.id == id) it.copy(name = clean) else it })
@@ -71,10 +76,10 @@ object UserDraftPresets {
 interface UserDraftPresetStore {
     fun presets(format: DraftFormat): StateFlow<List<UserDraftPreset>>
 
-    /** Saved under [name]; a preset with that name (any case) is replaced. [name] must be valid. */
+    /** Saved under [name]; a preset with that name (any case) is replaced. [name] must be valid and not reserved. */
     fun save(format: DraftFormat, name: String, times: DraftTimes, constructionMinutes: Int): UserDraftPreset
 
-    /** False when [name] isn't valid or is taken by another preset. */
+    /** False when [name] isn't valid, is a built-in's or is taken by another preset. */
     fun rename(format: DraftFormat, id: String, name: String): Boolean
 
     fun delete(format: DraftFormat, id: String)

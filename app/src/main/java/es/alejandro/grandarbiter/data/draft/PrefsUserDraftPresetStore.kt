@@ -29,6 +29,7 @@ class PrefsUserDraftPresetStore(
 
     @Synchronized
     override fun save(format: DraftFormat, name: String, times: DraftTimes, constructionMinutes: Int): UserDraftPreset {
+        require(!UserDraftPresets.isReserved(name)) { "'$name' is a built-in preset's name" }
         val preset = UserDraftPreset(newId(), UserDraftPresets.cleanName(name), format, times, constructionMinutes)
         val list = UserDraftPresets.withSaved(flow(format).value, preset)
         write(format, list)

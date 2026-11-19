@@ -174,7 +174,7 @@ private fun TimesCard(t: DraftTimesModel, onOpen: () -> Unit, onReset: () -> Uni
     val shape = RoundedCornerShape(12.dp)
     // Like DraftCard, but the padding is inside the clickable area.
     Column(Modifier.fillMaxWidth().clip(shape).background(colors.surfaceContainer).border(1.dp, colors.outlineVariant, shape)) {
-        val title = stringResource(when {
+        val title = t.userPreset?.name ?: stringResource(when {
             !t.timedPicks -> R.string.draft_times_untimed_title
             t.differsInUse && t.preset == DraftTimesPreset.PRO_TOUR -> R.string.draft_times_preset_pro_tour
             t.differsInUse -> R.string.draft_times_custom_title

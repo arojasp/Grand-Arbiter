@@ -50,6 +50,13 @@ class UserDraftPresetsTest {
         assertEquals("rcq", UserDraftPresets.withRenamed(list, "1", "rcq")!!.first { it.id == "1" }.name)   // its own name, other case
     }
 
+    @Test fun builtInNames_areReserved() {
+        assertTrue(UserDraftPresets.isReserved("mtr"))
+        assertTrue(UserDraftPresets.isReserved(" pro   tour "))
+        assertFalse(UserDraftPresets.isReserved("Pro Tour Atlanta"))
+        assertNull(UserDraftPresets.withRenamed(listOf(preset("1", "RCQ")), "1", "Pro tour"))
+    }
+
     @Test fun delete_onlyThatOne() =
         assertEquals(listOf("2"), UserDraftPresets.without(listOf(preset("1", "A"), preset("2", "B")), "1").map { it.id })
 

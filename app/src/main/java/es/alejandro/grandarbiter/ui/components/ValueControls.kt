@@ -162,8 +162,7 @@ private fun NumberDialog(title: String, value: Int, range: IntRange, unit: Strin
  * [width] fixes each segment; null shares the row's width equally (give [modifier] a width).
  * When a label does not fit its segment on one line (long labels, large text sizes) the segments
  * stack, one per row: a pill two or three lines tall clips its text at the round ends.
- * [selected] may match no value (nothing chosen yet). [dimmed] values look unavailable (like a
- * disabled control) but still call [onSelect], so the caller can say why they don't apply.
+ * [selected] may match no value (nothing chosen yet).
  */
 @Composable
 internal fun Choice(
@@ -172,12 +171,11 @@ internal fun Choice(
     onSelect: (Int) -> Unit,
     width: Int? = 56,
     modifier: Modifier = Modifier,
-    dimmed: Set<Int> = emptySet(),
     label: @Composable (Int) -> String = { it.toString() },
 ) {
     val labels = values.map { label(it) }
     if (width != null) {
-        ChoiceTrack(values, labels, selected, onSelect, stacked = false, segmentWidth = width.dp, modifier = modifier, dimmed = dimmed)
+        ChoiceTrack(values, labels, selected, onSelect, stacked = false, segmentWidth = width.dp, modifier = modifier)
         return
     }
     BoxWithConstraints(modifier) {
@@ -187,7 +185,7 @@ internal fun Choice(
         // Track padding 4 + 4, gaps 4 dp, text padding 8 + 8 inside each segment.
         val room = (maxWidth - 8.dp - 4.dp * (values.size - 1)) / values.size - 16.dp
         val fits = labels.all { text -> with(density) { measurer.measure(text, style).size.width.toDp() } <= room }
-        ChoiceTrack(values, labels, selected, onSelect, stacked = !fits, segmentWidth = null, modifier = Modifier.fillMaxWidth(), dimmed = dimmed)
+        ChoiceTrack(values, labels, selected, onSelect, stacked = !fits, segmentWidth = null, modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -200,7 +198,6 @@ private fun ChoiceTrack(
     stacked: Boolean,
     segmentWidth: Dp?,
     modifier: Modifier,
-    dimmed: Set<Int>,
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = if (stacked) RoundedCornerShape(18.dp) else CircleShape
@@ -214,8 +211,7 @@ private fun ChoiceTrack(
         ) {
             Text(labels[i], style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center,
                 color = if (on) colors.onPrimary else colors.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    .alpha(if (!on && values[i] in dimmed) DIMMED_ALPHA else 1f))
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
         }
     }
     if (stacked) {
@@ -237,14 +233,11 @@ private fun ChoiceTrack(
     }
 }
 
-/** Disabled-looking content (M3 convention), as the steppers' buttons at their limits. */
-private const val DIMMED_ALPHA = 0.4f
-
 @Composable
 private fun StepButton(symbol: String, description: String, enabled: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Box(
-        Modifier.size(36.dp).alpha(if (enabled) 1f else DIMMED_ALPHA).clip(CircleShape).background(colors.surfaceContainerHigh)
+        Modifier.size(36.dp).alpha(if (enabled) 1f else 0.4f).clip(CircleShape).background(colors.surfaceContainerHigh)
             .clickable(enabled = enabled, role = Role.Button, onClickLabel = description, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

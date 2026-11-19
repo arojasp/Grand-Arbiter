@@ -53,13 +53,7 @@ jobs:
           code=$(sed -n 's/^ *versionCode = \([0-9]*\)/\1/p' app/build.gradle.kts)
           [ "$tag" = "v$name" ] || { echo "::error::Tag $tag but versionName is $name."; exit 1; }
           python3 .github/scripts/check_whatsnew.py
-          patch="${name##*.}"
-          if [ ${#patch} -gt 3 ]; then
-            kind="app ${name%.*}.${patch:0:${#patch}-3}, documents update #${patch: -3}"
-          else
-            kind="app release"
-          fi
-          echo "Releasing $name ($code): $kind" >> "$GITHUB_STEP_SUMMARY"
+          echo "Releasing $name ($code)" >> "$GITHUB_STEP_SUMMARY"
 
       - uses: gradle/actions/wrapper-validation@v5
 

@@ -3,10 +3,12 @@ package es.alejandro.grandarbiter.ui.tools.drafttimer
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftTimeRows
 import es.alejandro.grandarbiter.domain.draft.DraftTimes
+import es.alejandro.grandarbiter.domain.draft.DraftTimesPreset
 import es.alejandro.grandarbiter.domain.draft.DraftTimings
 import es.alejandro.grandarbiter.domain.draft.FormatTimes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -33,6 +35,40 @@ class DraftTimesModelTest {
     }
 
     @Test fun onePack_noReviews() = assertTrue(booster(listOf(14)).reviews.isEmpty())
+
+    @Test fun presets_boosterOffersMtrAndProTour_selectedWhileUntouched() {
+        assertEquals(listOf(DraftTimesPreset.MTR, DraftTimesPreset.PRO_TOUR), booster(listOf(14, 14, 14)).presets)
+        assertEquals(DraftTimesPreset.MTR, booster(listOf(14, 14, 14)).preset)
+        val pt = booster(listOf(14, 14, 14), FormatTimes(DraftTimesPreset.PRO_TOUR.times))
+        assertEquals(DraftTimesPreset.PRO_TOUR, pt.preset)
+        assertEquals(6, pt.changedPicksInUse)
+        val edited = pt.times.withPick(pt.rowsOnScreen.last(), 10)
+        assertNull(booster(listOf(14, 14, 14), FormatTimes(edited)).preset)          // custom: nothing selected
+    }
+
+    @Test fun presets_proTourOnlyFor14CardPacks() {
+        assertEquals(setOf(DraftTimesPreset.PRO_TOUR), booster(listOf(15, 15, 15)).presetsNotForThesePacks)
+        assertTrue(booster(listOf(15, 14, 14)).presetsNotForThesePacks.isEmpty())
+        assertTrue(booster(listOf(14, 14, 14)).presetsNotForThesePacks.isEmpty())
+    }
+
+    @Test fun presets_judgedOnThePacksInUse() {
+        // Pro Tour kept, but 15-card packs: the draft runs as the MTR, like the setup says.
+        assertEquals(DraftTimesPreset.MTR, booster(listOf(15, 15, 15), FormatTimes(DraftTimesPreset.PRO_TOUR.times)).preset)
+        // Changes only to the 14-card list, 15-card packs in use: MTR too.
+        val row14 = DraftTimeRows.booster(14, DraftTimings.FALLBACK.booster).last()
+        assertEquals(DraftTimesPreset.MTR, booster(listOf(15, 15, 15), FormatTimes(DraftTimes.MTR.withPick(row14, 10))).preset)
+        // Untimed picks are never a preset.
+        assertNull(booster(listOf(14, 14, 14), FormatTimes(DraftTimes.MTR.withTimedPicks(false))).preset)
+    }
+
+    @Test fun presets_constructionDoesNotChangeWhichOneIsSelected() =
+        assertEquals(DraftTimesPreset.MTR, booster(listOf(14, 14, 14), FormatTimes(constructionMinutes = 30)).preset)
+
+    @Test fun presets_twoHeadedGiant_onlyMtr_noChoice() {
+        val m = DraftTimesModel.of(DraftFormat.TWO_HEADED_GIANT, List(6) { 14 }, FormatTimes(), DraftTimings.FALLBACK, null)
+        assertEquals(listOf(DraftTimesPreset.MTR), m.presets)
+    }
 
     @Test fun twoHeadedGiant_everyReview_andTakeTwo() {
         val m = DraftTimesModel.of(DraftFormat.TWO_HEADED_GIANT, List(6) { 14 }, FormatTimes(), DraftTimings.FALLBACK, null)

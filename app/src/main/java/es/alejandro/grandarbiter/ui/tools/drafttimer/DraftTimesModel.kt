@@ -3,9 +3,11 @@ package es.alejandro.grandarbiter.ui.tools.drafttimer
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftTimeRows
 import es.alejandro.grandarbiter.domain.draft.DraftTimes
+import es.alejandro.grandarbiter.domain.draft.DraftTimesPreset
 import es.alejandro.grandarbiter.domain.draft.DraftTimings
 import es.alejandro.grandarbiter.domain.draft.FormatTimes
 import es.alejandro.grandarbiter.domain.draft.PickRow
+import es.alejandro.grandarbiter.domain.draft.UserDraftPreset
 
 /**
  * What the Times screen shows for one format and the setup's packs: one list per pack size in use
@@ -18,6 +20,8 @@ data class DraftTimesModel(
     val reviews: List<ReviewRow>,
     val constructionMinutes: Int,
     val mtrConstructionMinutes: Int,
+    /** The judge's own presets of this format, by name. */
+    val userPresets: List<UserDraftPreset> = emptyList(),
 ) {
     data class PickList(val packSize: Int, val rows: List<PickRow>)
 
@@ -25,6 +29,28 @@ data class DraftTimesModel(
     data class ReviewRow(val pack: Int, val seconds: Int, val mtrSeconds: Int) {
         val isChanged: Boolean get() = seconds != mtrSeconds
     }
+
+    /** The ready-made times offered here (none, or only MTR: no choice to show). */
+    val presets: List<DraftTimesPreset> get() = DraftTimesPreset.availableFor(format)
+
+    /**
+     * The preset this draft's picks and reviews run as; null = custom times. Judged on the packs in
+     * use, like the setup's summary: Pro Tour kept for 15-card packs, or changes only to a pack size
+     * not in use, run as the MTR. Deck construction doesn't count (no preset sets it).
+     */
+    val preset: DraftTimesPreset?
+        get() {
+            val exact = DraftTimesPreset.matching(times)?.takeIf { it in presets && it !in presetsNotForThesePacks }
+            val asMtr = timedPicks && changedPicksInUse == 0 && changedReviews == 0
+            return exact ?: DraftTimesPreset.MTR.takeIf { asMtr && it in presets }
+        }
+
+    /** The judge's own preset that is exactly what's in use (times and construction); it wins over [preset]. */
+    val userPreset: UserDraftPreset? get() = userPresets.firstOrNull { it.matches(times, constructionMinutes) }
+
+    /** Offered but changing nothing with these packs: tapping one explains why instead. */
+    val presetsNotForThesePacks: Set<DraftTimesPreset>
+        get() = presets.filterNot { it.appliesTo(lists.map(PickList::packSize)) }.toSet()
 
     val timedPicks: Boolean get() = times.timedPicks
     val cardsPerPick: Int get() = if (format == DraftFormat.TWO_HEADED_GIANT) 2 else 1
@@ -53,6 +79,7 @@ data class DraftTimesModel(
             stored: FormatTimes,
             timings: DraftTimings,
             lastConstructionMinutes: Int?,
+            userPresets: List<UserDraftPreset> = emptyList(),
         ): DraftTimesModel {
             val times = stored.times
             val sizes = packSizes.distinct().sortedDescending()
@@ -79,7 +106,7 @@ data class DraftTimesModel(
             }
             return DraftTimesModel(format, times, lists, reviews,
                 constructionMinutes = stored.constructionMinutes ?: lastConstructionMinutes ?: mtrMinutes,
-                mtrConstructionMinutes = mtrMinutes)
+                mtrConstructionMinutes = mtrMinutes, userPresets = userPresets)
         }
     }
 }

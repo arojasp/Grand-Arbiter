@@ -12,6 +12,10 @@ import es.alejandro.grandarbiter.domain.draft.DraftTimesStore
 import es.alejandro.grandarbiter.domain.draft.DraftTimings
 import es.alejandro.grandarbiter.domain.draft.FormatTimes
 import es.alejandro.grandarbiter.domain.draft.PickRow
+import es.alejandro.grandarbiter.domain.draft.UserDraftPreset
+import es.alejandro.grandarbiter.domain.draft.UserDraftPresetStore
+import es.alejandro.grandarbiter.domain.draft.UserDraftPresets
+import es.alejandro.grandarbiter.data.draft.SharedDraftPreset
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -27,6 +31,7 @@ class DraftTimesViewModel(
     private val store: DraftTimesStore,
     sessions: DraftSessionStore,
     timingsRepository: DraftTimingsRepository,
+    private val presets: UserDraftPresetStore,
 ) : ViewModel() {
 
     val format: DraftFormat = DraftFormat.entries.firstOrNull { it.name == state.get<String>(ARG_FORMAT) }
@@ -39,10 +44,41 @@ class DraftTimesViewModel(
 
     private val stored = store.times(format)
 
-    val model: StateFlow<DraftTimesModel> = combine(stored, timingsRepository.timings) { s, t ->
-        DraftTimesModel.of(format, packSizes, s, t, lastMinutes)
+    private val own = presets.presets(format)
+
+    val model: StateFlow<DraftTimesModel> = combine(stored, timingsRepository.timings, own) { s, t, p ->
+        DraftTimesModel.of(format, packSizes, s, t, lastMinutes, p)
     }.stateIn(viewModelScope, SharingStarted.Eagerly,
-        DraftTimesModel.of(format, packSizes, stored.value, DraftTimings.FALLBACK, lastMinutes))
+        DraftTimesModel.of(format, packSizes, stored.value, DraftTimings.FALLBACK, lastMinutes, own.value))
+
+    /**
+     * A built-in preset sets picks and reviews and leaves deck construction as it is; the judge's
+     * own sets both, as saved.
+     */
+    fun choose(choice: PresetChoice) = when (choice) {
+        is PresetChoice.BuiltIn -> saveTimes { choice.preset.times }
+        is PresetChoice.Own -> store.save(format, FormatTimes(choice.preset.times, choice.preset.constructionMinutes))
+    }
+
+    /** The times and construction on screen under [name]; a preset with that name is replaced. */
+    fun savePreset(name: String) {
+        val m = model.value
+        // Construction as shown (it may still come from the last draft): stored too, so the preset matches.
+        store.save(format, stored.value.copy(constructionMinutes = m.constructionMinutes))
+        presets.save(format, name, m.times, m.constructionMinutes)
+    }
+
+    fun renamePreset(preset: UserDraftPreset, name: String): Boolean = presets.rename(format, preset.id, name)
+    fun deletePreset(preset: UserDraftPreset) = presets.delete(format, preset.id)
+
+    /** The preset of [format] called [name] (any case), to ask before an import replaces it. */
+    fun presetNamed(format: DraftFormat, name: String): UserDraftPreset? =
+        UserDraftPresets.named(presets.presets(format).value, name)
+
+    /** A shared preset saved under [name], in its own format (maybe not this screen's). Times in use don't change. */
+    fun importPreset(preset: SharedDraftPreset, name: String) {
+        presets.save(preset.format, name, preset.times, preset.constructionMinutes)
+    }
 
     fun setTimedPicks(on: Boolean) = saveTimes { it.withTimedPicks(on) }
     fun setPick(row: PickRow, seconds: Int) = saveTimes { it.withPick(row, seconds) }

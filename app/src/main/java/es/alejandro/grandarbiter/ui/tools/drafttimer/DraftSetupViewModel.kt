@@ -15,6 +15,8 @@ import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
 import es.alejandro.grandarbiter.domain.draft.DraftTimes
 import es.alejandro.grandarbiter.domain.draft.DraftTimesStore
 import es.alejandro.grandarbiter.domain.draft.FormatTimes
+import es.alejandro.grandarbiter.domain.draft.UserDraftPresetStore
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -33,6 +35,7 @@ class DraftSetupViewModel(
     timingsRepository: DraftTimingsRepository,
     private val settings: SettingsDataStore,
     private val timesStore: DraftTimesStore,
+    presets: UserDraftPresetStore,
 ) : ViewModel() {
 
     val format: DraftFormat = DraftFormat.entries.firstOrNull { it.name == state.get<String>(ARG_FORMAT) } ?: DraftFormat.BOOSTER
@@ -76,8 +79,10 @@ class DraftSetupViewModel(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, last)
 
     /** The Times section: what the Times screen shows for these packs ([DraftTimesModel]). Null in Rochester. */
-    val times: StateFlow<DraftTimesModel?> = combine(baseConfig, storedTimes, timings) { c, stored, t ->
-        if (hasTimes) DraftTimesModel.of(format, (1..c.packs).map(c::cardsInPack), stored, t, last.constructionMinutes) else null
+    private val own = if (hasTimes) presets.presets(format) else MutableStateFlow(emptyList())
+
+    val times: StateFlow<DraftTimesModel?> = combine(baseConfig, storedTimes, timings, own) { c, stored, t, p ->
+        if (hasTimes) DraftTimesModel.of(format, (1..c.packs).map(c::cardsInPack), stored, t, last.constructionMinutes, p) else null
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /** Starting a draft stores this as the last config: that is how "Manual start" is remembered. */

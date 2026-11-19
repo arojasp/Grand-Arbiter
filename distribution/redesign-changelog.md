@@ -162,3 +162,25 @@ along with the security hardening (no visible change). Play text, copied to `wha
 | Card detail: no bookmark icon on rulings | Card details: the small book icon next to each official ruling is gone; it said nothing the absence of the "Scryfall note" tag didn't already say. |
 | Settings: choose the community formats on cards | Settings > Card search: "Community formats in card details" opens a list to pick which community formats appear on cards (all by default). Official formats always appear; Banned & Restricted shows every list as before. Advanced search color chips are rounded like every other control you tap. |
 | Ask for a Play review, now and then | Now and then, after you've used the app for a while (looking up cards and rules on several days), Google Play may ask you to rate the app when you come back from a card or a rule. Never while a draft is running. Settings > About also has "Rate Grand Arbiter", which opens the app's Play page. |
+
+### Draft times: Pro Tour preset (branch `feature/draft-pt-preset`)
+
+From judge feedback (Pro Tour, RCQ, World Championship). Not released yet. Play text (330 characters,
+a list as Alejandro asked; no details of the Pro Tour times; not only for judges), to copy to
+`whatsnew/whatsnew-en-US` with the version bump:
+
+```
+Draft Timer > Times now has presets:
+• New "Pro Tour" preset.
+• Save your own times as presets, deck construction included, and switch between them before a draft. Booster and Two-Headed Giant keep their own.
+• Share a preset through any app. Whoever gets it pastes it in "Import preset" and sees what it changes before saving it.
+```
+
+| Commit | English |
+|---|---|
+| Draft Timer: Pro Tour preset on the Times screen | Draft Timer > Booster Draft > Times: a "Preset" choice at the top sets MTR or Pro Tour times in one tap. Pro Tour gives the first six picks of a 14-card pack more time (50, 45, 40, 35, 30 and 25 s); everything else stays as in the MTR. If you have edited the times yourself, the app asks before replacing them. With packs other than 14 cards, Pro Tour is dimmed and a tap explains that it is only for 14-card packs. The Times card of the setup says "Pro Tour" when those are the times in use. |
+| Draft Timer: your own presets | Draft Timer > Times: the "Preset" row opens a list with MTR, Pro Tour and your own presets. "Save current times as a preset" keeps the pick, review and deck construction times under a name (Booster and Two-Headed Giant each have their own). Choosing one sets them in one tap; the ⋮ next to it renames or deletes it. Saving with a name you already use asks before replacing it; MTR and Pro Tour can't be used as names. The setup's Times card shows the preset's name. |
+| Draft Timer: share a preset | Draft Timer > Times > Preset: the ⋮ of your own presets has a new "Share" option. It sends the preset as one line of text through any app (WhatsApp, email…), so another judge can import it into Grand Arbiter. |
+| Draft Timer: import a shared preset | Draft Timer > Times > Preset: "Import preset" opens a box to paste a preset another judge shared. Before importing it shows the preset's name, format, what it changes and its construction time; text that isn't a preset says so. Importing adds it to your presets without changing the times in use. If you already have a preset with that name, you can replace it or choose another name. A Two-Headed Giant preset imported from Booster goes to your Two-Headed Giant presets, and the reverse. |
+| Draft presets: sturdier import | Import preset finds the preset in whatever you paste: a whole chat copied with dates and names, a greeting with braces before it, text with invisible characters or curled quotes. A message cut off while copying says "Part of the preset is missing" instead of "not a preset". |
+| Draft presets: safer import | Import preset refuses presets made to mislead or to fill the phone: names with hidden control or text-direction characters, a hidden "MTR" or "Pro Tour" (it asks for another name), times for pack sizes or picks the app doesn't have, and numbers out of range. Broken text that names a preset says it can't be used instead of "part is missing". |

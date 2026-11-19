@@ -40,7 +40,7 @@ import es.alejandro.grandarbiter.domain.draft.DraftTimes
 import org.koin.androidx.compose.koinViewModel
 
 /**
- * Canvas "Tiempos · Pantalla Booster / 2HG": timed picks on/off, all picks ±5 s, one list per pack
+ * The preset in use (built-in or the judge's own, [PresetPicker]), timed picks on/off, all picks ±5 s, one list per pack
  * size in use (by pick number), reviews, deck construction and "Reset to MTR". Changes are saved at once.
  */
 @Composable
@@ -61,6 +61,10 @@ fun DraftTimesScreen(
             // Each card under its Label, outside it (as in Settings); 24 dp between groups.
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
+            Section(stringResource(R.string.draft_times_section_preset)) {
+                PresetPicker(m, viewModel::choose, viewModel::savePreset, viewModel::renamePreset, viewModel::deletePreset,
+                    viewModel::presetNamed, viewModel::importPreset)
+            }
             Section(stringResource(R.string.draft_times_section_picks)) { DraftCard {
                 SettingRow(stringResource(R.string.draft_times_timed), stringResource(R.string.draft_times_timed_hint)) {
                     Switch(
@@ -123,6 +127,7 @@ fun DraftTimesScreen(
             }
         }
     }
+
 }
 
 /** A time row; changed from the MTR: a dot, a tinted background and the MTR value in the hint. */

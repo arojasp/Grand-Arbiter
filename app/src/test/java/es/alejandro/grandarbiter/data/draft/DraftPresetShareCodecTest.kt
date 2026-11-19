@@ -90,7 +90,7 @@ class DraftPresetShareCodecTest {
         repeat(500) {
             val format = if (random.nextBoolean()) DraftFormat.BOOSTER else DraftFormat.TWO_HEADED_GIANT
             val picks = (1..random.nextInt(0, 4)).associate {
-                val size = random.nextInt(8, 21)
+                val size = random.nextInt(5, 16)                       // DraftConfig.CARDS_PER_PACK
                 size to (1..random.nextInt(1, size + 1)).associateWith { random.nextInt(1, 1000) }
             }
             val reviews = (0..random.nextInt(0, 4)).associateWith { random.nextInt(1, 1000) }

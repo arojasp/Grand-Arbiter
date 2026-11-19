@@ -83,22 +83,36 @@ object DraftPresetShareCodec {
         val clean = text.replace(INVISIBLE, "").replace(NO_BREAK_SPACE, ' ')
         // As shared first; then with the quotes a phone keyboard curls when the JSON is edited by hand
         // (only as a retry: a name may well contain curly quotes).
-        val result = decodeObjects(clean)
-        if (result != SharedPresetResult.NotAPreset) return result
+        val asIs = decodeObjects(clean)
+        if (asIs.isFinal) return asIs
         val straight = clean.replace(LEFT_QUOTE, '"').replace(RIGHT_QUOTE, '"')
-        if (straight != clean) decodeObjects(straight).let { if (it != SharedPresetResult.NotAPreset) return it }
-        // The preset's start is there but its end isn't: the message was cut when copied.
-        return if (KIND in clean) SharedPresetResult.Incomplete else SharedPresetResult.NotAPreset
+        val retried = if (straight != clean) decodeObjects(straight) else SharedPresetResult.NotAPreset
+        if (retried.isFinal) return retried
+        return when {
+            asIs != SharedPresetResult.NotAPreset -> asIs
+            retried != SharedPresetResult.NotAPreset -> retried
+            // The preset's start is there but its end isn't: the message was cut when copied.
+            KIND in clean -> SharedPresetResult.Incomplete
+            else -> SharedPresetResult.NotAPreset
+        }
     }
 
-    /** The first complete {…} in [text] that says it is a preset; others ("{jueces}") are skipped. */
+    /** A preset read, or one from a newer app: no retry can do better. */
+    private val SharedPresetResult.isFinal get() = this is SharedPresetResult.Read || this == SharedPresetResult.NewerVersion
+
+    /**
+     * The first complete {…} in [text] that says it is a preset; others ("{jueces}") are skipped.
+     * A complete {…} that mentions the preset's kind but can't be read (broken JSON, a kind that
+     * isn't a plain string) is [SharedPresetResult.Invalid]: not cut off, just wrong.
+     */
     private fun decodeObjects(text: String): SharedPresetResult {
+        var mentionsKind = false
         for (candidate in objects(text)) {
-            val obj = runCatching { json.parseToJsonElement(candidate) as? JsonObject }.getOrNull() ?: continue
-            if ((obj["kind"] as? JsonPrimitive)?.contentOrNull != KIND) continue
-            return decodeObject(obj)
+            val obj = runCatching { json.parseToJsonElement(candidate) as? JsonObject }.getOrNull()
+            if (obj != null && (obj["kind"] as? JsonPrimitive)?.contentOrNull == KIND) return decodeObject(obj)
+            if (KIND in candidate) mentionsKind = true
         }
-        return SharedPresetResult.NotAPreset
+        return if (mentionsKind) SharedPresetResult.Invalid else SharedPresetResult.NotAPreset
     }
 
     /** Each top-level {…} of [text], braces inside JSON strings ignored. An unclosed one is left out. */
@@ -132,11 +146,14 @@ object DraftPresetShareCodec {
             ?: return SharedPresetResult.Invalid
         val format = FORMATS.entries.firstOrNull { it.value == s.format.trim().lowercase() }?.key
             ?: return SharedPresetResult.Invalid
-        val name = UserDraftPresets.cleanName(s.name)
-        val keysOk = s.picks.keys.all { it in PACK_SIZES } &&
-            s.picks.values.all { picks -> picks.keys.all { it in PICKS } } &&
-            s.reviews.keys.all { it in REVIEWS }
-        if (!UserDraftPresets.isValidName(name) || !keysOk || s.minutes !in DraftConfig.CONSTRUCTION_MINUTES) {
+        // Invisible characters written as JSON escapes survive parsing: dropped here too, or "M" + zero-width + "TR"
+        // would look exactly like the built-in MTR and dodge its reserved name.
+        val name = UserDraftPresets.cleanName(s.name.replace(INVISIBLE, ""))
+        // Only what the app can show: pack sizes it offers, picks inside the pack, reviews between its packs.
+        // Anything else would be stored and never used (a crafted preset could bloat the phone's storage).
+        val keysOk = s.picks.all { (size, picks) -> size in DraftConfig.CARDS_PER_PACK && picks.keys.all { it in 1..size } } &&
+            s.reviews.keys.all { it == DraftTimes.EVERY_REVIEW || it in DraftConfig.PACKS }
+        if (!UserDraftPresets.isValidName(name) || !isSafeName(name) || !keysOk || s.minutes !in DraftConfig.CONSTRUCTION_MINUTES) {
             return SharedPresetResult.Invalid
         }
         val times = runCatching { DraftTimes(s.timed, s.picks.filterValues { it.isNotEmpty() }, s.reviews) }.getOrNull()
@@ -144,14 +161,27 @@ object DraftPresetShareCodec {
         return SharedPresetResult.Read(SharedDraftPreset(name, format, times, s.minutes))
     }
 
+    /**
+     * No control characters (a bell, NUL, NEL), no text-direction overrides (they make a name read
+     * as something else: "RCQ" + U+202E + "anoriG" shows as "RCQ Girona"), no broken surrogates.
+     * A judge's keyboard never types these; a crafted preset might.
+     */
+    internal fun isSafeName(name: String): Boolean {
+        name.forEachIndexed { i, c ->
+            if (Character.isISOControl(c) || c.code in BIDI_CONTROLS) return false
+            if (c.isHighSurrogate() && !(i + 1 < name.length && name[i + 1].isLowSurrogate())) return false
+            if (c.isLowSurrogate() && !(i > 0 && name[i - 1].isHighSurrogate())) return false
+        }
+        return true
+    }
+
     /** Stable words, not the enum's names: renaming a Kotlin constant must not break shared presets. */
     private val FORMATS = mapOf(DraftFormat.BOOSTER to "booster", DraftFormat.TWO_HEADED_GIANT to "two-headed-giant")
-    private val PACK_SIZES = 1..99
-    private val PICKS = 1..99
-    private val REVIEWS = 0..9
+    private val BIDI_CONTROLS = setOf(0x061C, 0x200E, 0x200F) + (0x202A..0x202E) + (0x2066..0x2069)
 
     // By code, not as characters: invisible or look-alike characters in the source are easy to break.
-    private val INVISIBLE = Regex("[" + listOf(0x200B, 0x200C, 0x200D, 0x2060, 0xFEFF).joinToString("") { Char(it).toString() } + "]")
+    // Zero-width space, word joiner, BOM. Not the zero-width (non-)joiners: family emoji and some scripts need them.
+    private val INVISIBLE = Regex("[" + listOf(0x200B, 0x2060, 0xFEFF).joinToString("") { Char(it).toString() } + "]")
     private val NO_BREAK_SPACE = Char(0x00A0)
     private val LEFT_QUOTE = Char(0x201C)
     private val RIGHT_QUOTE = Char(0x201D)

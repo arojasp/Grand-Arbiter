@@ -97,6 +97,15 @@ class ImportDialogTest {
         importButton().assertIsEnabled()
     }
 
+    /** A name that means something to String.format or a browser is shown exactly as written. */
+    @Test fun formatAndMarkupNames_shownAsText() {
+        listOf("%1\$s %d %n", "<b>MTR</b>").forEach { name ->
+            type(DraftPresetShareCodec.encode(rcq.copy(name = name)))
+            compose.onNodeWithText(name).assertExists()
+            importButton().assertIsEnabled()
+        }
+    }
+
     @Test fun fixingTheText_turnsImportOn() {
         type(rcqJson.dropLast(1))
         importButton().assertIsNotEnabled()

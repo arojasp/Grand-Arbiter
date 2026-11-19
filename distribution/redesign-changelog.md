@@ -165,7 +165,8 @@ along with the security hardening (no visible change). Play text, copied to `wha
 
 ### Draft times: Pro Tour preset (branch `feature/draft-pt-preset`)
 
-From judge feedback (Pro Tour, RCQ, World Championship). Released in **1.7.0 (versionCode 15)**.
+From judge feedback (Pro Tour, RCQ, World Championship). Released in **1.7.1 (versionCode 16)**, with the card data of 2026-11-19
+(1.7.0 / versionCode 15 was bumped on develop but never published).
 Play text (330 characters, a list as Alejandro asked; no details of the Pro Tour times; not only
 for judges), copied to `whatsnew/`:
 

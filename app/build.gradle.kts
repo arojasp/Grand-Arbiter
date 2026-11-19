@@ -15,12 +15,11 @@ android {
         applicationId = "es.alejandro.grandarbiter"
         minSdk = 26
         targetSdk = 37
-        // versionName = A.B.C + XXX. A.B.C tracks app changes (code, texts); XXX, a 3-digit counter
-        // appended to the patch, tracks document changes (rules, cards, release notes) since that
-        // A.B.C. 1.2.3001: app 1.2.3 with its first document update; 1.2.3002: one more, app
-        // unchanged; 1.2.4: new app version with no document changes. versionCode always +1.
+        // versionName = A.B.C; every release bumps one (new features: B; fixes or documents only: C).
+        // The changelog and the Play text say what changed. Until 1.7.0 a 3-digit document counter
+        // was appended (1.5.0001): dropped, it never went past 1. versionCode always +1.
         versionCode = 16
-        versionName = "1.7.0001"
+        versionName = "1.7.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -14,6 +14,8 @@ import es.alejandro.grandarbiter.domain.draft.FormatTimes
 import es.alejandro.grandarbiter.domain.draft.PickRow
 import es.alejandro.grandarbiter.domain.draft.UserDraftPreset
 import es.alejandro.grandarbiter.domain.draft.UserDraftPresetStore
+import es.alejandro.grandarbiter.domain.draft.UserDraftPresets
+import es.alejandro.grandarbiter.data.draft.SharedDraftPreset
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -68,6 +70,15 @@ class DraftTimesViewModel(
 
     fun renamePreset(preset: UserDraftPreset, name: String): Boolean = presets.rename(format, preset.id, name)
     fun deletePreset(preset: UserDraftPreset) = presets.delete(format, preset.id)
+
+    /** The preset of [format] called [name] (any case), to ask before an import replaces it. */
+    fun presetNamed(format: DraftFormat, name: String): UserDraftPreset? =
+        UserDraftPresets.named(presets.presets(format).value, name)
+
+    /** A shared preset saved under [name], in its own format (maybe not this screen's). Times in use don't change. */
+    fun importPreset(preset: SharedDraftPreset, name: String) {
+        presets.save(preset.format, name, preset.times, preset.constructionMinutes)
+    }
 
     fun setTimedPicks(on: Boolean) = saveTimes { it.withTimedPicks(on) }
     fun setPick(row: PickRow, seconds: Int) = saveTimes { it.withPick(row, seconds) }

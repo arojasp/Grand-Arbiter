@@ -59,6 +59,8 @@ import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.draft.DraftTimesPreset
 import es.alejandro.grandarbiter.domain.draft.UserDraftPreset
 import es.alejandro.grandarbiter.domain.draft.UserDraftPresets
+import es.alejandro.grandarbiter.domain.draft.DraftFormat
+import es.alejandro.grandarbiter.data.draft.SharedDraftPreset
 
 /** What the judge chose in the sheet: a built-in preset or one of their own. */
 sealed interface PresetChoice {
@@ -77,9 +79,36 @@ internal fun PresetPicker(
     onSave: (String) -> Unit,
     onRename: (UserDraftPreset, String) -> Boolean,
     onDelete: (UserDraftPreset) -> Unit,
+    presetNamed: (DraftFormat, String) -> UserDraftPreset?,
+    onImport: (SharedDraftPreset, String) -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
+    val context = LocalContext.current
     var open by remember { mutableStateOf(false) }
+    var importing by remember { mutableStateOf(false) }
+    var importNaming by remember { mutableStateOf<SharedDraftPreset?>(null) }
+    var importReplacing by remember { mutableStateOf<SharedDraftPreset?>(null) }
+    val importedHere = stringResource(R.string.draft_times_import_done)
+    val importedOther = stringResource(R.string.draft_times_import_done_other)
+    val otherFormatName = formatName(if (m.format == DraftFormat.BOOSTER) DraftFormat.TWO_HEADED_GIANT else DraftFormat.BOOSTER)
+    // Saved; back to the sheet when it's this format's, so the new preset is in sight.
+    val imported: (SharedDraftPreset, String) -> Unit = { preset, name ->
+        onImport(preset, name)
+        importing = false; importNaming = null; importReplacing = null
+        val clean = UserDraftPresets.cleanName(name)
+        val message = if (preset.format == m.format) importedHere.format(clean) else importedOther.format(clean, otherFormatName)
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        if (preset.format == m.format) open = true
+    }
+    // A built-in's name asks for another; a taken one asks before replacing.
+    val tryImport: (SharedDraftPreset) -> Unit = { preset ->
+        importing = false
+        when {
+            UserDraftPresets.isReserved(preset.name) -> importNaming = preset
+            presetNamed(preset.format, preset.name) != null -> importReplacing = preset
+            else -> imported(preset, preset.name)
+        }
+    }
     var replacing by remember { mutableStateOf<PresetChoice?>(null) }
     var saving by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf<UserDraftPreset?>(null) }
@@ -121,8 +150,34 @@ internal fun PresetPicker(
                 if (custom) replacing = choice else { open = false; onChoose(choice) }
             },
             onSave = { open = false; saving = true },
+            onImport = { open = false; importing = true },
             onRename = { renaming = it },
             onDelete = { deleting = it },
+        )
+    }
+
+    if (importing) ImportDialog(m.format, onDismiss = { importing = false }, onImport = tryImport)
+    importReplacing?.let { preset ->
+        ConfirmDialog(
+            title = stringResource(R.string.draft_times_preset_replace_title, preset.name),
+            confirm = stringResource(R.string.draft_times_replace_confirm),
+            dismiss = stringResource(R.string.draft_times_import_change_name),
+            onConfirm = { imported(preset, preset.name) },
+            onDismiss = { importReplacing = null; importNaming = preset },
+            onCancel = { importReplacing = null },
+        )
+    }
+    importNaming?.let { preset ->
+        NameDialog(
+            title = stringResource(R.string.draft_times_import_name_title),
+            initial = preset.name,
+            confirm = stringResource(R.string.draft_times_import_confirm),
+            onDismiss = { importNaming = null },
+            onConfirm = { name ->
+                val free = !UserDraftPresets.isReserved(name) && presetNamed(preset.format, name) == null
+                free.also { if (it) imported(preset, name) }
+            },
+            startTaken = true,
         )
     }
 
@@ -165,6 +220,7 @@ private fun PresetSheet(
     onDismiss: () -> Unit,
     onChoose: (PresetChoice) -> Unit,
     onSave: () -> Unit,
+    onImport: () -> Unit,
     onRename: (UserDraftPreset) -> Unit,
     onDelete: (UserDraftPreset) -> Unit,
 ) {
@@ -231,6 +287,12 @@ private fun PresetSheet(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).heightIn(min = 48.dp),
             ) {
                 Text(stringResource(R.string.draft_times_preset_save), style = MaterialTheme.typography.labelLarge, color = colors.primary)
+            }
+            TextButton(
+                onClick = onImport,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(top = 8.dp).heightIn(min = 48.dp),
+            ) {
+                Text(stringResource(R.string.draft_times_preset_import), style = MaterialTheme.typography.labelLarge, color = colors.primary)
             }
         }
     }
@@ -306,10 +368,12 @@ private fun NameDialog(
     onDismiss: () -> Unit,
     onConfirm: (String) -> Boolean,
     visible: Boolean = true,
+    /** The initial name is already taken (an import): say so before any typing. */
+    startTaken: Boolean = false,
 ) {
     // Focused with the whole name selected: typing replaces it, as in the number dialog.
     var field by remember { mutableStateOf(TextFieldValue(initial, TextRange(0, initial.length))) }
-    var taken by remember { mutableStateOf(false) }
+    var taken by remember { mutableStateOf(startTaken) }
     val focus = remember { FocusRequester() }
     if (!visible) return
     LaunchedEffect(Unit) { focus.requestFocus() }
@@ -345,9 +409,11 @@ private fun ConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     destructive: Boolean = false,
+    /** Back or a tap outside; [onDismiss] is the dismiss button (they differ for "Change name"). */
+    onCancel: () -> Unit = onDismiss,
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = onCancel,
         title = { Text(title) },
         confirmButton = {
             TextButton(onClick = onConfirm) {

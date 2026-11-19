@@ -62,7 +62,8 @@ fun DraftTimesScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Section(stringResource(R.string.draft_times_section_preset)) {
-                PresetPicker(m, viewModel::choose, viewModel::savePreset, viewModel::renamePreset, viewModel::deletePreset)
+                PresetPicker(m, viewModel::choose, viewModel::savePreset, viewModel::renamePreset, viewModel::deletePreset,
+                    viewModel::presetNamed, viewModel::importPreset)
             }
             Section(stringResource(R.string.draft_times_section_picks)) { DraftCard {
                 SettingRow(stringResource(R.string.draft_times_timed), stringResource(R.string.draft_times_timed_hint)) {

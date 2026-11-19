@@ -165,7 +165,16 @@ along with the security hardening (no visible change). Play text, copied to `wha
 
 ### Draft times: Pro Tour preset (branch `feature/draft-pt-preset`)
 
-From judge feedback (Pro Tour, RCQ, World Championship). Not released yet.
+From judge feedback (Pro Tour, RCQ, World Championship). Not released yet. Play text (330 characters,
+a list as Alejandro asked; no details of the Pro Tour times; not only for judges), to copy to
+`whatsnew/whatsnew-en-US` with the version bump:
+
+```
+Draft Timer > Times now has presets:
+• New "Pro Tour" preset.
+• Save your own times as presets, deck construction included, and switch between them before a draft. Booster and Two-Headed Giant keep their own.
+• Share a preset through any app. Whoever gets it pastes it in "Import preset" and sees what it changes before saving it.
+```
 
 | Commit | English |
 |---|---|

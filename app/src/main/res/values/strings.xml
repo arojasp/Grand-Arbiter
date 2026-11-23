@@ -131,6 +131,8 @@
     <string name="cards_legality">Legality</string>
     <string name="cards_no_rulings">No rulings for this card.</string>
     <string name="cards_ruling_scryfall">Scryfall note</string>
+    <string name="cards_ruling">Ruling</string>
+    <string name="cards_ruling_reference">ruling %1$s</string>
     <string name="cards_reserved">Reserved List</string>
     <string name="cards_game_changer">Game Changer</string>
     <string name="cards_attribution">Card data and images from Scryfall. Card text and images © Wizards of the Coast.</string>

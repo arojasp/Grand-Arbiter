@@ -12,6 +12,16 @@ class CardTextTest {
         a.spanStyles.filter { it.item.fontStyle == FontStyle.Italic }.map { a.text.substring(it.start, it.end) }
     }
 
+    @Test fun rulingCopy_official() = assertEquals(
+        "Lightning Bolt · Ruling 2024-11-08\nIt deals 3 damage. {T} stays as text.",
+        CardText.rulingCopy("Lightning Bolt", "2024-11-08", scryfallNote = false, text = "It deals 3 damage. {T} stays as text."),
+    )
+
+    @Test fun rulingCopy_scryfallNote() = assertEquals(
+        "Fire // Ice · Scryfall note 2020-08-07\nA note.",
+        CardText.rulingCopy("Fire // Ice", "2020-08-07", scryfallNote = true, text = "A note."),
+    )
+
     @Test fun reminderText_isItalic() =
         assertEquals(listOf("(reminder)"), italics("Flying (reminder)\nOther text"))
 

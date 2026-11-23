@@ -10,7 +10,8 @@
 # Procedure:
 #   0. On develop: python tools/update_all.py --cards (rules, release notes, card seed, tests);
 #      commit what it changed. Always, before the version bump.
-#   1. On develop: bump versionCode/versionName (app/build.gradle.kts) and edit distribution/whatsnew/*.
+#   1. On develop: bump versionCode/versionName (app/build.gradle.kts) and edit distribution/whatsnew/*
+#      (a list; the last line is always "• Minor fixes and improvements.").
 #   2. PR develop -> main, CI green, merge (merging also publishes the rules bundle, as always).
 #   3. git tag vX.Y.Z <commit on main> && git push origin vX.Y.Z
 #   4. Actions -> Release -> "Review deployments" -> approve "play".

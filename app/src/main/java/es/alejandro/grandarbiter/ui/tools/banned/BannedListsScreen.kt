@@ -1,7 +1,5 @@
 package es.alejandro.grandarbiter.ui.tools.banned
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -58,6 +55,8 @@ import org.koin.androidx.compose.koinViewModel
 import androidx.compose.ui.text.style.TextAlign
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import es.alejandro.grandarbiter.ui.components.ExpandChevron
+import es.alejandro.grandarbiter.ui.components.ExpandableContent
 
 /*
  * Figma: "Banned & Restricted Lists" (node 19:1296). Built from the card data's legalities
@@ -194,7 +193,6 @@ private fun FormatItem(
     onOpenCard: (String) -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val rotation by animateFloatAsState(if (expanded) 90f else 0f, label = "chevron")
     val named = view.list.named
     val byCategory = view.list.byCategory
     val count = named.size   // the badge counts real bans; categories are summarized below them
@@ -210,21 +208,16 @@ private fun FormatItem(
             Text(CardText.formatName(view.list.format), style = MaterialTheme.typography.titleMedium,
                 color = if (expanded) colors.primary else colors.onSurface, modifier = Modifier.weight(1f))
             if (expanded) Tag(count.toString(), container = colors.primary, content = colors.onPrimary) else Tag(count.toString())
-            if (view.list.entries.isNotEmpty()) {
-                Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp).rotate(rotation))
-            }
+            if (view.list.entries.isNotEmpty()) ExpandChevron(expanded)
         }
-        AnimatedVisibility(expanded) {
-            Column {
-                named.forEach { entry ->
-                    IndentedDivider()
-                    EntryRow(entry, view.list.format, highlighted = entry.oracleId in view.matches) { onOpenCard(entry.oracleId) }
-                }
-                if (byCategory.isNotEmpty()) {
-                    IndentedDivider()
-                    CategoryBlock(byCategory, view, categoriesExpanded, onToggleCategories, onOpenCard)
-                }
+        ExpandableContent(expanded) {
+            named.forEach { entry ->
+                IndentedDivider()
+                EntryRow(entry, view.list.format, highlighted = entry.oracleId in view.matches) { onOpenCard(entry.oracleId) }
+            }
+            if (byCategory.isNotEmpty()) {
+                IndentedDivider()
+                CategoryBlock(byCategory, view, categoriesExpanded, onToggleCategories, onOpenCard)
             }
         }
     }
@@ -268,7 +261,6 @@ private fun CategoryBlock(
     onOpenCard: (String) -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val rotation by animateFloatAsState(if (expanded) 90f else 0f, label = "categories")
     val groups = entries.groupBy { it.category }
     Column {
         Row(
@@ -283,17 +275,14 @@ private fun CategoryBlock(
                 Text(BanCategory.entries.filter { it in groups }.map { categoryLabel(it) }.joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
             }
-            Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant,
-                modifier = Modifier.size(20.dp).rotate(rotation))
+            ExpandChevron(expanded)
         }
-        AnimatedVisibility(expanded) {
-            Column {
-                BanCategory.entries.filter { it in groups }.forEach { category ->
-                    Label(categoryLabel(category), Modifier.padding(start = RowIndent, top = 12.dp, bottom = 4.dp))
-                    groups.getValue(category).forEachIndexed { i, entry ->
-                        if (i > 0) IndentedDivider()
-                        EntryRow(entry, view.list.format, highlighted = entry.oracleId in view.matches) { onOpenCard(entry.oracleId) }
-                    }
+        ExpandableContent(expanded) {
+            BanCategory.entries.filter { it in groups }.forEach { category ->
+                Label(categoryLabel(category), Modifier.padding(start = RowIndent, top = 12.dp, bottom = 4.dp))
+                groups.getValue(category).forEachIndexed { i, entry ->
+                    if (i > 0) IndentedDivider()
+                    EntryRow(entry, view.list.format, highlighted = entry.oracleId in view.matches) { onOpenCard(entry.oracleId) }
                 }
             }
         }

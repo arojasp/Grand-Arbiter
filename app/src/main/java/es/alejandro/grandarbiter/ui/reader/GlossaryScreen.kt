@@ -1,7 +1,6 @@
 package es.alejandro.grandarbiter.ui.reader
 
 import android.net.Uri
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,7 +27,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
@@ -51,6 +48,9 @@ import org.koin.androidx.compose.koinViewModel
 import androidx.compose.foundation.lazy.itemsIndexed
 import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.groupedItem
+import es.alejandro.grandarbiter.ui.components.animateListItem
+import es.alejandro.grandarbiter.ui.components.ExpandChevron
+import es.alejandro.grandarbiter.ui.components.ExpandableContent
 
 const val ARG_TERM = "term"
 
@@ -142,7 +142,7 @@ fun GlossaryScreen(
                     LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 24.dp)) {
                         // 700+ terms: one grouped list that stays lazy (design-decisions §3).
                         itemsIndexed(list, key = { _, it -> it.term }) { i, entry ->
-                            TermRow(entry, expanded = entry.term == open, onRefClick, Modifier.animateItem().groupedItem(i, list.size), divider = i > 0) {
+                            TermRow(entry, expanded = entry.term == open, onRefClick, animateListItem().groupedItem(i, list.size), divider = i > 0) {
                                 open = if (open == entry.term) null else entry.term
                             }
                         }
@@ -163,7 +163,7 @@ private fun TermRow(
     onToggle: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    Column(modifier.animateContentSize()) {
+    Column(modifier) {
         if (divider) ListDivider()
         Row(
             Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(16.dp),
@@ -172,10 +172,9 @@ private fun TermRow(
             // primary while open: a real state (design-decisions §1).
             Text(entry.term, style = MaterialTheme.typography.titleMedium,
                 color = if (expanded) colors.primary else colors.onSurface, modifier = Modifier.weight(1f))
-            Icon(painterResource(if (expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right), null,
-                tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
+            ExpandChevron(expanded)
         }
-        if (expanded) {
+        ExpandableContent(expanded) {
             SelectionContainer {
                 MarkupText(entry.definition, onRefClick, Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp))
             }

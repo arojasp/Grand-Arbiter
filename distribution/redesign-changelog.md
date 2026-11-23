@@ -185,3 +185,20 @@ Draft Timer > Times now has presets:
 | Draft Timer: import a shared preset | Draft Timer > Times > Preset: "Import preset" opens a box to paste a preset another judge shared. Before importing it shows the preset's name, format, what it changes and its construction time; text that isn't a preset says so. Importing adds it to your presets without changing the times in use. If you already have a preset with that name, you can replace it or choose another name. A Two-Headed Giant preset imported from Booster goes to your Two-Headed Giant presets, and the reverse. |
 | Draft presets: sturdier import | Import preset finds the preset in whatever you paste: a whole chat copied with dates and names, a greeting with braces before it, text with invisible characters or curled quotes. A message cut off while copying says "Part of the preset is missing" instead of "not a preset". |
 | Draft presets: safer import | Import preset refuses presets made to mislead or to fill the phone: names with hidden control or text-direction characters, a hidden "MTR" or "Pro Tour" (it asks for another name), times for pack sizes or picks the app doesn't have, and numbers out of range. Broken text that names a preset says it can't be used instead of "part is missing". |
+
+### Copying text and Tools (branch `feature/next-update`)
+
+Alejandro noticed rulings couldn't be copied; the review found nothing on the card screen could. Not released yet.
+
+| Commit | English |
+|---|---|
+| Card details: copy rulings, select the card text | Card details: each ruling has a copy button, like the rules, and copies the card name, date and text ("Blood Moon · Ruling 2020-08-07"); mana symbols copy as {T}, {R}. The card's name, type line, Oracle text and rulings can now be selected to copy any part by hand. |
+| Tools: tools first, new texts | Tools: Draft Timer and Deck Counter come first, in a tinted block with filled icons, so they stand out. The Head Judge Announcement moved to References, and its screen now has the same full name. The descriptions are shorter and say what each one does; Booster Draft no longer mentions only the MTR. |
+
+### Animations (branch `feature/animations`)
+
+Every animation reviewed with recordings (canvas `Animaciones_inventario`, `Animaciones_build`). Not released yet.
+
+| Commit | English |
+|---|---|
+| Expandable lists: one animation | Everything that opens below a row (rulings and card art, Banned & Restricted formats and custom lists, the rules documents' contents and parts, the glossary, Release Notes sections) now opens the same way: the content appears from the top down and fades in, and closes a little faster. The arrow always points right and turns down when open. Before, Banned & Restricted lists looked like they scrolled while opening, and rulings slid sideways when closing. |

@@ -43,23 +43,24 @@ import es.alejandro.grandarbiter.ui.components.SectionTitle
 import es.alejandro.grandarbiter.ui.navigation.Screen
 
 /*
- * The tools hub: two grouped lists like the Home document library. The in-tournament tools are the
- * screen's main actions, so their icon sits on a tonal tile (primaryContainer); the references
- * keep a plain icon. Canvas "Lote F · Tools". (The Figma glows, gradients and icon-above-title cards
- * were removed: decoration without function, design-decisions §5.)
+ * The tools hub: two grouped lists. The tools you run (Draft Timer, Deck Counter) come first, with no
+ * heading, in a primaryContainer panel with the icon on a primary tile. The references keep a plain
+ * icon on the neutral panel.
  */
 
 private data class Tool(val title: Int, val description: Int, val icon: ImageVector, val route: String)
 
-private val TOURNAMENT_TOOLS = listOf(
-    Tool(R.string.tools_deck_counter, R.string.tools_deck_counter_desc, Icons.Outlined.Style, Screen.DeckCounter.route),
-    Tool(R.string.tools_announcement, R.string.tools_announcement_desc, Icons.Outlined.Campaign, Screen.HeadJudgeAnnouncement.route),
+/** Things you run during an event. */
+private val TOOLS = listOf(
     Tool(R.string.tools_draft_timer, R.string.tools_draft_timer_desc, Icons.Outlined.Timelapse, Screen.DraftTimer.route),
+    Tool(R.string.tools_deck_counter, R.string.tools_deck_counter_desc, Icons.Outlined.Style, Screen.DeckCounter.route),
 )
 
+/** Things you read; the Head Judge Announcement is a checklist to read from, so it's here. */
 private val REFERENCES = listOf(
     Tool(R.string.tools_banned_lists, R.string.tools_banned_lists_desc, Icons.Outlined.Block, Screen.BannedLists.route),
     Tool(R.string.tools_quick_references, R.string.tools_quick_references_desc, Icons.AutoMirrored.Outlined.MenuBook, Screen.QuickReferences.route),
+    Tool(R.string.tools_announcement, R.string.tools_announcement_desc, Icons.Outlined.Campaign, Screen.HeadJudgeAnnouncement.route),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,8 +93,7 @@ fun ToolsScreen(
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { SectionTitle(stringResource(R.string.tools_in_tournament)) }
-            item { ToolList(TOURNAMENT_TOOLS, primary = true, onOpen) }
+            item { ToolList(TOOLS, primary = true, onOpen) }
             item { SectionTitle(stringResource(R.string.tools_references), Modifier.padding(top = 12.dp)) }
             item { ToolList(REFERENCES, primary = false, onOpen) }
         }
@@ -102,7 +102,8 @@ fun ToolsScreen(
 
 @Composable
 private fun ToolList(tools: List<Tool>, primary: Boolean, onOpen: (String) -> Unit) {
-    Panel(color = MaterialTheme.colorScheme.surfaceContainer, shape = RoundedCornerShape(16.dp)) {
+    val colors = MaterialTheme.colorScheme
+    Panel(color = if (primary) colors.primaryContainer else colors.surfaceContainer, shape = RoundedCornerShape(16.dp)) {
         tools.forEachIndexed { i, tool ->
             if (i > 0) ListDivider()
             ToolRow(tool, primary) { onOpen(tool.route) }
@@ -114,6 +115,8 @@ private fun ToolList(tools: List<Tool>, primary: Boolean, onOpen: (String) -> Un
 @Composable
 private fun ToolRow(tool: Tool, primary: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
+    val content = if (primary) colors.onPrimaryContainer else colors.onSurface
+    val secondary = if (primary) colors.onPrimaryContainer else colors.onSurfaceVariant
     Row(
         Modifier.fillMaxWidth().heightIn(min = 72.dp).clickable(onClick = onClick)
             .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
@@ -121,10 +124,9 @@ private fun ToolRow(tool: Tool, primary: Boolean, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (primary) {
-            // Main actions of the screen: the same tonal tile as the active navigation item.
-            Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(colors.primaryContainer),
+            Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(colors.primary),
                 contentAlignment = Alignment.Center) {
-                Icon(tool.icon, null, tint = colors.onPrimaryContainer, modifier = Modifier.size(24.dp))
+                Icon(tool.icon, null, tint = colors.onPrimary, modifier = Modifier.size(24.dp))
             }
         } else {
             Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
@@ -132,10 +134,10 @@ private fun ToolRow(tool: Tool, primary: Boolean, onClick: () -> Unit) {
             }
         }
         Column(Modifier.weight(1f)) {
-            Text(stringResource(tool.title), style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
-            Text(stringResource(tool.description), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            Text(stringResource(tool.title), style = MaterialTheme.typography.titleMedium, color = content)
+            Text(stringResource(tool.description), style = MaterialTheme.typography.bodyMedium, color = secondary)
         }
         Icon(painterResource(R.drawable.ic_chevron_right), null,   // the row's text names it
-            tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
+            tint = secondary, modifier = Modifier.size(20.dp))
     }
 }

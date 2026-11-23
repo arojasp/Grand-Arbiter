@@ -202,3 +202,9 @@ Every animation reviewed with recordings (canvas `Animaciones_inventario`, `Anim
 | Commit | English |
 |---|---|
 | Expandable lists: one animation | Everything that opens below a row (rulings and card art, Banned & Restricted formats and custom lists, the rules documents' contents and parts, the glossary, Release Notes sections) now opens the same way: the content appears from the top down and fades in, and closes a little faster. The arrow always points right and turns down when open. Before, Banned & Restricted lists looked like they scrolled while opening, and rulings slid sideways when closing. |
+
+### Maintenance (branch `chore/textfield-state`)
+
+| Commit | English |
+|---|---|
+| Card search field on TextFieldState | The card search field uses Compose's current text field API; the old one is deprecated. Nothing changes for the user: typing, clearing, the Advanced search form and restoring the search after the app is closed behave exactly as before (checked on the emulator, screens identical pixel by pixel). |

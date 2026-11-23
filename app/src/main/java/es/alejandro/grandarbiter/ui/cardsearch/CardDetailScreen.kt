@@ -1,8 +1,6 @@
 package es.alejandro.grandarbiter.ui.cardsearch
 
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,7 +51,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -84,6 +81,8 @@ import es.alejandro.grandarbiter.ui.theme.LocalHighContrast
 import es.alejandro.grandarbiter.ui.theme.legalColors
 import es.alejandro.grandarbiter.ui.theme.softened
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.components.ExpandChevron
+import es.alejandro.grandarbiter.ui.components.ExpandableContent
 
 /*
  * Figma: "Oracle Search - Card Detail Refined Grid" (node 19:932).
@@ -270,7 +269,6 @@ private fun RulingsBlock(cardName: String, rulings: List<CardRuling>) {
             return@Section
         }
         var expanded by rememberSaveable { mutableStateOf(false) }
-        val rotation by animateFloatAsState(if (expanded) 180f else 0f, label = "chevron")
         Panel(colors.surfaceContainerHigh, RoundedCornerShape(12.dp)) {
             Row(
                 Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(16.dp),
@@ -284,16 +282,13 @@ private fun RulingsBlock(cardName: String, rulings: List<CardRuling>) {
                     style = MaterialTheme.typography.labelLarge,
                     color = colors.onSurface, modifier = Modifier.weight(1f),
                 )
-                Icon(painterResource(R.drawable.ic_expand_more), null, tint = colors.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp).rotate(rotation))
+                ExpandChevron(expanded)
             }
-            AnimatedVisibility(expanded) {
-                Column {
-                    rulings.forEach { ruling ->
-                        ListDivider()
-                        RulingRow(ruling) {
-                            copy(copiedLabel, CardText.rulingCopy(cardName, ruling.date, ruling.source != "wotc", ruling.text))
-                        }
+            ExpandableContent(expanded) {
+                rulings.forEach { ruling ->
+                    ListDivider()
+                    RulingRow(ruling) {
+                        copy(copiedLabel, CardText.rulingCopy(cardName, ruling.date, ruling.source != "wotc", ruling.text))
                     }
                 }
             }
@@ -412,7 +407,6 @@ private fun artsOf(card: CardDetail): List<Art> {
 private fun ArtBlock(arts: List<Art>) {
     val colors = MaterialTheme.colorScheme
     var expanded by rememberSaveable { mutableStateOf(false) }
-    val rotation by animateFloatAsState(if (expanded) 180f else 0f, label = "chevron")
     Section(stringResource(R.string.cards_card_image)) {
         Panel(colors.surfaceContainerHigh, RoundedCornerShape(12.dp)) {
             Row(
@@ -424,11 +418,10 @@ private fun ArtBlock(arts: List<Art>) {
                 Text(stringResource(if (expanded) R.string.cards_hide_image else R.string.cards_show_image),
                     style = MaterialTheme.typography.labelLarge,
                     color = colors.onSurface, modifier = Modifier.weight(1f))
-                Icon(painterResource(R.drawable.ic_expand_more), null, tint = colors.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp).rotate(rotation))
+                ExpandChevron(expanded)
             }
             // Only requested when opened: the image is the one part that needs a connection.
-            AnimatedVisibility(expanded) {
+            ExpandableContent(expanded) {
                 Column(
                     Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),

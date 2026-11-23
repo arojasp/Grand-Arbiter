@@ -1,7 +1,5 @@
 package es.alejandro.grandarbiter.ui.tools.banned
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,11 +17,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -37,6 +32,8 @@ import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Tag
 import es.alejandro.grandarbiter.ui.components.bannedTagColors
 import es.alejandro.grandarbiter.ui.components.restrictedTagColors
+import es.alejandro.grandarbiter.ui.components.ExpandChevron
+import es.alejandro.grandarbiter.ui.components.ExpandableContent
 
 private val Indent = 32.dp
 
@@ -52,7 +49,6 @@ internal fun CustomListItem(
     onOpenCard: (String) -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val rotation by animateFloatAsState(if (expanded) 90f else 0f, label = "chevron")
     val list = view.list
     Column(modifier) {
         if (divider) ListDivider()
@@ -67,10 +63,9 @@ internal fun CustomListItem(
                 color = if (expanded) colors.primary else colors.onSurface, modifier = Modifier.weight(1f))
             val count = list.entries.size.toString()
             if (expanded) Tag(count, container = colors.primary, content = colors.onPrimary) else Tag(count)
-            Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant,
-                modifier = Modifier.size(20.dp).rotate(rotation))
+            ExpandChevron(expanded)
         }
-        AnimatedVisibility(expanded) {
+        ExpandableContent(expanded) {
             Column {
                 if (list.note.isNotBlank()) {
                     Text(list.note, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant,

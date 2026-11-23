@@ -1,5 +1,8 @@
 # Weekly PRs against develop for outdated Gradle dependencies (version catalog, AGP, Kotlin, the
 # Gradle wrapper) and GitHub Actions. CI runs on each one: merge if green, close if not wanted.
+# The wrapper is part of the "gradle" ecosystem: "gradle-wrapper" isn't a valid one, and an
+# invalid entry made Dependabot reject the whole file, so it never ran before this was fixed.
+# Dependabot reads this file from the default branch (main).
 version: 2
 updates:
   - package-ecosystem: gradle
@@ -15,13 +18,6 @@ updates:
       androidx:
         patterns: ["androidx.*"]
     open-pull-requests-limit: 5
-
-  - package-ecosystem: gradle-wrapper
-    directory: "/"
-    target-branch: develop
-    schedule:
-      interval: weekly
-      day: monday
 
   - package-ecosystem: github-actions
     directory: "/"

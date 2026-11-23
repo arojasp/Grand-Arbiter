@@ -60,8 +60,9 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil.compose.SubcomposeAsyncImage
-import coil.request.ImageRequest
+import coil3.compose.SubcomposeAsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.ui.tools.banned.StatusTag
 import es.alejandro.grandarbiter.domain.model.cards.CardDetail

@@ -9,7 +9,10 @@ plugins {
 
 android {
     namespace = "es.alejandro.grandarbiter"
-    compileSdk = 37
+    // 37.1: Compose 1.13 (BOM 2026.11.01) requires it.
+    compileSdk {
+        version = release(37) { minorApiLevel = 1 }
+    }
 
     defaultConfig {
         applicationId = "es.alejandro.grandarbiter"

@@ -54,6 +54,7 @@ import es.alejandro.grandarbiter.ui.tools.releasenotes.ARG_SECTION
 import es.alejandro.grandarbiter.ui.tools.releasenotes.ARG_CARD_INDEX
 import es.alejandro.grandarbiter.ui.tools.releasenotes.ARG_SET_CODE
 import es.alejandro.grandarbiter.ui.home.RELEASE_NOTES_ID
+import es.alejandro.grandarbiter.ui.theme.Motion
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -104,9 +105,6 @@ val LOOKUP_ROUTES = setOf(
     QuickReferenceRoutes.DETAIL, Screen.ReleaseNoteCard.route,
 )
 
-/** Cross-fade between screens. Navigation's default (700 ms) felt slow; 0 would remove it. */
-private const val SCREEN_FADE_MS = 150
-
 /** Key under which the Advanced search form hands its query back to Card Search. */
 private const val ADVANCED_RESULT = "advanced_search_query"
 
@@ -120,12 +118,11 @@ fun AppNavGraph(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier,
-        // Navigation's default is a long fade that made the app feel slow (judge feedback):
-        // a short one keeps the change visible without the wait.
-        enterTransition = { fadeIn(tween(SCREEN_FADE_MS)) },
-        exitTransition = { fadeOut(tween(SCREEN_FADE_MS)) },
-        popEnterTransition = { fadeIn(tween(SCREEN_FADE_MS)) },
-        popExitTransition = { fadeOut(tween(SCREEN_FADE_MS)) },
+        // A short cross-fade: Navigation's default (700 ms) made the app feel slow.
+        enterTransition = { fadeIn(tween(Motion.FADE_MS)) },
+        exitTransition = { fadeOut(tween(Motion.FADE_MS)) },
+        popEnterTransition = { fadeIn(tween(Motion.FADE_MS)) },
+        popExitTransition = { fadeOut(tween(Motion.FADE_MS)) },
     ) {
 
         composable(Screen.Home.route) { 

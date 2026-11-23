@@ -18,6 +18,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Cancel
@@ -54,7 +60,6 @@ import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.cards.CardSearchResult
 import es.alejandro.grandarbiter.domain.model.cards.CardSummary
 import es.alejandro.grandarbiter.ui.components.Tag
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.runtime.LaunchedEffect
@@ -79,10 +84,14 @@ fun CardSearchScreen(
     viewModel: CardSearchViewModel = koinViewModel(),
 ) {
     val query by viewModel.query.collectAsState()
+    // The field owns what's typed; the ViewModel gets every change (it searches and keeps it across process death).
+    // Only this one-way flow: copying the ViewModel's value back into the field could undo a fast keystroke.
+    val field = rememberTextFieldState(query)
+    LaunchedEffect(field) { snapshotFlow { field.text.toString() }.collect(viewModel::onQueryChange) }
     // The Advanced search form's "Search": its query replaces the field's.
     LaunchedEffect(queryFromForm) {
         if (queryFromForm != null) {
-            viewModel.onQueryChange(queryFromForm)
+            field.setTextAndPlaceCursorAtEnd(queryFromForm)
             onQueryFromFormUsed()
         }
     }
@@ -116,7 +125,7 @@ fun CardSearchScreen(
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding).fillMaxSize()) {
             // Nothing to search until the first import is done (an update keeps the old data: Ready).
-            SearchHeader(query, viewModel::onQueryChange, viewModel::retryOnline, { onOpenAdvanced(query) },
+            SearchHeader(field, viewModel::retryOnline, { onOpenAdvanced(query) },
                 enabled = dataState is CardDataState.Ready, autoOnline = autoOnline)
             when {
                 dataState is CardDataState.Checking -> Unit
@@ -161,8 +170,7 @@ fun CardSearchScreen(
 
 @Composable
 private fun SearchHeader(
-    query: String,
-    onQueryChange: (String) -> Unit,
+    field: TextFieldState,
     onSearch: () -> Unit,
     onOpenAdvanced: () -> Unit,
     enabled: Boolean,
@@ -178,7 +186,7 @@ private fun SearchHeader(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Box(Modifier.weight(1f)) { CardSearchField(query, onQueryChange, onSearch, enabled) }
+            Box(Modifier.weight(1f)) { CardSearchField(field, onSearch, enabled) }
             // Icon only (Alejandro's call; canvas Busqueda2_inicio). 48 dp, tonal, with its name for TalkBack.
             FilledTonalIconButton(onClick = onOpenAdvanced, enabled = enabled, modifier = Modifier.size(48.dp),
                 shape = RoundedCornerShape(8.dp)) {
@@ -186,7 +194,7 @@ private fun SearchHeader(
             }
         }
         // Shown while there's nothing typed. With automatic search on, it also says which searches go to Scryfall.
-        if (query.isEmpty() && enabled) {
+        if (field.text.isEmpty() && enabled) {
             Text(stringResource(if (autoOnline) R.string.cards_syntax_hint_online else R.string.cards_syntax_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -196,24 +204,23 @@ private fun SearchHeader(
 
 /** 48dp field (a Material TextField is 56dp min): Figma "Search Bar". */
 @Composable
-private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, onSearch: () -> Unit, enabled: Boolean) {
+private fun CardSearchField(state: TextFieldState, onSearch: () -> Unit, enabled: Boolean) {
     val colors = MaterialTheme.colorScheme
     val keyboard = LocalSoftwareKeyboardController.current
     // Disabled = M3's dimmed content (the "disabled controls" exception); it also doesn't respond.
     val content = if (enabled) colors.onSurface else colors.onSurface.copy(alpha = 0.38f)
     val secondary = if (enabled) colors.onSurfaceVariant else colors.onSurface.copy(alpha = 0.38f)
     BasicTextField(
-        value = query,
-        onValueChange = onQueryChange,
+        state = state,
         enabled = enabled,
-        singleLine = true,
+        lineLimits = TextFieldLineLimits.SingleLine,
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = content),   // typed text: body, Regular
         cursorBrush = SolidColor(colors.primary),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         // Results come by themselves; after a failed online search the key tries again.
-        keyboardActions = KeyboardActions(onSearch = { keyboard?.hide(); onSearch() }),
+        onKeyboardAction = { keyboard?.hide(); onSearch() },
         modifier = Modifier.fillMaxWidth(),
-        decorationBox = { field ->
+        decorator = { field ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -225,7 +232,7 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, onSe
                 Icon(painterResource(R.drawable.ic_search), null, tint = secondary, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(12.dp))
                 Box(Modifier.weight(1f)) {
-                    if (query.isEmpty()) {
+                    if (state.text.isEmpty()) {
                         Text(
                             stringResource(R.string.cards_search_placeholder),
                             style = MaterialTheme.typography.bodyLarge, color = secondary, maxLines = 1,
@@ -234,12 +241,12 @@ private fun CardSearchField(query: String, onQueryChange: (String) -> Unit, onSe
                     }
                     field()
                 }
-                if (query.isNotEmpty() && enabled) {
+                if (state.text.isNotEmpty() && enabled) {
                     Icon(
                         Icons.Outlined.Cancel,
                         contentDescription = stringResource(R.string.reader_clear_search),
                         tint = colors.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp).clickable { onQueryChange("") },
+                        modifier = Modifier.size(20.dp).clickable { state.clearText() },
                     )
                 }
             }

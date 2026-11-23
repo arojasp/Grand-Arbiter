@@ -44,7 +44,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -456,7 +457,7 @@ private fun StatusSheet(name: String, current: ListStatus?, onDismiss: () -> Uni
     var kind by rememberSaveable { mutableStateOf(when (current) { ListStatus.Restricted -> 1; is ListStatus.Points -> 2; else -> 0 }) }
     var points by rememberSaveable { mutableStateOf((current as? ListStatus.Points)?.value ?: 1) }
     val pointsLabel = stringResource(R.string.custom_points_label)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberBottomSheetState(SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh) {
         Column(Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(name, style = MaterialTheme.typography.titleLarge)

@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: gradle/actions/wrapper-validation@v5
+      - uses: gradle/actions/wrapper-validation@v6
 
       - name: Release notes for Play (≤ 500 characters)
         run: python3 .github/scripts/check_whatsnew.py
@@ -35,8 +35,10 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v6
         with:
+          # MIT-licensed caching. v6's default ("enhanced") caching is a closed-source component with its own terms.
+          cache-provider: basic
           # Only develop writes the cache; PRs and main read it.
           cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
 

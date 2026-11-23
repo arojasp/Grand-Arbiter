@@ -2,8 +2,11 @@ package es.alejandro.grandarbiter
 
 import android.app.Application
 import android.util.Log
-import coil.ImageLoader
-import coil.ImageLoaderFactory
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import coil3.request.crossfade
 import okhttp3.OkHttpClient
 import es.alejandro.grandarbiter.di.appModule
 import es.alejandro.grandarbiter.di.cardsModule
@@ -25,15 +28,15 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
-class GrandArbiterApplication : Application(), ImageLoaderFactory {
+class GrandArbiterApplication : Application(), SingletonImageLoader.Factory {
 
     /** App-lifetime work that must not be cancelled with a screen. */
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     /** Coil uses the app's OkHttpClient, which adds the headers Scryfall's image CDN requires. */
-    override fun newImageLoader(): ImageLoader =
-        ImageLoader.Builder(this)
-            .okHttpClient { get<OkHttpClient>() }
+    override fun newImageLoader(context: PlatformContext): ImageLoader =
+        ImageLoader.Builder(context)
+            .components { add(OkHttpNetworkFetcherFactory(callFactory = { get<OkHttpClient>() })) }
             .crossfade(true)
             .build()
 
@@ -52,6 +55,10 @@ class GrandArbiterApplication : Application(), ImageLoaderFactory {
                 viewModelModule
             )
         }
+
+        // Coil 2's disk cache: Coil 3 keeps its own in coil3_disk_cache and never reads this one.
+        // Only installs from before 1.9 have it; this can go once those are rare.
+        appScope.launch(Dispatchers.IO) { java.io.File(cacheDir, "image_cache").deleteRecursively() }
 
         // Load the bundled rules into rules.db when the APK ships a newer bundle (no-op otherwise).
         appScope.launch {

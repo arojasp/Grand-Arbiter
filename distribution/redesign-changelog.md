@@ -203,6 +203,12 @@ Every animation reviewed with recordings (canvas `Animaciones_inventario`, `Anim
 |---|---|
 | Expandable lists: one animation | Everything that opens below a row (rulings and card art, Banned & Restricted formats and custom lists, the rules documents' contents and parts, the glossary, Release Notes sections) now opens the same way: the content appears from the top down and fades in, and closes a little faster. The arrow always points right and turns down when open. Before, Banned & Restricted lists looked like they scrolled while opening, and rulings slid sideways when closing. |
 
+### Maintenance (branch `chore/coil-3`)
+
+| Commit | English |
+|---|---|
+| Coil 3 | Card art now loads with Coil 3 (the image library; it was on Coil 2). Nothing changes for the user: art, double-faced cards, the "needs a connection" message and art already seen loading offline look exactly the same (checked on the emulator, screens identical pixel by pixel, and on a release build). Coil 2's old image cache is deleted on start, since Coil 3 keeps its own. |
+
 ### Maintenance (branch `chore/textfield-state`)
 
 | Commit | English |

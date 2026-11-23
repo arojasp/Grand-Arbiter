@@ -35,7 +35,7 @@ jobs:
         with:
           ref: develop
 
-      - uses: gradle/actions/wrapper-validation@v5   # the gradle-wrapper.jar is the official one
+      - uses: gradle/actions/wrapper-validation@v6   # the gradle-wrapper.jar is the official one
 
       - uses: actions/setup-python@v7
         with:
@@ -49,7 +49,7 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - uses: gradle/actions/setup-gradle@v5   # v5, not v6: v6 moved caching to a closed-source component with its own terms
+      - uses: gradle/actions/setup-gradle@v6   # v5, not v6: v6 moved caching to a closed-source component with its own terms
 
       - name: Run tools/update_all.py
         id: update

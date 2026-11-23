@@ -208,3 +208,9 @@ Every animation reviewed with recordings (canvas `Animaciones_inventario`, `Anim
 | Commit | English |
 |---|---|
 | Coil 3 | Card art now loads with Coil 3 (the image library; it was on Coil 2). Nothing changes for the user: art, double-faced cards, the "needs a connection" message and art already seen loading offline look exactly the same (checked on the emulator, screens identical pixel by pixel, and on a release build). Coil 2's old image cache is deleted on start, since Coil 3 keeps its own. |
+
+### Maintenance (branch `chore/textfield-state`)
+
+| Commit | English |
+|---|---|
+| Card search field on TextFieldState | The card search field uses Compose's current text field API; the old one is deprecated. Nothing changes for the user: typing, clearing, the Advanced search form and restoring the search after the app is closed behave exactly as before (checked on the emulator, screens identical pixel by pixel). |

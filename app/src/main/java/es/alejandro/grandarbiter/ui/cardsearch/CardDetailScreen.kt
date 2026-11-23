@@ -1,8 +1,6 @@
 package es.alejandro.grandarbiter.ui.cardsearch
 
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +22,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
+import es.alejandro.grandarbiter.ui.reader.CopyRuleButton
+import es.alejandro.grandarbiter.ui.reader.rememberCopyText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Image
@@ -50,7 +51,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -81,6 +81,8 @@ import es.alejandro.grandarbiter.ui.theme.LocalHighContrast
 import es.alejandro.grandarbiter.ui.theme.legalColors
 import es.alejandro.grandarbiter.ui.theme.softened
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.components.ExpandChevron
+import es.alejandro.grandarbiter.ui.components.ExpandableContent
 
 /*
  * Figma: "Oracle Search - Card Detail Refined Grid" (node 19:932).
@@ -137,7 +139,7 @@ private fun CardDetailContent(card: CardDetail, lists: List<ListOnCard>) {
     ) {
         item { HeaderBlock(card) }
         item { OracleBlock(card) }
-        item { RulingsBlock(card.rulings) }
+        item { RulingsBlock(card.name, card.rulings) }
         if (!card.isToken) {
             val (official, community) = card.legalities.partition { it.official }
             item { LegalityBlock(stringResource(R.string.cards_legality), official) }
@@ -152,8 +154,9 @@ private fun CardDetailContent(card: CardDetail, lists: List<ListOnCard>) {
 
 // ---------------------------------------------------------------- header
 
+/** Selectable, like the Oracle text: a judge can copy the name or type line by hand. */
 @Composable
-private fun HeaderBlock(card: CardDetail) {
+private fun HeaderBlock(card: CardDetail) = SelectionContainer {
     val colors = MaterialTheme.colorScheme
     Panel(colors.surfaceContainerHigh, RoundedCornerShape(12.dp), Modifier.padding(16.dp)) {
         Row(verticalAlignment = Alignment.Top) {
@@ -209,7 +212,9 @@ private fun LabeledValue(label: String, value: String, modifier: Modifier = Modi
 @Composable
 private fun OracleBlock(card: CardDetail) {
     val colors = MaterialTheme.colorScheme
-    Section(stringResource(R.string.cards_oracle_text)) {
+    // Selectable, no copy button (Alejandro, 2026-11-23): copy by hand the part you need.
+    // Mana symbols copy as their text ({T}, {2}{U}).
+    Section(stringResource(R.string.cards_oracle_text)) { SelectionContainer {
         Panel(colors.surfaceContainer, RoundedCornerShape(12.dp), Modifier.padding(16.dp)) {
             if (card.faces.isEmpty()) {
                 if (card.oracleText.isNullOrBlank()) {
@@ -225,7 +230,7 @@ private fun OracleBlock(card: CardDetail) {
                 }
             }
         }
-    }
+    } }
 }
 
 @Composable
@@ -253,8 +258,10 @@ private fun FaceText(face: CardFace) {
  * The row to open them has the same shape as "Show card art" below.
  */
 @Composable
-private fun RulingsBlock(rulings: List<CardRuling>) {
+private fun RulingsBlock(cardName: String, rulings: List<CardRuling>) {
     val colors = MaterialTheme.colorScheme
+    val copy = rememberCopyText()
+    val copiedLabel = stringResource(R.string.cards_ruling)
     Section(stringResource(R.string.cards_official_rulings)) {
         if (rulings.isEmpty()) {
             Text(stringResource(R.string.cards_no_rulings), style = MaterialTheme.typography.bodyMedium,
@@ -262,7 +269,6 @@ private fun RulingsBlock(rulings: List<CardRuling>) {
             return@Section
         }
         var expanded by rememberSaveable { mutableStateOf(false) }
-        val rotation by animateFloatAsState(if (expanded) 180f else 0f, label = "chevron")
         Panel(colors.surfaceContainerHigh, RoundedCornerShape(12.dp)) {
             Row(
                 Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(16.dp),
@@ -276,14 +282,13 @@ private fun RulingsBlock(rulings: List<CardRuling>) {
                     style = MaterialTheme.typography.labelLarge,
                     color = colors.onSurface, modifier = Modifier.weight(1f),
                 )
-                Icon(painterResource(R.drawable.ic_expand_more), null, tint = colors.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp).rotate(rotation))
+                ExpandChevron(expanded)
             }
-            AnimatedVisibility(expanded) {
-                Column {
-                    rulings.forEach { ruling ->
-                        ListDivider()
-                        RulingRow(ruling)
+            ExpandableContent(expanded) {
+                rulings.forEach { ruling ->
+                    ListDivider()
+                    RulingRow(ruling) {
+                        copy(copiedLabel, CardText.rulingCopy(cardName, ruling.date, ruling.source != "wotc", ruling.text))
                     }
                 }
             }
@@ -291,19 +296,21 @@ private fun RulingsBlock(rulings: List<CardRuling>) {
     }
 }
 
+/** A ruling: selectable, plus the reader's quiet copy button (copies card name, date and text). */
 @Composable
-private fun RulingRow(ruling: CardRuling) {
+private fun RulingRow(ruling: CardRuling, onCopy: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val official = ruling.source == "wotc"
     Row(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SelectionContainer(Modifier.weight(1f)) { Column(Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(ruling.date, style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"), color = colors.onSurfaceVariant)
                 // Official is the norm; only Scryfall's own notes are marked.
                 if (!official) Tag(stringResource(R.string.cards_ruling_scryfall))
             }
             OracleText(ruling.text, MaterialTheme.typography.bodyMedium, colors.onSurface)
-        }
+        } }
+        CopyRuleButton(stringResource(R.string.cards_ruling_reference, ruling.date), onCopy, Modifier.padding(top = 4.dp, end = 4.dp))
     }
 }
 
@@ -400,7 +407,6 @@ private fun artsOf(card: CardDetail): List<Art> {
 private fun ArtBlock(arts: List<Art>) {
     val colors = MaterialTheme.colorScheme
     var expanded by rememberSaveable { mutableStateOf(false) }
-    val rotation by animateFloatAsState(if (expanded) 180f else 0f, label = "chevron")
     Section(stringResource(R.string.cards_card_image)) {
         Panel(colors.surfaceContainerHigh, RoundedCornerShape(12.dp)) {
             Row(
@@ -412,11 +418,10 @@ private fun ArtBlock(arts: List<Art>) {
                 Text(stringResource(if (expanded) R.string.cards_hide_image else R.string.cards_show_image),
                     style = MaterialTheme.typography.labelLarge,
                     color = colors.onSurface, modifier = Modifier.weight(1f))
-                Icon(painterResource(R.drawable.ic_expand_more), null, tint = colors.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp).rotate(rotation))
+                ExpandChevron(expanded)
             }
             // Only requested when opened: the image is the one part that needs a connection.
-            AnimatedVisibility(expanded) {
+            ExpandableContent(expanded) {
                 Column(
                     Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),

@@ -16,6 +16,17 @@ object CardText {
     const val SYMBOL_PREFIX = "mana:"
     private val SYMBOL = Regex("""\{([^{}]{1,10})\}""")
 
+    /**
+     * One ruling for the clipboard, ready for a chat or an appeal report:
+     *
+     *     Lightning Bolt · Ruling 2024-11-08
+     *     The ruling's text, symbols as {T}.
+     *
+     * Scryfall's own notes say so instead of "Ruling". English, like the card text.
+     */
+    fun rulingCopy(cardName: String, date: String, scryfallNote: Boolean, text: String): String =
+        "$cardName · ${if (scryfallNote) "Scryfall note" else "Ruling"} $date\n$text"
+
     /** The symbols in a text, without braces: "{T}: Add {G}." -> [T, G]. */
     fun symbols(text: String): List<String> = SYMBOL.findAll(text).map { it.groupValues[1] }.distinct().toList()
 

@@ -1,6 +1,5 @@
 package es.alejandro.grandarbiter.ui.reader
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,7 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
@@ -45,6 +42,8 @@ import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
 import es.alejandro.grandarbiter.ui.components.Section
 import es.alejandro.grandarbiter.ui.components.groupedItem
+import es.alejandro.grandarbiter.ui.components.ExpandChevron
+import es.alejandro.grandarbiter.ui.components.ExpandableContent
 
 @Composable
 fun ReaderContentsScreen(
@@ -86,7 +85,7 @@ fun ReaderContentsScreen(
                     // One grouped list (design-decisions §3); the contents are short enough for a Panel.
                     item(key = "contents") {
                         Panel(color = MaterialTheme.colorScheme.surfaceContainer, shape = RoundedCornerShape(16.dp)) {
-                            Column(Modifier.animateContentSize()) {
+                            Column {
                                 state.contents.forEachIndexed { i, entry ->
                                     if (i > 0) ListDivider()
                                     TocGroup(
@@ -121,7 +120,7 @@ private fun TocGroup(entry: TocEntry, expanded: Boolean, onToggle: () -> Unit, o
         title = entry.title?.let { InlineMarkup.plainText(it) }.orEmpty(),
         expanded = if (hasChildren) expanded else null,
     ) { if (hasChildren) onToggle() else onOpenPage(PageRef(entry.sectionId)) }
-    if (hasChildren && expanded) {
+    ExpandableContent(hasChildren && expanded) {
         Column(Modifier.padding(bottom = 8.dp)) {
             if (entry.opensPage) {
                 TocChildRow(number = null, title = stringResource(R.string.reader_overview), penalty = null) { onOpenPage(PageRef(entry.sectionId)) }
@@ -156,12 +155,7 @@ private fun TocTopRow(number: String?, title: String, expanded: Boolean?, onClic
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f),
         )
-        Icon(
-            painter = painterResource(if (expanded == true) R.drawable.ic_expand_more else R.drawable.ic_chevron_right),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
-        )
+        ExpandChevron(expanded == true)
     }
 }
 

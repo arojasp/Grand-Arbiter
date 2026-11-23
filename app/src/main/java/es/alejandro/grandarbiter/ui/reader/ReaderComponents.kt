@@ -2,7 +2,6 @@ package es.alejandro.grandarbiter.ui.reader
 
 import es.alejandro.grandarbiter.ui.theme.penaltyColors
 import androidx.annotation.StringRes
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -74,6 +73,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import es.alejandro.grandarbiter.ui.theme.highContrastBorder
+import es.alejandro.grandarbiter.ui.components.ExpandChevron
+import es.alejandro.grandarbiter.ui.components.ExpandableContent
 
 // ---------------------------------------------------------------- text
 
@@ -369,7 +370,7 @@ fun PartCard(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier.fillMaxWidth().animateContentSize(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         border = highContrastBorder(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
@@ -388,14 +389,9 @@ fun PartCard(
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Icon(
-                painter = painterResource(if (expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp),
-            )
+            ExpandChevron(expanded)
         }
-        if (expanded) {
+        ExpandableContent(expanded) {
             Column(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),

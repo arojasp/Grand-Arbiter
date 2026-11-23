@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import kotlinx.coroutines.CoroutineScope
+import es.alejandro.grandarbiter.ui.theme.Motion
 import es.alejandro.grandarbiter.ui.theme.softened
 
 /** What the button is doing, for a caption next to it ("Keep holding…", "Hold to confirm"). */
@@ -160,7 +161,7 @@ private fun Modifier.holdToConfirm(
                 // Released before the end: nothing happens. A quick tap teaches the gesture.
                 val wasTap = progress.value < 0.25f
                 hold.cancel()
-                scope.launch { progress.animateTo(0f, tween(150)) }
+                scope.launch { progress.animateTo(0f, tween(Motion.FADE_MS)) }
                 onStateChange(if (wasTap) HoldState.TAPPED else HoldState.IDLE)
             } else {
                 scope.launch { progress.snapTo(0f) }

@@ -73,6 +73,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.components.animateListItem
+import es.alejandro.grandarbiter.ui.components.ExpandChevron
 
 // ---------------------------------------------------------------- what the list shows
 
@@ -301,7 +303,7 @@ private fun Notes(
             // One grouped list, like the rules documents' contents: section headers are rows, an open
             // section's content follows inside the same list. No spacedBy: it would split the group.
             itemsIndexed(shown, key = { _, it -> it.key }) { i, item ->
-                val grouped = Modifier.animateItem().groupedItem(i, shown.size)
+                val grouped = animateListItem().groupedItem(i, shown.size)
                 // Dividers: before each section header and card row; between every search result.
                 val divider = i > 0 && (searching || item !is NotesItem.Block)
                 when (item) {
@@ -351,8 +353,7 @@ private fun SectionHeader(section: NotesItem.Section, expanded: Boolean, divider
                         style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                 }
             }
-            Icon(painterResource(if (expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right), null,
-                tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
+            ExpandChevron(expanded)
         }
     }
 }

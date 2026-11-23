@@ -68,6 +68,8 @@ import es.alejandro.grandarbiter.ui.reader.highlightedSnippet
 import es.alejandro.grandarbiter.ui.reader.sectionLabel
 import es.alejandro.grandarbiter.ui.theme.highContrastBorder
 import org.koin.androidx.compose.koinViewModel
+import es.alejandro.grandarbiter.ui.components.animateListItem
+import es.alejandro.grandarbiter.ui.components.ExpandChevron
 
 /*
  * Create / edit a quick reference: title, the rules (in order, each with an optional note) and a
@@ -167,7 +169,7 @@ fun QuickReferenceEditScreen(
                     onMove = { viewModel.move(rule.rule.sectionId, it) },
                     onRemove = { viewModel.remove(rule.rule.sectionId) },
                     onNote = { viewModel.setNote(rule.rule.sectionId, it) },
-                    modifier = Modifier.animateItem().padding(top = 12.dp),
+                    modifier = animateListItem().padding(top = 12.dp),
                 )
             }
 
@@ -308,11 +310,8 @@ private fun IndexRowView(row: IndexRow, divider: Boolean, onToggle: () -> Unit, 
             Box(Modifier.size(24.dp), contentAlignment = Alignment.Center) {
                 when {
                     row.loading -> CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                    row.expandable -> Icon(
-                        painterResource(if (row.expanded) R.drawable.ic_expand_more else R.drawable.ic_chevron_right),
-                        stringResource(if (row.expanded) R.string.qr_collapse else R.string.qr_expand),
-                        tint = colors.onSurfaceVariant,
-                    )
+                    row.expandable -> ExpandChevron(row.expanded,
+                        contentDescription = stringResource(if (row.expanded) R.string.qr_collapse else R.string.qr_expand))
                 }
             }
             Spacer(Modifier.width(8.dp))

@@ -194,3 +194,11 @@ Alejandro noticed rulings couldn't be copied; the review found nothing on the ca
 |---|---|
 | Card details: copy rulings, select the card text | Card details: each ruling has a copy button, like the rules, and copies the card name, date and text ("Blood Moon · Ruling 2020-08-07"); mana symbols copy as {T}, {R}. The card's name, type line, Oracle text and rulings can now be selected to copy any part by hand. |
 | Tools: tools first, new texts | Tools: Draft Timer and Deck Counter come first, in a tinted block with filled icons, so they stand out. The Head Judge Announcement moved to References, and its screen now has the same full name. The descriptions are shorter and say what each one does; Booster Draft no longer mentions only the MTR. |
+
+### Animations (branch `feature/animations`)
+
+Every animation reviewed with recordings (canvas `Animaciones_inventario`, `Animaciones_build`). Not released yet.
+
+| Commit | English |
+|---|---|
+| Expandable lists: one animation | Everything that opens below a row (rulings and card art, Banned & Restricted formats and custom lists, the rules documents' contents and parts, the glossary, Release Notes sections) now opens the same way: the content appears from the top down and fades in, and closes a little faster. The arrow always points right and turns down when open. Before, Banned & Restricted lists looked like they scrolled while opening, and rulings slid sideways when closing. |

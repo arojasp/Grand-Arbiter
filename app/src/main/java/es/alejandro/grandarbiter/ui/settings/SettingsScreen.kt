@@ -134,8 +134,12 @@ fun SettingsScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
+            // Most used first: settings that change how the app looks and behaves, then data and information.
             item { AccessibilitySection(display, viewModel::setTextScale, viewModel::setThemeMode, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
-            item { DocumentsSection(documents) }
+            item {
+                DraftTimerSection(vibrationStrength, viewModel::setVibrationStrength, viewModel::testVibration,
+                    beepVolume, viewModel::setBeepVolume, viewModel::testBeep, beepMuted)
+            }
             item {
                 SettingsSection(stringResource(R.string.settings_card_search)) {
                     SettingsPanel {
@@ -146,11 +150,8 @@ fun SettingsScreen(
                     }
                 }
             }
-            item {
-                DraftTimerSection(vibrationStrength, viewModel::setVibrationStrength, viewModel::testVibration,
-                    beepVolume, viewModel::setBeepVolume, viewModel::testBeep, beepMuted)
-            }
             item { CardDatabaseSection(cardData, updateState, rulesUpdateState, viewModel::checkForUpdates) }
+            item { DocumentsSection(documents) }
             item { AboutSection() }
         }
     }

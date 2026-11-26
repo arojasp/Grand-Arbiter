@@ -220,3 +220,4 @@ Every animation reviewed with recordings (canvas `Animaciones_inventario`, `Anim
 | Commit | English |
 |---|---|
 | Draft Timer: vibration strength and beep volume | New Draft Timer section in Settings: Vibration strength (Light, Medium, Strong) and Beep volume (Low, Medium, High), each with a button to try it. Medium and High are what the timer did before. The beep now plays on the alarm channel, like a timer, so it sounds with the phone in silent or vibrate mode; if the alarm volume is off, Settings says the beep won't play. The switches in the draft setup still turn each alert on or off. |
+| Settings in order of use | Settings now goes from the most used to the least: Accessibility, Draft timer, Card search, Card database, Documents, About. Before, Documents came second and Draft timer after Card search. |

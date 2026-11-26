@@ -65,6 +65,7 @@ import es.alejandro.grandarbiter.domain.model.cards.CardUpdateState
 import es.alejandro.grandarbiter.domain.model.rules.RulesDocumentInfo
 import es.alejandro.grandarbiter.domain.model.rules.RulesUpdateState
 import es.alejandro.grandarbiter.ui.cardsearch.CardText
+import es.alejandro.grandarbiter.ui.cardsearch.OracleText
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.OutlinedIconButton
@@ -111,6 +112,7 @@ fun SettingsScreen(
     val vibrationStrength by viewModel.vibrationStrength.collectAsState()
     val beepVolume by viewModel.beepVolume.collectAsState()
     val beepMuted by viewModel.beepMuted.collectAsState()
+    val textSample by viewModel.textSample.collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -135,7 +137,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
             // Most used first: settings that change how the app looks and behaves, then data and information.
-            item { AccessibilitySection(display, viewModel::setTextScale, viewModel::setThemeMode, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
+            item { AccessibilitySection(display, textSample, viewModel::setTextScale, viewModel::setThemeMode, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
             item {
                 DraftTimerSection(vibrationStrength, viewModel::setVibrationStrength, viewModel::testVibration,
                     beepVolume, viewModel::setBeepVolume, viewModel::testBeep, beepMuted)
@@ -163,6 +165,7 @@ fun SettingsScreen(
 @Composable
 private fun AccessibilitySection(
     display: DisplaySettings,
+    sample: TextSample?,
     onTextScale: (TextScale) -> Unit,
     onThemeMode: (ThemeMode) -> Unit,
     onHighContrast: (Boolean) -> Unit,
@@ -191,10 +194,15 @@ private fun AccessibilitySection(
                             .border(1.dp, colors.outlineVariant.softened(0.2f), RoundedCornerShape(8.dp))
                             .padding(12.dp)
                     ) {
-                        Text(stringResource(R.string.settings_text_preview),
-                            // Sample of reading text at the chosen size.
-                            style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                            color = colors.onSurfaceVariant)
+                        // Reading text at the chosen size: a card's Oracle text, a different one each time Settings opens.
+                        if (sample != null) {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                val style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic)
+                                if (sample.text != null) OracleText("“${sample.text}”", style, colors.onSurfaceVariant)
+                                else Text(stringResource(R.string.settings_text_preview), style = style, color = colors.onSurfaceVariant)
+                                sample.name?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant) }
+                            }
+                        }
                     }
                 }
             }

@@ -20,6 +20,7 @@ import es.alejandro.grandarbiter.domain.repository.CardRepository
 import es.alejandro.grandarbiter.domain.repository.RulesRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -79,6 +80,21 @@ class SettingsViewModel(
     fun testBeep() = alerts.beep(beepVolume.value)
     val beepMuted: StateFlow<Boolean> = alerts.beepMuted
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    /**
+     * The Text size preview, picked once per visit (this ViewModel lives as long as the screen).
+     * Null while it loads. Starts at a random card and takes the next one that is installed and fits.
+     */
+    val textSample: StateFlow<TextSample?> = flow {
+        val start = TextSizeSamples.nextIndex()
+        val names = TextSizeSamples.names
+        val found = names.indices.asSequence().map { names[(start + it) % names.size] }.firstNotNullOfOrNull { name ->
+            runCatching { cards.findByName(name)?.let { cards.card(it.oracleId) } }.getOrNull()
+                ?.takeIf { it.oracleText != null && TextSizeSamples.fits(it.oracleText) }
+                ?.let { TextSample(it.name, it.oracleText) }
+        }
+        emit(found ?: TextSample(null, null))
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private companion object {
         val ORDER = listOf(DocumentId.CR, DocumentId.IPG, DocumentId.MTR, DocumentId.JAR)

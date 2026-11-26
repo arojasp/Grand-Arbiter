@@ -76,6 +76,7 @@ import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
 import es.alejandro.grandarbiter.domain.draft.DraftTimesStore
 import es.alejandro.grandarbiter.domain.draft.UserDraftPresetStore
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftFormatViewModel
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftOpenRequests
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftRunViewModel
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftSetupViewModel
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftTimesViewModel
@@ -175,6 +176,7 @@ val appModule = module {
         )
     }
     single { DraftSessionActions(get(), get()) }
+    single { DraftOpenRequests() }
     single { SectionVersions(get(), get(), get()) }
 }
 

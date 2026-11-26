@@ -95,6 +95,10 @@ class DraftSessionActions(
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
     fun togglePause() = update { s, _, now -> if (s.isRunning) s.paused(now) else s.started(now) }
+
+    /** From the notification, which may be a moment behind: does nothing if already paused (or running). */
+    fun pause() = update { s, _, now -> if (s.isRunning) s.paused(now) else s }
+    fun resume() = update { s, _, now -> if (s.isRunning) s else s.started(now) }
     fun next() = update { s, plan, now -> s.next(plan, now) }
     fun previous() = update { s, plan, now -> s.previous(plan, now) }
 

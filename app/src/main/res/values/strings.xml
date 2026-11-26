@@ -642,4 +642,21 @@
     <string name="qr_browse">Or browse the %1$s</string>
     <string name="qr_expand">Show contents</string>
     <string name="qr_collapse">Hide contents</string>
+
+    <!-- Draft timer notification (the timer keeps running outside the draft screen) -->
+    <string name="draft_notif_channel">Draft timer</string>
+    <string name="draft_notif_channel_desc">The running draft: time left and what comes next</string>
+    <string name="draft_notif_pick">Pick %1$d · Pack %2$d</string>
+    <string name="draft_notif_pick_actor">Pick %1$s · Pack %2$d</string>
+    <string name="draft_notif_review" tools:ignore="PluralsCandidate">Review · Pack %1$d complete</string>
+    <string name="draft_notif_layout" tools:ignore="PluralsCandidate">Pack %1$d laid out</string>
+    <string name="draft_notif_construction_text">Registration and deck building</string>
+    <string name="draft_notif_pass_left">Pass left</string>
+    <string name="draft_notif_pass_right">Pass right</string>
+    <string name="draft_notif_untimed">Untimed</string>
+    <string name="draft_notif_next">Next: %1$s</string>
+    <string name="draft_notif_next_pick">Next pick: %1$s</string>
+    <string name="draft_notif_next_pack">Next: pack %1$d · %2$s</string>
+    <string name="draft_notif_time_up">Time\'s up · %1$s</string>
+    <string name="draft_notif_left">%1$s left</string>
 </resources>

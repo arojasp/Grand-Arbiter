@@ -53,13 +53,16 @@ import androidx.navigation.compose.rememberNavController
 import es.alejandro.grandarbiter.NavigationItem
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.domain.model.ThemeMode
+import androidx.compose.runtime.collectAsState
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftOpenRequests
 import es.alejandro.grandarbiter.ui.navigation.AppNavGraph
 import es.alejandro.grandarbiter.ui.navigation.Screen
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
 
 @Composable
 fun MainScreen(snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }) {
-    MainScreenContent(startDestination = Screen.Home.route, snackbarHostState = snackbarHostState, reviews = koinInject())
+    MainScreenContent(startDestination = Screen.Home.route, snackbarHostState = snackbarHostState, reviews = koinInject(),
+        draftOpens = koinInject())
 }
 
 @Composable
@@ -67,9 +70,19 @@ fun MainScreenContent(
     startDestination: String,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     reviews: ReviewPrompter? = null,
+    draftOpens: DraftOpenRequests? = null,
 ) {
     val navController = rememberNavController()
     if (reviews != null) ReviewOnLookups(navController, reviews)
+    if (draftOpens != null) {
+        val open by draftOpens.pending.collectAsState()
+        LaunchedEffect(open) {
+            if (open) {
+                navController.navigate(Screen.DraftRun.route) { launchSingleTop = true }
+                draftOpens.consume()
+            }
+        }
+    }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 

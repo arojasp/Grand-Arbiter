@@ -6,6 +6,13 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Release notes viewer: online or offline (ConnectivityManager). Normal permission, no prompt. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Draft timer outside the draft screen: a foreground service with its notification (shown only
+         if the user allows notifications), kept awake while a timed step runs, as a Live Update. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
 
     <application
         android:name=".GrandArbiterApplication"
@@ -29,6 +36,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".ui.tools.drafttimer.DraftTimerService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Tournament draft timer: alerts at the end of every pick, review and deck construction while the judge uses other apps or the screen is off, and shows the running step." />
+        </service>
     </application>
 
 </manifest>

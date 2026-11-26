@@ -1,6 +1,7 @@
 package es.alejandro.grandarbiter
 
 import android.app.UiModeManager
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -32,7 +33,10 @@ import es.alejandro.grandarbiter.ui.main.MainViewModel
 import es.alejandro.grandarbiter.ui.main.appupdate.AppUpdateController
 import es.alejandro.grandarbiter.ui.main.appupdate.AppUpdateUi
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftNotification
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftOpenRequests
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -41,6 +45,7 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel()
     private lateinit var appUpdates: AppUpdateController
+    private val draftOpens: DraftOpenRequests by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Splash stays until the stored display settings are read (theme: no dark-then-light flash).
@@ -49,6 +54,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         appUpdates = AppUpdateController(this)
+        if (savedInstanceState == null) openDraftIfAsked(intent)
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) { viewModel.appUpdateRequired.collect(appUpdates::setRequired) }
         }
@@ -86,6 +92,16 @@ class MainActivity : ComponentActivity() {
                 MainScreen(snackbar)
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        openDraftIfAsked(intent)
+    }
+
+    /** A tap on the draft timer notification. */
+    private fun openDraftIfAsked(intent: Intent?) {
+        if (intent?.getBooleanExtra(DraftNotification.EXTRA_OPEN_DRAFT, false) == true) draftOpens.request()
     }
 
     /** "CR updated" after the launch check, and the app-update snackbar / dialog. */

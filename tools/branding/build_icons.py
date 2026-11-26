@@ -10,6 +10,7 @@ splash screen use only the shape, so the cut-out has to exist in the geometry it
   app/src/main/res/drawable/ic_launcher_background.xml   flat BG
   app/src/main/res/drawable/ic_launcher_monochrome.xml   the same single path (themed icons, Android 13+)
   app/src/main/res/drawable/ic_splash.xml                the same path in @color/splash_icon (dark/light)
+  app/src/main/res/drawable/ic_stat_draft_timer.xml      the same path cropped to 24dp (draft timer notification)
   branding/play-store-icon-512.png                       Google Play listing icon   (--png)
   branding/icon-preview.png                              masks + small sizes check   (--png)
 
@@ -116,6 +117,22 @@ def vector(fill: str, d: str) -> str:
 '''
 
 
+def vector_notification(d: str, shape) -> str:
+    """Status bar icon: 24dp, the mark filling a 22dp square (1dp margin, as Material's small icons)."""
+    x0, y0, x1, y1 = shape.bounds
+    side = max(x1 - x0, y1 - y0) * 24 / 22
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    return HEADER + f'''<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="{n(side)}" android:viewportHeight="{n(side)}">
+    <group android:translateX="{n(side / 2 - cx)}" android:translateY="{n(side / 2 - cy)}">
+        <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd"
+            android:pathData="{d}" />
+    </group>
+</vector>
+'''
+
+
 def vector_background() -> str:
     return HEADER + f'''<vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
@@ -181,7 +198,8 @@ def main() -> int:
     (RES / "ic_launcher_monochrome.xml").write_text(vector("#FFFFFFFF", d), encoding="utf-8", newline="\n")
     (RES / "ic_launcher_background.xml").write_text(vector_background(), encoding="utf-8", newline="\n")
     (RES / "ic_splash.xml").write_text(vector("@color/splash_icon", d), encoding="utf-8", newline="\n")
-    print(f"wrote ic_launcher_{{foreground,background,monochrome}}.xml, ic_splash.xml (mark radius {r:.1f}/33)")
+    (RES / "ic_stat_draft_timer.xml").write_text(vector_notification(d, shape), encoding="utf-8", newline="\n")
+    print(f"wrote ic_launcher_{{foreground,background,monochrome}}.xml, ic_splash.xml, ic_stat_draft_timer.xml (mark radius {r:.1f}/33)")
     if "--png" in sys.argv:
         write_png(d)
         print("wrote branding/play-store-icon-512.png, branding/icon-preview.png")

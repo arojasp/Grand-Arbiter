@@ -47,6 +47,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -85,6 +87,10 @@ fun DraftRunScreen(
     KeepScreenOn()
 
     if (state == DraftRunState.NoDraft) LaunchedEffect(Unit) { onNoDraft() }
+    // The timer keeps going outside this screen: the service starts while the screen is visible.
+    val context = LocalContext.current
+    val running = (state as? DraftRunState.Active)?.snapshot?.position.let { it != null && it != DraftPosition.Finished }
+    if (running) LaunchedEffect(Unit) { DraftTimerService.start(context) }
 
     Scaffold(
         containerColor = colors.background,
@@ -551,11 +557,7 @@ private fun Footer(s: DraftSnapshot, viewModel: DraftRunViewModel, onEnd: () -> 
 private fun UntimedFooter(s: DraftSnapshot, step: DraftStep, viewModel: DraftRunViewModel, onEnd: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val next = s.nextStep
-    val nextLabel = when {
-        step is DraftStep.Review -> stringResource(R.string.draft_start_pack, step.nextPack)
-        next is DraftStep.Pick -> stringResource(R.string.draft_next_pick_button)
-        else -> startLabel(step, next)
-    }
+    val nextLabel = untimedNextLabel(LocalResources.current, step, next)
     PrimaryButton("$nextLabel  ›", viewModel::next)
     var hold by remember { mutableStateOf(HoldState.IDLE) }
     LaunchedEffect(hold) { if (hold == HoldState.TAPPED) { delay(1_500); hold = HoldState.IDLE } }
@@ -600,18 +602,9 @@ private fun RochesterPickFooter(s: DraftSnapshot, viewModel: DraftRunViewModel, 
     EndDraftLink(onEnd)
 }
 
+/** Same labels as the notification's actions (DraftNotification). */
 @Composable
-internal fun startLabel(ended: DraftStep, next: DraftStep?): String = when (next) {
-    is DraftStep.Pick -> when {
-        ended is DraftStep.Review -> stringResource(R.string.draft_start_pack, next.pack)
-        ended is DraftStep.LayOut -> stringResource(R.string.draft_start_picks)
-        else -> stringResource(R.string.draft_start_pick, next.pick)
-    }
-    is DraftStep.LayOut -> stringResource(R.string.draft_start_pack, next.pack)
-    is DraftStep.Review -> stringResource(R.string.draft_start_review)
-    is DraftStep.Construction -> stringResource(R.string.draft_start_construction)
-    null -> stringResource(R.string.draft_finish)
-}
+internal fun startLabel(ended: DraftStep, next: DraftStep?): String = startLabel(LocalResources.current, ended, next)
 
 @Composable
 private fun PrimaryButton(text: String, onClick: () -> Unit) {

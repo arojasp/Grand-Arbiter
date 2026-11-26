@@ -1,7 +1,26 @@
 package es.alejandro.grandarbiter.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Slider
+import androidx.compose.material3.rememberSliderState
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.unit.LayoutDirection
+import es.alejandro.grandarbiter.ui.theme.LocalHighContrast
+import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -270,3 +289,91 @@ internal fun ToggleChip(text: String, selected: Boolean, onClick: () -> Unit, le
         modifier = Modifier.heightIn(min = 48.dp),
     )
 }
+/**
+ * One of a few ordered levels on a slider, lowest first (Settings › Draft Timer). The thumb is a
+ * 4 dp bar in a [THUMB_SLOT]-wide slot, so the first and last stops sit inside the track instead of
+ * on its ends. TalkBack reads the selected level's [label], not a percentage.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun <T> StepSlider(
+    options: List<T>,
+    selected: T,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+    val highContrast = LocalHighContrast.current
+    val selectedLabel = label(selected)
+    val position = options.indexOf(selected).coerceAtLeast(0).toFloat()
+    val state = rememberSliderState(position, steps = (options.size - 2).coerceAtLeast(0),
+        trackRange = 0f..(options.size - 1).coerceAtLeast(1).toFloat())
+    // The thumb shows the stored level: a drag only asks for a new one (onValueChange).
+    SideEffect { state.value = position }
+    Slider(
+        state = state,
+        onValueChange = { value -> options.getOrNull(value.roundToInt())?.takeIf { it != selected }?.let(onSelect) },
+        modifier = modifier.semantics { stateDescription = selectedLabel },
+        thumb = { _ ->
+            Box(Modifier.size(THUMB_SLOT, THUMB_HEIGHT), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(4.dp, THUMB_HEIGHT).background(colors.primary, RoundedCornerShape(2.dp)))
+            }
+        },
+        track = { s -> StepTrack(s.value, s.trackRange, options.size, highContrast) },
+    )
+}
+
+/**
+ * The slider lays its track out between the thumb's centers at both ends, so this draws it out to
+ * the edges of the thumb slot: the end stops then sit [THUMB_SLOT] / 2 inside the drawn track.
+ */
+@Composable
+private fun StepTrack(value: Float, range: ClosedFloatingPointRange<Float>, count: Int, highContrast: Boolean) {
+    val colors = MaterialTheme.colorScheme
+    val active = colors.primary
+    // High contrast: the rest of the track is an outline, so it can't be mistaken for the filled part.
+    val inactive = if (highContrast) colors.outline else colors.surfaceContainerHighest
+    val stopOnActive = colors.onPrimary
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    Canvas(Modifier.fillMaxWidth().height(TRACK_HEIGHT)) {
+        val span = range.endInclusive - range.start
+        val fraction = if (span > 0f) ((value - range.start) / span).coerceIn(0f, 1f) else 0f
+        val thumbX = fraction * size.width
+        val inset = (THUMB_SLOT / 2).toPx()
+        val gap = THUMB_GAP.toPx()
+        val outer = CornerRadius(size.height / 2)
+        val inner = CornerRadius(2.dp.toPx())
+        val stroke = 1.dp.toPx()
+        fun segment(from: Float, to: Float, color: Color, roundStart: Boolean, roundEnd: Boolean, outlined: Boolean = false) {
+            if (to <= from) return
+            val edge = if (outlined) stroke / 2 else 0f
+            val path = Path().apply {
+                addRoundRect(RoundRect(Rect(from + edge, edge, to - edge, size.height - edge),
+                    topLeft = if (roundStart) outer else inner, bottomLeft = if (roundStart) outer else inner,
+                    topRight = if (roundEnd) outer else inner, bottomRight = if (roundEnd) outer else inner))
+            }
+            if (outlined) drawPath(path, color, style = Stroke(stroke)) else drawPath(path, color)
+        }
+        fun draw() {
+            segment(-inset, thumbX - gap, active, roundStart = true, roundEnd = false)
+            segment(thumbX + gap, size.width + inset, inactive, roundStart = false, roundEnd = true, outlined = highContrast)
+            if (count > 1) for (i in 0 until count) {
+                val x = i * size.width / (count - 1)
+                val color = when {
+                    x < thumbX - gap - STOP_RADIUS.toPx() -> stopOnActive
+                    x > thumbX + gap + STOP_RADIUS.toPx() -> active
+                    else -> null   // under the thumb
+                } ?: continue
+                drawCircle(color, STOP_RADIUS.toPx(), Offset(x, size.height / 2))
+            }
+        }
+        if (rtl) scale(-1f, 1f) { draw() } else draw()
+    }
+}
+
+private val THUMB_SLOT = 16.dp
+private val THUMB_HEIGHT = 28.dp
+private val TRACK_HEIGHT = 12.dp
+private val THUMB_GAP = 8.dp      // half the bar + the gap on each side of it
+private val STOP_RADIUS = 2.dp

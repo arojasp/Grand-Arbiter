@@ -214,3 +214,13 @@ Every animation reviewed with recordings (canvas `Animaciones_inventario`, `Anim
 | Commit | English |
 |---|---|
 | Card search field on TextFieldState | The card search field uses Compose's current text field API; the old one is deprecated. Nothing changes for the user: typing, clearing, the Advanced search form and restoring the search after the app is closed behave exactly as before (checked on the emulator, screens identical pixel by pixel). |
+
+### Draft Timer alerts (branch `feature/draft-alert-levels`)
+
+| Commit | English |
+|---|---|
+| Draft Timer: vibration strength and beep volume | New Draft Timer section in Settings: Vibration strength (Light, Medium, Strong) and Beep volume (Low, Medium, High), each with a button to try it. Medium and High are what the timer did before. The beep now plays on the alarm channel, like a timer, so it sounds with the phone in silent or vibrate mode; if the alarm volume is off, Settings says the beep won't play. The switches in the draft setup still turn each alert on or off. |
+| Settings in order of use | Settings now goes from the most used to the least: Accessibility, Draft timer, Card search, Card database, Documents, About. Before, Documents came second and Draft timer after Card search. |
+| Sentence case for the app's own names | Names the app gives its own parts are written in sentence case, like the rest of the app: Card search, Judge call, Document library, Oracle search, Deck counter, Quick references, Head Judge announcement, Power / toughness, Hand / life. Official names keep their capitals (Comprehensive Rules, Release Notes, Banned & Restricted, Game Lossâ€¦). |
+| Settings: Documents before Card database | Documents now comes before Card database, whose Check for updates button checks both and shows both results under it. |
+| Text size preview with card text | The Text size preview in Settings shows the rules text of an iconic card (Black Lotus, Lightning Bolt, Counterspell, Tarmogoyfâ€¦), a different one each time Settings opens, with mana symbols drawn as in card details. The text comes from the card database, so it's always the current Oracle wording. |

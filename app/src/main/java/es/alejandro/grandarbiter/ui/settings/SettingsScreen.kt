@@ -65,6 +65,17 @@ import es.alejandro.grandarbiter.domain.model.cards.CardUpdateState
 import es.alejandro.grandarbiter.domain.model.rules.RulesDocumentInfo
 import es.alejandro.grandarbiter.domain.model.rules.RulesUpdateState
 import es.alejandro.grandarbiter.ui.cardsearch.CardText
+import es.alejandro.grandarbiter.ui.cardsearch.OracleText
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import es.alejandro.grandarbiter.domain.draft.BeepVolume
+import es.alejandro.grandarbiter.domain.draft.VibrationStrength
+import es.alejandro.grandarbiter.ui.components.StepSlider
 import es.alejandro.grandarbiter.ui.components.Label
 import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
@@ -98,6 +109,10 @@ fun SettingsScreen(
     val rulesUpdateState by viewModel.rulesUpdateState.collectAsState()
     val autoOnline by viewModel.autoOnlineSearch.collectAsState()
     val hiddenFormats by viewModel.hiddenCommunityFormats.collectAsState()
+    val vibrationStrength by viewModel.vibrationStrength.collectAsState()
+    val beepVolume by viewModel.beepVolume.collectAsState()
+    val beepMuted by viewModel.beepMuted.collectAsState()
+    val textSample by viewModel.textSample.collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -121,8 +136,12 @@ fun SettingsScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
-            item { AccessibilitySection(display, viewModel::setTextScale, viewModel::setThemeMode, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
-            item { DocumentsSection(documents) }
+            // Most used first: settings that change how the app looks and behaves, then data and information.
+            item { AccessibilitySection(display, textSample, viewModel::setTextScale, viewModel::setThemeMode, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
+            item {
+                DraftTimerSection(vibrationStrength, viewModel::setVibrationStrength, viewModel::testVibration,
+                    beepVolume, viewModel::setBeepVolume, viewModel::testBeep, beepMuted)
+            }
             item {
                 SettingsSection(stringResource(R.string.settings_card_search)) {
                     SettingsPanel {
@@ -133,6 +152,8 @@ fun SettingsScreen(
                     }
                 }
             }
+            item { DocumentsSection(documents) }
+            // After Documents: its "Check for updates" checks documents and cards, and shows both results.
             item { CardDatabaseSection(cardData, updateState, rulesUpdateState, viewModel::checkForUpdates) }
             item { AboutSection() }
         }
@@ -144,6 +165,7 @@ fun SettingsScreen(
 @Composable
 private fun AccessibilitySection(
     display: DisplaySettings,
+    sample: TextSample?,
     onTextScale: (TextScale) -> Unit,
     onThemeMode: (ThemeMode) -> Unit,
     onHighContrast: (Boolean) -> Unit,
@@ -172,10 +194,15 @@ private fun AccessibilitySection(
                             .border(1.dp, colors.outlineVariant.softened(0.2f), RoundedCornerShape(8.dp))
                             .padding(12.dp)
                     ) {
-                        Text(stringResource(R.string.settings_text_preview),
-                            // Sample of reading text at the chosen size.
-                            style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                            color = colors.onSurfaceVariant)
+                        // Reading text at the chosen size: a card's Oracle text, a different one each time Settings opens.
+                        if (sample != null) {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                val style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic)
+                                if (sample.text != null) OracleText("“${sample.text}”", style, colors.onSurfaceVariant)
+                                else Text(stringResource(R.string.settings_text_preview), style = style, color = colors.onSurfaceVariant)
+                                sample.name?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant) }
+                            }
+                        }
                     }
                 }
             }
@@ -309,6 +336,77 @@ private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChang
             ),
         )
     }
+}
+
+// ---------------------------------------------------------------- draft timer
+
+/** How the step-end alerts feel and sound. The draft setup's switches decide whether they play. */
+@Composable
+private fun DraftTimerSection(
+    strength: VibrationStrength,
+    onStrength: (VibrationStrength) -> Unit,
+    onTestVibration: () -> Unit,
+    volume: BeepVolume,
+    onVolume: (BeepVolume) -> Unit,
+    onTestBeep: () -> Unit,
+    beepMuted: Boolean,
+) {
+    SettingsSection(stringResource(R.string.settings_draft_timer)) {
+        SettingsPanel {
+            LevelRow(stringResource(R.string.settings_vibration_strength), VibrationStrength.entries, strength,
+                { stringResource(it.label()) }, onStrength, stringResource(R.string.settings_test_vibration), onTestVibration)
+            PanelDivider()
+            LevelRow(stringResource(R.string.settings_beep_volume), BeepVolume.entries, volume,
+                { stringResource(it.label()) }, onVolume, stringResource(R.string.settings_test_beep), onTestBeep,
+                notice = stringResource(R.string.settings_beep_alarm_muted).takeIf { beepMuted })
+        }
+    }
+}
+
+/** Title with the chosen level on the right; below, the levels slider and a play button that tries it. */
+@Composable
+private fun <T> LevelRow(
+    title: String,
+    levels: List<T>,
+    selected: T,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    testLabel: String,
+    onTest: () -> Unit,
+    notice: String? = null,
+) {
+    val colors = MaterialTheme.colorScheme
+    Column(Modifier.fillMaxWidth().padding(start = 16.dp, top = 16.dp, end = 12.dp, bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.padding(end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(title, style = MaterialTheme.typography.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
+            Text(label(selected), style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StepSlider(levels, selected, label, onSelect,
+                Modifier.weight(1f).semantics { contentDescription = title })
+            OutlinedIconButton(onClick = onTest, border = BorderStroke(1.dp, colors.outline)) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = testLabel, tint = colors.primary)
+            }
+        }
+        // Read out when it appears: it can come from turning the alarm volume down with Settings open.
+        if (notice != null) {
+            Text(notice, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant,
+                modifier = Modifier.padding(end = 4.dp).semantics { liveRegion = LiveRegionMode.Polite })
+        }
+    }
+}
+
+private fun VibrationStrength.label(): Int = when (this) {
+    VibrationStrength.LIGHT -> R.string.settings_level_light
+    VibrationStrength.MEDIUM -> R.string.settings_level_medium
+    VibrationStrength.STRONG -> R.string.settings_level_strong
+}
+
+private fun BeepVolume.label(): Int = when (this) {
+    BeepVolume.LOW -> R.string.settings_level_low
+    BeepVolume.MEDIUM -> R.string.settings_level_medium
+    BeepVolume.HIGH -> R.string.settings_level_high
 }
 
 // ---------------------------------------------------------------- documents

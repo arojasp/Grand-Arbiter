@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.ui.components.Label
+import es.alejandro.grandarbiter.domain.draft.DraftRunState
 import es.alejandro.grandarbiter.domain.draft.DraftFormat
 import es.alejandro.grandarbiter.domain.draft.DraftPosition
 import es.alejandro.grandarbiter.domain.draft.DraftSnapshot

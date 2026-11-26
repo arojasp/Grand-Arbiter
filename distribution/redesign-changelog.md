@@ -224,3 +224,9 @@ Every animation reviewed with recordings (canvas `Animaciones_inventario`, `Anim
 | Sentence case for the app's own names | Names the app gives its own parts are written in sentence case, like the rest of the app: Card search, Judge call, Document library, Oracle search, Deck counter, Quick references, Head Judge announcement, Power / toughness, Hand / life. Official names keep their capitals (Comprehensive Rules, Release Notes, Banned & Restricted, Game Lossâ€¦). |
 | Settings: Documents before Card database | Documents now comes before Card database, whose Check for updates button checks both and shows both results under it. |
 | Text size preview with card text | The Text size preview in Settings shows the rules text of an iconic card (Black Lotus, Lightning Bolt, Counterspell, Tarmogoyfâ€¦), a different one each time Settings opens, with mana symbols drawn as in card details. The text comes from the card database, so it's always the current Oracle wording. |
+
+### Draft timer in the background (branch `feature/draft-background`)
+
+| Commit | English |
+|---|---|
+| Draft timer ticking moved out of the screen | Groundwork, no visible change: the draft's once-a-second clock and its vibration and beep now live in one place shared by the whole app instead of inside the draft screen, so a background service can watch the same clock later without alerting twice. Checked on the emulator: one vibration per step end on the draft screen, none while away from it, no burst on coming back, as before. |

@@ -2,109 +2,32 @@ package es.alejandro.grandarbiter.ui.tools.drafttimer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import es.alejandro.grandarbiter.data.draft.DraftTimingsRepository
-import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
-import es.alejandro.grandarbiter.domain.draft.BeepVolume
-import es.alejandro.grandarbiter.domain.draft.DraftAlertPolicy
-import es.alejandro.grandarbiter.domain.draft.VibrationStrength
-import es.alejandro.grandarbiter.domain.draft.DraftAlerts
-import es.alejandro.grandarbiter.domain.draft.DraftPlan
-import es.alejandro.grandarbiter.domain.draft.DraftPlans
-import es.alejandro.grandarbiter.domain.draft.DraftPosition
-import es.alejandro.grandarbiter.domain.draft.DraftSession
-import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
-import es.alejandro.grandarbiter.domain.draft.DraftSnapshot
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
+import es.alejandro.grandarbiter.data.draft.DraftSessionActions
+import es.alejandro.grandarbiter.data.draft.DraftTicker
+import es.alejandro.grandarbiter.domain.draft.DraftRunState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
-sealed interface DraftRunState {
-    data object Loading : DraftRunState
-    /** No draft in progress (ended, or never started): the screen goes back to the format picker. */
-    data object NoDraft : DraftRunState
-    data class Active(val snapshot: DraftSnapshot) : DraftRunState
-}
-
 /**
- * The running draft. Ticks once per second only while the screen is subscribed (foreground):
- * that is also when step-end alerts fire. Every new session value (pause, jump) or coming back to
- * the screen restarts the ticking with no previous tick, so a jump never alerts and returning
- * after a while gives no burst of vibrations.
+ * The running draft screen. The ticking and the step-end alerts live in [DraftTicker]; this
+ * watches it while the screen is shown (and 5 s more, so a rotation doesn't restart it).
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class DraftRunViewModel(
-    private val store: DraftSessionStore,
-    timingsRepository: DraftTimingsRepository,
-    settings: SettingsDataStore,
-    private val alerts: DraftAlerts,
+    ticker: DraftTicker,
+    private val actions: DraftSessionActions,
 ) : ViewModel() {
 
-    private sealed interface Source {
-        data object None : Source
-        data class Ready(val session: DraftSession, val plan: DraftPlan) : Source
-    }
-
-    private val beep: StateFlow<Boolean> = settings.draftBeep
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
-    private val vibrate: StateFlow<Boolean> = settings.draftVibrate
-        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    private val vibrationStrength: StateFlow<VibrationStrength> = settings.draftVibrationStrength
-        .stateIn(viewModelScope, SharingStarted.Eagerly, VibrationStrength.DEFAULT)
-    private val beepVolume: StateFlow<BeepVolume> = settings.draftBeepVolume
-        .stateIn(viewModelScope, SharingStarted.Eagerly, BeepVolume.DEFAULT)
-
-    /** Null until the MTR timings are read (a moment at start-up). */
-    private val source: StateFlow<Source?> = combine(store.session, timingsRepository.timings) { session, timings ->
-        if (session == null) Source.None else Source.Ready(session, DraftPlans.create(session.config, timings))
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-    val state: StateFlow<DraftRunState> = source
-        .flatMapLatest { s ->
-            when (s) {
-                null -> flowOf(DraftRunState.Loading)
-                Source.None -> flowOf(DraftRunState.NoDraft)
-                is Source.Ready -> ticks(s.session, s.plan)
-            }
-        }
+    val state: StateFlow<DraftRunState> = ticker.state
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DraftRunState.Loading)
 
-    private fun ticks(session: DraftSession, plan: DraftPlan): Flow<DraftRunState> = flow {
-        var previousElapsed: Long? = null   // null: just (re)started or jumped, never alert
-        while (true) {
-            val now = System.currentTimeMillis()
-            val elapsed = session.elapsedAt(plan, now)
-            if (DraftAlertPolicy.shouldAlert(plan, previousElapsed, elapsed, session.step)) {
-                if (vibrate.value) alerts.vibrate(vibrationStrength.value)
-                if (beep.value) alerts.beep(beepVolume.value)
-            }
-            previousElapsed = elapsed
-            val snapshot = DraftSnapshot.of(session, plan, now)
-            emit(DraftRunState.Active(snapshot))
-            // Nothing changes while paused, waiting for "Start…" (manual start) or after the end.
-            if (!session.isRunning || snapshot.position !is DraftPosition.Running) break
-            delay(1_000 - elapsed % 1_000)   // next whole second: steps last whole seconds (elapsed counts from a step start)
-        }
-    }
-
-    fun togglePause() = update { s, _, now -> if (s.isRunning) s.paused(now) else s.started(now) }
-    fun next() = update { s, plan, now -> s.next(plan, now) }
-    fun previous() = update { s, plan, now -> s.previous(plan, now) }
+    fun togglePause() = actions.togglePause()
+    fun next() = actions.next()
+    fun previous() = actions.previous()
 
     /** Manual start: "Start pick 4", "Start review", "Start pack 2", "Start deck construction". */
-    fun startNext() = update { s, plan, now -> s.startNext(plan, now) }
+    fun startNext() = actions.startNext()
 
     /** "End draft" (after confirming) and "Finish" on the time-up screen. */
-    fun endDraft() = store.save(null)
-
-    private fun update(change: (DraftSession, DraftPlan, Long) -> DraftSession) {
-        val ready = source.value as? Source.Ready ?: return
-        store.save(change(ready.session, ready.plan, System.currentTimeMillis()))
-    }
+    fun endDraft() = actions.endDraft()
 }

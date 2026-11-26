@@ -122,3 +122,19 @@ data class DraftSnapshot(
         }
     }
 }
+
+/** What the running draft looks like at one moment, for the draft screen (and anything else that watches it). */
+sealed interface DraftRunState {
+    data object Loading : DraftRunState
+    /** No draft in progress (ended, or never started): the screen goes back to the format picker. */
+    data object NoDraft : DraftRunState
+    data class Active(val snapshot: DraftSnapshot) : DraftRunState
+}
+
+/** Whether a step end vibrates and beeps, and how: the draft setup's switches and the Settings levels. */
+data class DraftAlertSettings(
+    val vibrate: Boolean = true,
+    val beep: Boolean = false,
+    val strength: VibrationStrength = VibrationStrength.DEFAULT,
+    val volume: BeepVolume = BeepVolume.DEFAULT,
+)

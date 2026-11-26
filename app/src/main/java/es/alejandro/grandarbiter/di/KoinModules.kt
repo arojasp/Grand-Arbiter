@@ -40,6 +40,7 @@ import es.alejandro.grandarbiter.ui.tools.announcement.AnnouncementViewModel
 import es.alejandro.grandarbiter.ui.tools.deckcounter.DeckCounterViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import kotlinx.coroutines.flow.combine
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -63,10 +64,13 @@ import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceDetailViewMode
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferenceEditViewModel
 import es.alejandro.grandarbiter.ui.tools.quickrefs.QuickReferencesViewModel
 import es.alejandro.grandarbiter.data.draft.AndroidDraftAlerts
+import es.alejandro.grandarbiter.data.draft.DraftSessionActions
+import es.alejandro.grandarbiter.data.draft.DraftTicker
 import es.alejandro.grandarbiter.data.draft.DraftTimingsRepository
 import es.alejandro.grandarbiter.data.draft.PrefsDraftSessionStore
 import es.alejandro.grandarbiter.data.draft.PrefsDraftTimesStore
 import es.alejandro.grandarbiter.data.draft.PrefsUserDraftPresetStore
+import es.alejandro.grandarbiter.domain.draft.DraftAlertSettings
 import es.alejandro.grandarbiter.domain.draft.DraftAlerts
 import es.alejandro.grandarbiter.domain.draft.DraftSessionStore
 import es.alejandro.grandarbiter.domain.draft.DraftTimesStore
@@ -161,6 +165,16 @@ val appModule = module {
     single<UserDraftPresetStore> { PrefsUserDraftPresetStore(androidContext()) }
     single<DraftAlerts> { AndroidDraftAlerts(androidContext()) }
     single { DraftTimingsRepository(get()) }
+    single {
+        val settings = get<SettingsDataStore>()
+        DraftTicker(
+            store = get(),
+            timings = get<DraftTimingsRepository>().timings,
+            alertSettings = combine(settings.draftVibrate, settings.draftBeep, settings.draftVibrationStrength, settings.draftBeepVolume, ::DraftAlertSettings),
+            alerts = get(),
+        )
+    }
+    single { DraftSessionActions(get(), get()) }
     single { SectionVersions(get(), get(), get()) }
 }
 

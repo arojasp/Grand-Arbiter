@@ -1,6 +1,6 @@
 # Grand Arbiter — Privacy Policy
 
-Last updated: November 10, 2026
+Last updated: November 26, 2026
 
 Grand Arbiter is a free app for Magic: The Gathering judges. It has no accounts, no ads, no analytics and no tracking. The developer runs no server and receives no data from the app.
 
@@ -11,9 +11,13 @@ Everything the app keeps stays on your device:
 - the rules documents and the card database;
 - your quick references and notes;
 - your custom ban lists (names, notes and the cards in them);
-- your settings (text size, theme, contrast, keep screen on, card search) and the judge call timer.
+- your settings (text size, theme, contrast, keep screen on, card search, draft timer alerts), the judge call timer and the draft in progress.
 
 If Android's own backup is enabled on your device, your quick references, custom lists and settings are included in your Google backup, as with any app. You can turn this off in Android's settings.
+
+## Notifications
+
+While a draft timer is running, the app keeps it going in the background so it can vibrate and beep at the end of each step, and shows a notification with the current step and the time left. The notification is made on your device; nothing is sent anywhere. If you don't allow notifications, the timer still runs and alerts, and the notification only appears in Android's list of running apps. You can change this at any time in Android's settings or in Settings › Draft timer › Alerts and notifications.
 
 ## Card searches sent to Scryfall
 

@@ -189,7 +189,7 @@
     <string name="settings_community_formats">Community formats in card details</string>
     <string name="settings_community_formats_hint">Official formats are always shown.</string>
     <string name="settings_community_formats_count">%1$d of %2$d shown</string>
-    <string name="settings_draft_timer">Draft Timer</string>
+    <string name="settings_draft_timer">Draft timer</string>
     <string name="settings_vibration_strength">Vibration strength</string>
     <string name="settings_beep_volume">Beep volume</string>
     <string name="settings_test_vibration">Test vibration</string>
@@ -216,7 +216,7 @@
     <string name="tools_deck_counter_desc">Count main deck and sideboard</string>
     <string name="tools_announcement">Head Judge Announcement</string>
     <string name="tools_announcement_desc">Checklist for the opening announcement</string>
-    <string name="tools_draft_timer">Draft Timer</string>
+    <string name="tools_draft_timer">Draft timer</string>
     <string name="tools_draft_timer_desc">Times every pick, review and deck construction</string>
     <string name="tools_banned_lists">Banned &amp; Restricted</string>
     <string name="tools_banned_lists_desc">Official lists by format, and your own</string>

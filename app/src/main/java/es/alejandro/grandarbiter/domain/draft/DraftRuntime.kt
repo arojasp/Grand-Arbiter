@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.domain.draft
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /** The draft in progress (at most one), kept across app restarts. */
@@ -19,10 +20,23 @@ interface DraftSessionStore {
     fun save(session: DraftSession?)
 }
 
-/** What happens when a step runs out. Implemented with the Vibrator; faked in tests. */
+/** What happens when a step runs out, and the Settings "Test" buttons. Implemented with the Vibrator and a tone. */
 interface DraftAlerts {
-    /** One vibration if [vibrate] (on by default), a short beep if [beep] (off by default). */
-    fun stepEnded(vibrate: Boolean, beep: Boolean)
+    fun vibrate(strength: VibrationStrength)
+    fun beep(volume: BeepVolume)
+
+    /** True while the phone's alarm volume is at zero: the beep plays on the alarm channel, so it can't be heard. */
+    val beepMuted: Flow<Boolean>
+}
+
+/** How the step-end vibration feels. [MEDIUM] is the one vibration the timer always had. */
+enum class VibrationStrength { LIGHT, MEDIUM, STRONG;
+    companion object { val DEFAULT = MEDIUM }
+}
+
+/** How loud the step-end beep is, relative to the phone's alarm volume. [HIGH] is the beep the timer always had. */
+enum class BeepVolume { LOW, MEDIUM, HIGH;
+    companion object { val DEFAULT = HIGH }
 }
 
 /** Picks the plan factory for a format. */

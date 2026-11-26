@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
 import es.alejandro.grandarbiter.data.rules.bundle.DocumentId
+import es.alejandro.grandarbiter.domain.draft.BeepVolume
+import es.alejandro.grandarbiter.domain.draft.DraftAlerts
+import es.alejandro.grandarbiter.domain.draft.VibrationStrength
 import es.alejandro.grandarbiter.domain.model.DisplaySettings
 import es.alejandro.grandarbiter.domain.model.TextScale
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
@@ -27,6 +30,7 @@ class SettingsViewModel(
     private val updater: CardDataUpdater,
     private val rulesUpdater: RulesDataUpdater,
     private val settings: SettingsDataStore,
+    private val alerts: DraftAlerts,
 ) : ViewModel() {
 
     val display: StateFlow<DisplaySettings> = settings.displaySettings
@@ -63,6 +67,19 @@ class SettingsViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
     fun setCommunityFormatShown(format: String, shown: Boolean) =
         viewModelScope.launch { settings.setCommunityFormatShown(format, shown) }
+
+    /** Draft Timer alerts. Always adjustable: the draft setup's switches decide whether they play. */
+    val vibrationStrength: StateFlow<VibrationStrength> = settings.draftVibrationStrength
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), VibrationStrength.DEFAULT)
+    val beepVolume: StateFlow<BeepVolume> = settings.draftBeepVolume
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), BeepVolume.DEFAULT)
+    fun setVibrationStrength(strength: VibrationStrength) = viewModelScope.launch { settings.setDraftVibrationStrength(strength) }
+    fun setBeepVolume(volume: BeepVolume) = viewModelScope.launch { settings.setDraftBeepVolume(volume) }
+    fun testVibration() = alerts.vibrate(vibrationStrength.value)
+    fun testBeep() = alerts.beep(beepVolume.value)
+    val beepMuted: StateFlow<Boolean> = alerts.beepMuted
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
     private companion object {
         val ORDER = listOf(DocumentId.CR, DocumentId.IPG, DocumentId.MTR, DocumentId.JAR)
     }

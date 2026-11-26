@@ -189,6 +189,17 @@
     <string name="settings_community_formats">Community formats in card details</string>
     <string name="settings_community_formats_hint">Official formats are always shown.</string>
     <string name="settings_community_formats_count">%1$d of %2$d shown</string>
+    <string name="settings_draft_timer">Draft Timer</string>
+    <string name="settings_vibration_strength">Vibration strength</string>
+    <string name="settings_beep_volume">Beep volume</string>
+    <string name="settings_test_vibration">Test vibration</string>
+    <string name="settings_test_beep">Test beep</string>
+    <string name="settings_beep_alarm_muted">Alarm volume is off: the beep won\'t play.</string>
+    <string name="settings_level_light">Light</string>
+    <string name="settings_level_low">Low</string>
+    <string name="settings_level_medium">Medium</string>
+    <string name="settings_level_strong">Strong</string>
+    <string name="settings_level_high">High</string>
     <string name="settings_rate">Rate Grand Arbiter</string>
     <string name="settings_rate_hint">Opens the app\'s page on Google Play</string>
     <string name="settings_documents">Documents</string>

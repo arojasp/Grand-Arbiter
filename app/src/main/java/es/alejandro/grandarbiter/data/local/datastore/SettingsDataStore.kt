@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import es.alejandro.grandarbiter.domain.draft.BeepVolume
+import es.alejandro.grandarbiter.domain.draft.VibrationStrength
 import es.alejandro.grandarbiter.domain.model.DisplaySettings
 import es.alejandro.grandarbiter.domain.model.TextScale
 import es.alejandro.grandarbiter.domain.model.ThemeMode
@@ -30,6 +32,8 @@ class SettingsDataStore(private val context: Context) : SearchPreferences, CardD
     private val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
     private val DRAFT_BEEP = booleanPreferencesKey("draft_beep")
     private val DRAFT_VIBRATE = booleanPreferencesKey("draft_vibrate")
+    private val DRAFT_VIBRATION_STRENGTH = stringPreferencesKey("draft_vibration_strength")
+    private val DRAFT_BEEP_VOLUME = stringPreferencesKey("draft_beep_volume")
     private val AUTO_ONLINE_SEARCH = booleanPreferencesKey("auto_online_search")
     private val HIDDEN_COMMUNITY_FORMATS = stringSetPreferencesKey("hidden_community_formats")
     private val REVIEW_FIRST_DAY = longPreferencesKey("review_first_day")
@@ -57,6 +61,16 @@ class SettingsDataStore(private val context: Context) : SearchPreferences, CardD
     /** Draft timer: one vibration when a step runs out. On by default. */
     val draftVibrate: Flow<Boolean> = context.dataStore.data.map { it[DRAFT_VIBRATE] ?: true }.distinctUntilChanged()
     suspend fun setDraftVibrate(enabled: Boolean) = set(DRAFT_VIBRATE, enabled)
+
+    /** Draft timer: how the step-end vibration feels (Settings). Used only while [draftVibrate] is on. */
+    val draftVibrationStrength: Flow<VibrationStrength> =
+        context.dataStore.data.map { enumOr(it[DRAFT_VIBRATION_STRENGTH], VibrationStrength.DEFAULT) }.distinctUntilChanged()
+    suspend fun setDraftVibrationStrength(strength: VibrationStrength) = set(DRAFT_VIBRATION_STRENGTH, strength.name)
+
+    /** Draft timer: how loud the step-end beep is (Settings). Used only while [draftBeep] is on. */
+    val draftBeepVolume: Flow<BeepVolume> =
+        context.dataStore.data.map { enumOr(it[DRAFT_BEEP_VOLUME], BeepVolume.DEFAULT) }.distinctUntilChanged()
+    suspend fun setDraftBeepVolume(volume: BeepVolume) = set(DRAFT_BEEP_VOLUME, volume.name)
 
     /** Card search: Scryfall-only searches go out by themselves. On by default. */
     override val autoOnlineSearch: Flow<Boolean> = context.dataStore.data.map { it[AUTO_ONLINE_SEARCH] ?: true }.distinctUntilChanged()

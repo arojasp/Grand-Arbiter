@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import es.alejandro.grandarbiter.data.draft.DraftTimingsRepository
 import es.alejandro.grandarbiter.data.local.datastore.SettingsDataStore
+import es.alejandro.grandarbiter.domain.draft.BeepVolume
 import es.alejandro.grandarbiter.domain.draft.DraftAlertPolicy
+import es.alejandro.grandarbiter.domain.draft.VibrationStrength
 import es.alejandro.grandarbiter.domain.draft.DraftAlerts
 import es.alejandro.grandarbiter.domain.draft.DraftPlan
 import es.alejandro.grandarbiter.domain.draft.DraftPlans
@@ -53,6 +55,10 @@ class DraftRunViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
     private val vibrate: StateFlow<Boolean> = settings.draftVibrate
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    private val vibrationStrength: StateFlow<VibrationStrength> = settings.draftVibrationStrength
+        .stateIn(viewModelScope, SharingStarted.Eagerly, VibrationStrength.DEFAULT)
+    private val beepVolume: StateFlow<BeepVolume> = settings.draftBeepVolume
+        .stateIn(viewModelScope, SharingStarted.Eagerly, BeepVolume.DEFAULT)
 
     /** Null until the MTR timings are read (a moment at start-up). */
     private val source: StateFlow<Source?> = combine(store.session, timingsRepository.timings) { session, timings ->
@@ -74,7 +80,10 @@ class DraftRunViewModel(
         while (true) {
             val now = System.currentTimeMillis()
             val elapsed = session.elapsedAt(plan, now)
-            if (DraftAlertPolicy.shouldAlert(plan, previousElapsed, elapsed, session.step)) alerts.stepEnded(vibrate = vibrate.value, beep = beep.value)
+            if (DraftAlertPolicy.shouldAlert(plan, previousElapsed, elapsed, session.step)) {
+                if (vibrate.value) alerts.vibrate(vibrationStrength.value)
+                if (beep.value) alerts.beep(beepVolume.value)
+            }
             previousElapsed = elapsed
             val snapshot = DraftSnapshot.of(session, plan, now)
             emit(DraftRunState.Active(snapshot))

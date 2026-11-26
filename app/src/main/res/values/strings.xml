@@ -1,17 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Grand Arbiter</string>
     <string name="nav_home">Home</string>
-    <string name="nav_card_search">Card Search</string>
+    <string name="nav_card_search">Card search</string>
     <string name="nav_tools">Tools</string>
 
     <!-- Home Screen -->
-    <string name="home_judge_call">Judge Call</string>
+    <string name="home_judge_call">Judge call</string>
     <string name="home_judge_call_subtitle">Time to add to the match</string>
     <string name="home_start_timer">Start</string>
     <string name="home_pause_timer">Pause</string>
     <string name="home_hold_to_reset">Hold to reset</string>
     <string name="home_reset_timer">Reset</string>
-    <string name="home_document_library">Document Library</string>
+    <string name="home_document_library">Document library</string>
     <string name="home_cr_title">Comprehensive Rules</string>
     <string name="home_ipg_title">Infraction Procedure Guide</string>
     <string name="home_mtr_title">Magic Tournament Rules</string>
@@ -41,7 +41,7 @@
     <string name="penalty_disqualification">Disqualification</string>
 
     <!-- Card search -->
-    <string name="cards_title">Oracle Search</string>
+    <string name="cards_title">Oracle search</string>
     <string name="cards_details">Card details</string>
     <string name="cards_settings">Settings</string>
     <plurals name="cards_found">
@@ -51,10 +51,10 @@
     <string name="cards_found_many">%1$d+ cards found</string>
     <string name="cards_end">End of results</string>
     <string name="cards_label_type">Type</string>
-    <string name="cards_label_pt">Power / Toughness</string>
+    <string name="cards_label_pt">Power / toughness</string>
     <string name="cards_label_loyalty">Loyalty</string>
     <string name="cards_label_defense">Defense</string>
-    <string name="cards_label_hand_life">Hand / Life</string>
+    <string name="cards_label_hand_life">Hand / life</string>
     <string name="cards_oracle_text">Oracle text</string>
     <string name="cards_no_text">This card has no rules text.</string>
     <string name="cards_official_rulings">Official rulings</string>
@@ -189,6 +189,17 @@
     <string name="settings_community_formats">Community formats in card details</string>
     <string name="settings_community_formats_hint">Official formats are always shown.</string>
     <string name="settings_community_formats_count">%1$d of %2$d shown</string>
+    <string name="settings_draft_timer">Draft timer</string>
+    <string name="settings_vibration_strength">Vibration strength</string>
+    <string name="settings_beep_volume">Beep volume</string>
+    <string name="settings_test_vibration">Test vibration</string>
+    <string name="settings_test_beep">Test beep</string>
+    <string name="settings_beep_alarm_muted">Alarm volume is off: the beep won\'t play.</string>
+    <string name="settings_level_light">Light</string>
+    <string name="settings_level_low">Low</string>
+    <string name="settings_level_medium">Medium</string>
+    <string name="settings_level_strong">Strong</string>
+    <string name="settings_level_high">High</string>
     <string name="settings_rate">Rate Grand Arbiter</string>
     <string name="settings_rate_hint">Opens the app\'s page on Google Play</string>
     <string name="settings_documents">Documents</string>
@@ -201,15 +212,15 @@
 
     <!-- Tools -->
     <string name="tools_references">References</string>
-    <string name="tools_deck_counter">Deck Counter</string>
+    <string name="tools_deck_counter">Deck counter</string>
     <string name="tools_deck_counter_desc">Count main deck and sideboard</string>
-    <string name="tools_announcement">Head Judge Announcement</string>
+    <string name="tools_announcement">Head Judge announcement</string>
     <string name="tools_announcement_desc">Checklist for the opening announcement</string>
-    <string name="tools_draft_timer">Draft Timer</string>
+    <string name="tools_draft_timer">Draft timer</string>
     <string name="tools_draft_timer_desc">Times every pick, review and deck construction</string>
     <string name="tools_banned_lists">Banned &amp; Restricted</string>
     <string name="tools_banned_lists_desc">Official lists by format, and your own</string>
-    <string name="tools_quick_references">Quick References</string>
+    <string name="tools_quick_references">Quick references</string>
     <string name="banned_title">Banned &amp; Restricted</string>
     <string name="banned_search_placeholder">Search cards or formats</string>
     <string name="banned_data_from">From Scryfall card data, %1$s</string>
@@ -276,7 +287,7 @@
     <string name="tools_quick_references_desc">Rules you keep at hand, with notes</string>
 
     <!-- Head Judge announcement -->
-    <string name="hj_title">Head Judge Announcement</string>
+    <string name="hj_title">Head Judge announcement</string>
     <string name="hj_reset">Reset checklist</string>
     <string name="hj_topic_welcome">Welcome</string>
     <string name="hj_topic_judges">Names of judges</string>
@@ -408,7 +419,7 @@
     <string name="release_notes_card_source">From the %1$s release notes.</string>
     <string name="release_notes_card_source_dated">From the %1$s release notes, revision of %2$s.</string>
 
-    <!-- Draft Timer -->
+    <!-- Draft timer -->
     <string name="draft_choose_format">Choose a format</string>
     <string name="draft_format_booster">Booster Draft</string>
     <string name="draft_format_booster_desc">MTR, Pro Tour or your own pick times, review between packs and deck construction.</string>

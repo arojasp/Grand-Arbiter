@@ -21,8 +21,8 @@ android {
         // versionName = A.B.C; every release bumps one (new features: B; fixes or documents only: C).
         // The changelog and the Play text say what changed. Until 1.7.0 a 3-digit document counter
         // was appended (1.5.0001): dropped, it never went past 1. versionCode always +1.
-        versionCode = 17
-        versionName = "1.8.0"
+        versionCode = 18
+        versionName = "1.9.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

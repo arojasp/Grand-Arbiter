@@ -150,8 +150,9 @@ fun SettingsScreen(
                     }
                 }
             }
-            item { CardDatabaseSection(cardData, updateState, rulesUpdateState, viewModel::checkForUpdates) }
             item { DocumentsSection(documents) }
+            // After Documents: its "Check for updates" checks documents and cards, and shows both results.
+            item { CardDatabaseSection(cardData, updateState, rulesUpdateState, viewModel::checkForUpdates) }
             item { AboutSection() }
         }
     }

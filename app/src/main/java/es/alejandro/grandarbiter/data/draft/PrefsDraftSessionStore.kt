@@ -14,7 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * The draft in progress in SharedPreferences, like the judge call timer: a few numbers written
- * only on start, pause, jumps and end. No service, no notification: the time comes from the clock.
+ * only on start, pause, jumps and end. The time comes from the wall clock, so it stays right with
+ * no process alive (process death, a stopped service, a reboot).
  */
 class PrefsDraftSessionStore(context: Context) : DraftSessionStore {
 

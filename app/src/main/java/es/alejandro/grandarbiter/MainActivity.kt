@@ -35,6 +35,7 @@ import es.alejandro.grandarbiter.ui.main.appupdate.AppUpdateUi
 import es.alejandro.grandarbiter.ui.theme.GrandArbiterTheme
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftNotification
 import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftOpenRequests
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftTimerNews
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModel()
     private lateinit var appUpdates: AppUpdateController
     private val draftOpens: DraftOpenRequests by inject()
+    private val draftNews: DraftTimerNews by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Splash stays until the stored display settings are read (theme: no dark-then-light flash).
@@ -55,6 +57,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         appUpdates = AppUpdateController(this)
         if (savedInstanceState == null) openDraftIfAsked(intent)
+        lifecycleScope.launch { draftNews.seed() }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) { viewModel.appUpdateRequired.collect(appUpdates::setRequired) }
         }

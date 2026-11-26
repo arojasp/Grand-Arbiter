@@ -58,6 +58,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.tools.drafttimer.NotificationAccess
+import es.alejandro.grandarbiter.ui.tools.drafttimer.rememberNotificationAccess
 import es.alejandro.grandarbiter.domain.model.DisplaySettings
 import es.alejandro.grandarbiter.domain.model.TextScale
 import es.alejandro.grandarbiter.domain.model.cards.CardDataInfo
@@ -100,6 +102,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onOpenDraftTimer: () -> Unit,
     viewModel: SettingsViewModel = koinViewModel(),
 ) {
     val display by viewModel.display.collectAsState()
@@ -109,9 +112,12 @@ fun SettingsScreen(
     val rulesUpdateState by viewModel.rulesUpdateState.collectAsState()
     val autoOnline by viewModel.autoOnlineSearch.collectAsState()
     val hiddenFormats by viewModel.hiddenCommunityFormats.collectAsState()
+    val vibrate by viewModel.vibrate.collectAsState()
     val vibrationStrength by viewModel.vibrationStrength.collectAsState()
+    val beep by viewModel.beep.collectAsState()
     val beepVolume by viewModel.beepVolume.collectAsState()
-    val beepMuted by viewModel.beepMuted.collectAsState()
+    val asked by viewModel.notificationPermissionAsked.collectAsState()
+    val notifications = rememberNotificationAccess(asked, viewModel::setNotificationPermissionAsked)
     val textSample by viewModel.textSample.collectAsState()
 
     Scaffold(
@@ -138,10 +144,7 @@ fun SettingsScreen(
         ) {
             // Most used first: settings that change how the app looks and behaves, then data and information.
             item { AccessibilitySection(display, textSample, viewModel::setTextScale, viewModel::setThemeMode, viewModel::setHighContrast, viewModel::setKeepScreenOn) }
-            item {
-                DraftTimerSection(vibrationStrength, viewModel::setVibrationStrength, viewModel::testVibration,
-                    beepVolume, viewModel::setBeepVolume, viewModel::testBeep, beepMuted)
-            }
+            item { DraftTimerSection(vibrate, vibrationStrength, beep, beepVolume, notifications.access, onOpenDraftTimer) }
             item {
                 SettingsSection(stringResource(R.string.settings_card_search)) {
                     SettingsPanel {
@@ -317,7 +320,7 @@ private fun CommunityFormatsRow(hidden: Set<String>, onShown: (String, Boolean) 
     }
 }
 @Composable
-private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     val colors = MaterialTheme.colorScheme
     Row(
         Modifier.fillMaxWidth().clickable(role = Role.Switch) { onChange(!checked) }.padding(16.dp),
@@ -340,32 +343,32 @@ private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChang
 
 // ---------------------------------------------------------------- draft timer
 
-/** How the step-end alerts feel and sound. The draft setup's switches decide whether they play. */
+/** One row: what the alerts do now; the switches, levels and notifications have their own screen. */
 @Composable
-private fun DraftTimerSection(
-    strength: VibrationStrength,
-    onStrength: (VibrationStrength) -> Unit,
-    onTestVibration: () -> Unit,
-    volume: BeepVolume,
-    onVolume: (BeepVolume) -> Unit,
-    onTestBeep: () -> Unit,
-    beepMuted: Boolean,
-) {
+private fun DraftTimerSection(vibrate: Boolean, strength: VibrationStrength, beep: Boolean, volume: BeepVolume,
+                              notifications: NotificationAccess, onOpen: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val off = stringResource(R.string.settings_level_off)
+    val summary = stringResource(R.string.settings_draft_alerts_summary,
+        if (vibrate) stringResource(strength.label()) else off,
+        if (beep) stringResource(volume.label()) else off,
+        stringResource(if (notifications == NotificationAccess.ON) R.string.draft_notif_on else R.string.draft_notif_off))
     SettingsSection(stringResource(R.string.settings_draft_timer)) {
         SettingsPanel {
-            LevelRow(stringResource(R.string.settings_vibration_strength), VibrationStrength.entries, strength,
-                { stringResource(it.label()) }, onStrength, stringResource(R.string.settings_test_vibration), onTestVibration)
-            PanelDivider()
-            LevelRow(stringResource(R.string.settings_beep_volume), BeepVolume.entries, volume,
-                { stringResource(it.label()) }, onVolume, stringResource(R.string.settings_test_beep), onTestBeep,
-                notice = stringResource(R.string.settings_beep_alarm_muted).takeIf { beepMuted })
+            Row(
+                Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onOpen).padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TitleAndSubtitle(stringResource(R.string.settings_draft_alerts), summary, Modifier.weight(1f))
+                Icon(painterResource(R.drawable.ic_chevron_right), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
+            }
         }
     }
 }
 
 /** Title with the chosen level on the right; below, the levels slider and a play button that tries it. */
 @Composable
-private fun <T> LevelRow(
+internal fun <T> LevelRow(
     title: String,
     levels: List<T>,
     selected: T,
@@ -397,13 +400,13 @@ private fun <T> LevelRow(
     }
 }
 
-private fun VibrationStrength.label(): Int = when (this) {
+internal fun VibrationStrength.label(): Int = when (this) {
     VibrationStrength.LIGHT -> R.string.settings_level_light
     VibrationStrength.MEDIUM -> R.string.settings_level_medium
     VibrationStrength.STRONG -> R.string.settings_level_strong
 }
 
-private fun BeepVolume.label(): Int = when (this) {
+internal fun BeepVolume.label(): Int = when (this) {
     BeepVolume.LOW -> R.string.settings_level_low
     BeepVolume.MEDIUM -> R.string.settings_level_medium
     BeepVolume.HIGH -> R.string.settings_level_high
@@ -638,7 +641,7 @@ private fun AboutSection() {
 
 /** A section: its Label (like every group label in the app), then its content 16 dp apart. */
 @Composable
-private fun SettingsSection(title: String, content: @Composable () -> Unit) {
+internal fun SettingsSection(title: String, content: @Composable () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Label(title, Modifier.padding(start = 4.dp))
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) { content() }
@@ -647,7 +650,7 @@ private fun SettingsSection(title: String, content: @Composable () -> Unit) {
 
 /** The settings panels are the app's Panel, on surfaceContainer. */
 @Composable
-private fun SettingsPanel(content: @Composable () -> Unit) {
+internal fun SettingsPanel(content: @Composable () -> Unit) {
     Panel(color = MaterialTheme.colorScheme.surfaceContainer) { content() }
 }
 
@@ -657,10 +660,10 @@ private fun PanelRow(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun PanelDivider() = ListDivider()
+internal fun PanelDivider() = ListDivider()
 
 @Composable
-private fun TitleAndSubtitle(title: String, subtitle: String, modifier: Modifier = Modifier) {
+internal fun TitleAndSubtitle(title: String, subtitle: String, modifier: Modifier = Modifier) {
     Column(modifier) {
         Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
         Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -34,6 +34,9 @@ class SettingsDataStore(private val context: Context) : SearchPreferences, CardD
     private val DRAFT_VIBRATE = booleanPreferencesKey("draft_vibrate")
     private val DRAFT_VIBRATION_STRENGTH = stringPreferencesKey("draft_vibration_strength")
     private val DRAFT_BEEP_VOLUME = stringPreferencesKey("draft_beep_volume")
+    private val DRAFT_NOTIFICATIONS_OFFERED = booleanPreferencesKey("draft_notifications_offered")
+    private val NOTIFICATION_PERMISSION_ASKED = booleanPreferencesKey("notification_permission_asked")
+    private val DRAFT_BACKGROUND_NEWS_SEEN = booleanPreferencesKey("draft_background_news_seen")
     private val AUTO_ONLINE_SEARCH = booleanPreferencesKey("auto_online_search")
     private val HIDDEN_COMMUNITY_FORMATS = stringSetPreferencesKey("hidden_community_formats")
     private val REVIEW_FIRST_DAY = longPreferencesKey("review_first_day")
@@ -71,6 +74,18 @@ class SettingsDataStore(private val context: Context) : SearchPreferences, CardD
     val draftBeepVolume: Flow<BeepVolume> =
         context.dataStore.data.map { enumOr(it[DRAFT_BEEP_VOLUME], BeepVolume.DEFAULT) }.distinctUntilChanged()
     suspend fun setDraftBeepVolume(volume: BeepVolume) = set(DRAFT_BEEP_VOLUME, volume.name)
+
+    /** Draft timer: the first-setup card about notifications was answered ("Turn on" or "Not now"). */
+    val draftNotificationsOffered: Flow<Boolean> = context.dataStore.data.map { it[DRAFT_NOTIFICATIONS_OFFERED] ?: false }.distinctUntilChanged()
+    suspend fun setDraftNotificationsOffered() = set(DRAFT_NOTIFICATIONS_OFFERED, true)
+
+    /** The notification permission dialog was shown once: refused twice, Android stops showing it. */
+    val notificationPermissionAsked: Flow<Boolean> = context.dataStore.data.map { it[NOTIFICATION_PERMISSION_ASKED] ?: false }.distinctUntilChanged()
+    suspend fun setNotificationPermissionAsked() = set(NOTIFICATION_PERMISSION_ASKED, true)
+
+    /** «Updated» on Tools › Draft timer (background timer). Null: not decided yet (see DraftTimerNews). */
+    val draftBackgroundNewsSeen: Flow<Boolean?> = context.dataStore.data.map { it[DRAFT_BACKGROUND_NEWS_SEEN] }.distinctUntilChanged()
+    suspend fun setDraftBackgroundNewsSeen(seen: Boolean) = set(DRAFT_BACKGROUND_NEWS_SEEN, seen)
 
     /** Card search: Scryfall-only searches go out by themselves. On by default. */
     override val autoOnlineSearch: Flow<Boolean> = context.dataStore.data.map { it[AUTO_ONLINE_SEARCH] ?: true }.distinctUntilChanged()

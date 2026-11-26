@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import es.alejandro.grandarbiter.R
 import es.alejandro.grandarbiter.ui.components.ListDivider
 import es.alejandro.grandarbiter.ui.components.Panel
+import es.alejandro.grandarbiter.ui.home.UpdatedLabel
 import es.alejandro.grandarbiter.ui.components.SectionTitle
 import es.alejandro.grandarbiter.ui.navigation.Screen
 
@@ -68,6 +69,8 @@ private val REFERENCES = listOf(
 fun ToolsScreen(
     onOpen: (route: String) -> Unit,
     onOpenSettings: () -> Unit,
+    /** «Updated» on the Draft timer row: the timer now keeps running in the background. */
+    draftTimerUpdated: Boolean = false,
 ) {
     val colors = MaterialTheme.colorScheme
     Scaffold(
@@ -93,7 +96,7 @@ fun ToolsScreen(
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { ToolList(TOOLS, primary = true, onOpen) }
+            item { ToolList(TOOLS, primary = true, onOpen, updated = setOfNotNull(Screen.DraftTimer.route.takeIf { draftTimerUpdated })) }
             item { SectionTitle(stringResource(R.string.tools_references), Modifier.padding(top = 12.dp)) }
             item { ToolList(REFERENCES, primary = false, onOpen) }
         }
@@ -101,19 +104,19 @@ fun ToolsScreen(
 }
 
 @Composable
-private fun ToolList(tools: List<Tool>, primary: Boolean, onOpen: (String) -> Unit) {
+private fun ToolList(tools: List<Tool>, primary: Boolean, onOpen: (String) -> Unit, updated: Set<String> = emptySet()) {
     val colors = MaterialTheme.colorScheme
     Panel(color = if (primary) colors.primaryContainer else colors.surfaceContainer, shape = RoundedCornerShape(16.dp)) {
         tools.forEachIndexed { i, tool ->
             if (i > 0) ListDivider()
-            ToolRow(tool, primary) { onOpen(tool.route) }
+            ToolRow(tool, primary, tool.route in updated) { onOpen(tool.route) }
         }
     }
 }
 
 /** One row: icon, title, description, chevron. The whole row is one button. */
 @Composable
-private fun ToolRow(tool: Tool, primary: Boolean, onClick: () -> Unit) {
+private fun ToolRow(tool: Tool, primary: Boolean, updated: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val content = if (primary) colors.onPrimaryContainer else colors.onSurface
     val secondary = if (primary) colors.onPrimaryContainer else colors.onSurfaceVariant
@@ -134,7 +137,10 @@ private fun ToolRow(tool: Tool, primary: Boolean, onClick: () -> Unit) {
             }
         }
         Column(Modifier.weight(1f)) {
-            Text(stringResource(tool.title), style = MaterialTheme.typography.titleMedium, color = content)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(tool.title), style = MaterialTheme.typography.titleMedium, color = content)
+                if (updated) UpdatedLabel()
+            }
             Text(stringResource(tool.description), style = MaterialTheme.typography.bodyMedium, color = secondary)
         }
         Icon(painterResource(R.drawable.ic_chevron_right), null,   // the row's text names it

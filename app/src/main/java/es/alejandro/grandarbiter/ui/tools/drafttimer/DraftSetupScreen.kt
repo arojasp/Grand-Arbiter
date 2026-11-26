@@ -28,6 +28,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,6 +64,11 @@ fun DraftSetupScreen(
     val times by viewModel.times.collectAsState()
     val beep by viewModel.beep.collectAsState()
     val vibrate by viewModel.vibrate.collectAsState()
+    val offered by viewModel.notificationsOffered.collectAsState()
+    val asked by viewModel.notificationPermissionAsked.collectAsState()
+    val notifications = rememberNotificationAccess(asked, viewModel::setNotificationPermissionAsked)
+    // Already on (e.g. Android 12 and older, or allowed before): nothing to offer.
+    if (offered == false && notifications.access == NotificationAccess.ON) LaunchedEffect(Unit) { viewModel.setNotificationsOffered() }
 
     Scaffold(
         containerColor = colors.background,
@@ -83,6 +90,12 @@ fun DraftSetupScreen(
             // Each card under its Label, outside it (as in Settings); 24 dp between groups.
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
+            if (offered == false && notifications.access != NotificationAccess.ON) {
+                NotificationsCard(
+                    onTurnOn = { notifications.change(); viewModel.setNotificationsOffered() },
+                    onNotNow = viewModel::setNotificationsOffered,
+                )
+            }
             Section(stringResource(R.string.draft_section_format)) { DraftCard {
                 val rochester = viewModel.format == DraftFormat.ROCHESTER
                 if (rochester) {
@@ -154,6 +167,10 @@ fun DraftSetupScreen(
                         checked = beep, onCheckedChange = { viewModel.setBeep(it) },
                         colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                     )
+                }
+                if (offered == true) {
+                    HorizontalDivider(color = colors.outlineVariant)
+                    NotificationsRow(notifications, MaterialTheme.typography.titleSmall, contentPadding = PaddingValues(0.dp))
                 }
             } }
             estimate?.let { e ->

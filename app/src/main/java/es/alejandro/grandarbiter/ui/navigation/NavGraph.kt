@@ -14,6 +14,10 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import org.koin.compose.koinInject
+import es.alejandro.grandarbiter.ui.settings.DraftTimerSettingsScreen
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftTimerNews
 import es.alejandro.grandarbiter.ui.cardsearch.AdvancedSearchScreen
 import es.alejandro.grandarbiter.ui.cardsearch.AdvancedSearchViewModel
 import es.alejandro.grandarbiter.ui.cardsearch.CardDetailScreen
@@ -79,6 +83,7 @@ sealed class Screen(val route: String) {
         fun createRoute(format: DraftFormat, sizes: List<Int>) = "draft_timer/${format.name}/times?${DraftTimesViewModel.ARG_SIZES}=${sizes.joinToString(",")}"
     }
     object DraftRun : Screen("draft_timer/run")
+    object DraftTimerSettings : Screen("settings/draft_timer")
     object HeadJudgeAnnouncement : Screen("head_judge_announcement")
     object BannedLists : Screen("banned_lists")
     object ReleaseNotes : Screen("release_notes")
@@ -192,13 +197,18 @@ fun AppNavGraph(
             CardDetailScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Tools.route) {
+            val news = koinInject<DraftTimerNews>()
+            val draftTimerUpdated by news.show.collectAsState(initial = false)
             ToolsScreen(
                 onOpen = { route -> navController.navigate(route) },
                 onOpenSettings = { navController.navigate(Screen.Settings.route) },
+                draftTimerUpdated = draftTimerUpdated,
             )
         }
         composable(Screen.DeckCounter.route) { DeckCounterScreen(onBack = { navController.popBackStack() }) }
         composable(Screen.DraftTimer.route) {
+            val news = koinInject<DraftTimerNews>()
+            LaunchedEffect(Unit) { news.markSeen() }
             // A draft in progress: the picker asks first (resume or discard).
             DraftFormatScreen(
                 onBack = { navController.popBackStack() },
@@ -307,7 +317,13 @@ fun AppNavGraph(
             )
         }
         composable(Screen.Settings.route) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenDraftTimer = { navController.navigate(Screen.DraftTimerSettings.route) },
+            )
+        }
+        composable(Screen.DraftTimerSettings.route) {
+            DraftTimerSettingsScreen(onBack = { navController.popBackStack() })
         }
     }
 }

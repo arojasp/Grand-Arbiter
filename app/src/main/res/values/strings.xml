@@ -533,6 +533,7 @@
     <string name="draft_vibrate_hint">One vibration per step</string>
     <string name="draft_beep">Beep at 0:00</string>
     <string name="draft_beep_hint">Short tone, off by default</string>
+    <string name="settings_draft_beep_hint">Short tone</string>
     <string name="draft_section_estimate">Estimated duration</string>
     <plurals name="draft_estimate_picks">
         <item quantity="one">Picks (%1$d pack × %2$d)</item>
@@ -659,4 +660,16 @@
     <string name="draft_notif_next_pack">Next: pack %1$d · %2$s</string>
     <string name="draft_notif_time_up">Time\'s up · %1$s</string>
     <string name="draft_notif_left">%1$s left</string>
+    <string name="draft_notif_row_title">Notifications</string>
+    <string name="draft_notif_row_on">The time and the next step show in the notification shade</string>
+    <string name="draft_notif_row_off">The timer still alerts, but the time won\'t show in the notification shade</string>
+    <string name="draft_notif_on">On</string>
+    <string name="draft_notif_off">Off</string>
+    <string name="draft_notif_turn_on">Turn on</string>
+    <string name="draft_notif_not_now">Not now</string>
+    <string name="draft_notif_card_title">The timer keeps running in the background</string>
+    <string name="draft_notif_card_text">It alerts at 0:00 even when you leave this screen or lock the phone. Turn on notifications to see the time and the next step there too.</string>
+    <string name="settings_draft_alerts">Alerts and notifications</string>
+    <string name="settings_draft_alerts_summary">Vibration: %1$s · Beep: %2$s · Notifications: %3$s</string>
+    <string name="settings_level_off">Off</string>
 </resources>

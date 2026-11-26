@@ -34,6 +34,8 @@ import es.alejandro.grandarbiter.ui.main.MainViewModel
 import es.alejandro.grandarbiter.ui.reader.ReaderContentsViewModel
 import es.alejandro.grandarbiter.ui.reader.ReaderPageViewModel
 import es.alejandro.grandarbiter.ui.settings.SettingsViewModel
+import es.alejandro.grandarbiter.ui.settings.DraftTimerSettingsViewModel
+import es.alejandro.grandarbiter.ui.tools.drafttimer.DraftTimerNews
 import es.alejandro.grandarbiter.ui.tools.banned.BannedListsViewModel
 import es.alejandro.grandarbiter.ui.tools.banned.CustomListEditViewModel
 import es.alejandro.grandarbiter.ui.tools.announcement.AnnouncementViewModel
@@ -176,6 +178,7 @@ val appModule = module {
         )
     }
     single { DraftSessionActions(get(), get()) }
+    single { DraftTimerNews(androidContext(), get()) }
     single { DraftOpenRequests() }
     single { SectionVersions(get(), get(), get()) }
 }
@@ -205,4 +208,5 @@ val viewModelModule = module {
     viewModelOf(::DraftSetupViewModel)
     viewModelOf(::DraftTimesViewModel)
     viewModelOf(::DraftRunViewModel)
+    viewModelOf(::DraftTimerSettingsViewModel)
 }

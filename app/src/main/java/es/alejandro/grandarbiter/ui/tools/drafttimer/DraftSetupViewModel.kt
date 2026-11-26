@@ -103,6 +103,14 @@ class DraftSetupViewModel(
     val vibrate: StateFlow<Boolean> = settings.draftVibrate
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
+    /** Null until read: the notifications card must not flash before it's known whether it was answered. */
+    val notificationsOffered: StateFlow<Boolean?> = settings.draftNotificationsOffered
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val notificationPermissionAsked: StateFlow<Boolean> = settings.notificationPermissionAsked
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    fun setNotificationsOffered() = viewModelScope.launch { settings.setDraftNotificationsOffered() }
+    fun setNotificationPermissionAsked() = viewModelScope.launch { settings.setNotificationPermissionAsked() }
+
     fun setPacks(value: Int) { state[KEY_PACKS] = value.coerceIn(DraftConfig.PACKS) }
     fun setCardsPerPack(value: Int) { state[KEY_CARDS] = value.coerceIn(cardsRange) }
     fun setConstructionMinutes(value: Int) { state[KEY_MINUTES] = value.coerceIn(DraftConfig.CONSTRUCTION_MINUTES) }

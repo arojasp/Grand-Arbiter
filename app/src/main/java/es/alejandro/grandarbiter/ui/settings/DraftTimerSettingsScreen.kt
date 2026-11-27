@@ -28,6 +28,8 @@ import es.alejandro.grandarbiter.domain.draft.BeepVolume
 import es.alejandro.grandarbiter.domain.draft.DraftAlerts
 import es.alejandro.grandarbiter.domain.draft.VibrationStrength
 import es.alejandro.grandarbiter.ui.tools.drafttimer.NotificationsRow
+import es.alejandro.grandarbiter.ui.tools.drafttimer.BatteryRow
+import es.alejandro.grandarbiter.ui.tools.drafttimer.rememberBatteryUnrestricted
 import es.alejandro.grandarbiter.ui.tools.drafttimer.rememberNotificationAccess
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -51,6 +53,7 @@ fun DraftTimerSettingsScreen(onBack: () -> Unit, viewModel: DraftTimerSettingsVi
     val muted by viewModel.beepMuted.collectAsState()
     val asked by viewModel.notificationPermissionAsked.collectAsState()
     val notifications = rememberNotificationAccess(asked, viewModel::setNotificationPermissionAsked)
+    val battery = rememberBatteryUnrestricted()
 
     Scaffold(
         containerColor = colors.background,
@@ -96,7 +99,11 @@ fun DraftTimerSettingsScreen(onBack: () -> Unit, viewModel: DraftTimerSettingsVi
                 }
             }
             item {
-                SettingsPanel { NotificationsRow(notifications, MaterialTheme.typography.titleMedium) }
+                SettingsPanel {
+                    NotificationsRow(notifications, MaterialTheme.typography.titleMedium)
+                    PanelDivider()
+                    BatteryRow(battery, MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }

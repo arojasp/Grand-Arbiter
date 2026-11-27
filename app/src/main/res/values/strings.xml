@@ -667,6 +667,11 @@
     <string name="draft_notif_off">Off</string>
     <string name="draft_notif_turn_on">Turn on</string>
     <string name="draft_notif_not_now">Not now</string>
+    <string name="draft_battery_row_title">Battery</string>
+    <string name="draft_battery_row_unrestricted">The timer keeps running with the screen off</string>
+    <string name="draft_battery_row_optimized">Some phones pause the timer when the screen is off. Allow unrestricted battery use to avoid it.</string>
+    <string name="draft_battery_unrestricted">Unrestricted</string>
+    <string name="draft_battery_optimized">Optimized</string>
     <string name="draft_notif_card_title">The timer keeps running in the background</string>
     <string name="draft_notif_card_text">It alerts at 0:00 even when you leave this screen or lock the phone. Turn on notifications to see the time and the next step there too.</string>
     <string name="settings_draft_alerts">Alerts and notifications</string>

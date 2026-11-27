@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,6 +50,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import es.alejandro.grandarbiter.R
+import es.alejandro.grandarbiter.ui.home.UpdatedLabel
 
 /**
  * Whether the draft timer's notification can be seen. The timer runs either way; this only decides
@@ -163,14 +165,18 @@ fun NotificationsRow(state: NotificationAccessState, titleStyle: TextStyle, modi
 
 /** The first draft setup after the update: the timer now runs in the background; turn on its notification? */
 @Composable
-fun NotificationsCard(onTurnOn: () -> Unit, onNotNow: () -> Unit) {
+fun NotificationsCard(onSetUp: () -> Unit, onNotNow: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     DraftCard {
-        Text(stringResource(R.string.draft_notif_card_title), style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
+        Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.draft_notif_card_title), style = MaterialTheme.typography.titleMedium, color = colors.onSurface,
+                modifier = Modifier.weight(1f, fill = false))
+            Box(Modifier.padding(top = 2.dp)) { UpdatedLabel(R.string.label_new) }
+        }
         Text(stringResource(R.string.draft_notif_card_text), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
             TextButton(onClick = onNotNow) { Text(stringResource(R.string.draft_notif_not_now), style = MaterialTheme.typography.labelLarge) }
-            Button(onClick = onTurnOn) { Text(stringResource(R.string.draft_notif_turn_on), style = MaterialTheme.typography.labelLarge) }
+            Button(onClick = onSetUp) { Text(stringResource(R.string.draft_notif_set_up), style = MaterialTheme.typography.labelLarge) }
         }
     }
 }

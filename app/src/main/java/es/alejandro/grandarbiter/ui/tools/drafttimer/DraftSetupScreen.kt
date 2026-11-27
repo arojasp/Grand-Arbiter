@@ -55,6 +55,7 @@ fun DraftSetupScreen(
     onStarted: () -> Unit,
     /** The Times screen of this format, with each pack's size (15, 14, 14). */
     onOpenTimes: (DraftFormat, List<Int>) -> Unit,
+    onOpenAlertsSettings: () -> Unit,
     viewModel: DraftSetupViewModel = koinViewModel(),
 ) {
     val colors = MaterialTheme.colorScheme
@@ -67,7 +68,9 @@ fun DraftSetupScreen(
     val asked by viewModel.notificationPermissionAsked.collectAsState()
     val notifications = rememberNotificationAccess(asked, viewModel::setNotificationPermissionAsked)
     // Already on (e.g. Android 12 and older, or allowed before): nothing to offer.
-    if (offered == false && notifications.access == NotificationAccess.ON) LaunchedEffect(Unit) { viewModel.setNotificationsOffered() }
+    val battery = rememberBatteryUnrestricted()
+    val allSet = notifications.access == NotificationAccess.ON && battery
+    if (offered == false && allSet) LaunchedEffect(Unit) { viewModel.setNotificationsOffered() }
 
     Scaffold(
         containerColor = colors.background,
@@ -89,9 +92,9 @@ fun DraftSetupScreen(
             // Each card under its Label, outside it (as in Settings); 24 dp between groups.
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            if (offered == false && notifications.access != NotificationAccess.ON) {
+            if (offered == false && !allSet) {
                 NotificationsCard(
-                    onTurnOn = { notifications.change(); viewModel.setNotificationsOffered() },
+                    onSetUp = { viewModel.setNotificationsOffered(); onOpenAlertsSettings() },
                     onNotNow = viewModel::setNotificationsOffered,
                 )
             }

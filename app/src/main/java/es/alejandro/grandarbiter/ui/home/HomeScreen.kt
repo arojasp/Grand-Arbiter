@@ -1,5 +1,6 @@
 package es.alejandro.grandarbiter.ui.home
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -303,7 +304,7 @@ private fun DocumentRow(item: DocumentLibraryItem, onClick: () -> Unit) {
 
 /** «Updated»: the section changed since the user last entered it (SectionVersions). */
 @Composable
-internal fun UpdatedLabel() {
+internal fun UpdatedLabel(@StringRes text: Int = R.string.home_updated) {
     Surface(
         shape = RoundedCornerShape(4.dp),   // a status, the shape of every Tag (pills are for things you tap)
         // Inverted (light on dark / dark on light): the one label on Home that has to stand out.
@@ -311,7 +312,7 @@ internal fun UpdatedLabel() {
         contentColor = MaterialTheme.colorScheme.inverseOnSurface
     ) {
         Text(
-            text = stringResource(R.string.home_updated),
+            text = stringResource(text),
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
         )

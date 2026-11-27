@@ -222,6 +222,7 @@ fun AppNavGraph(
             DraftSetupScreen(
                 onBack = { navController.popBackStack() },
                 onOpenTimes = { format, sizes -> navController.navigate(Screen.DraftTimes.createRoute(format, sizes)) },
+                onOpenAlertsSettings = { navController.navigate(Screen.DraftTimerSettings.route) },
                 onStarted = {
                     navController.navigate(Screen.DraftRun.route) { popUpTo(Screen.DraftTimer.route) { inclusive = true } }
                 },

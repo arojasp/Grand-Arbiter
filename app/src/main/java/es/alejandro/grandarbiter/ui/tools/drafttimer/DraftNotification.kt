@@ -57,7 +57,9 @@ object DraftNotification {
                 .also { n -> notice.remainingMs?.let { n.setShortCriticalText(formatClock(it)) } }
             else -> b.setContentTitle(title).setContentText(stepText(res, step, notice.next))
         }
-        notice.endsAtMs?.let { b.setUsesChronometer(true).setChronometerCountDown(true).setShowWhen(true).setWhen(it) }
+        notice.endsAtMs?.let {
+            b.setUsesChronometer(true).setChronometerCountDown(true).setShowWhen(true).setWhen(countdownBase(it))
+        }
         notice.startedAtMs?.let { b.setUsesChronometer(true).setShowWhen(true).setWhen(it) }
         if (notice.endsAtMs == null && notice.startedAtMs == null) b.setShowWhen(false)
         notice.actions.forEach { action -> b.addAction(0, actionLabel(res, action, notice), DraftTimerService.actionIntent(context, action)) }
@@ -146,3 +148,10 @@ internal fun untimedNextLabel(res: Resources, step: DraftStep, next: DraftStep?)
     next is DraftStep.Pick -> res.getString(R.string.draft_next_pick_button)
     else -> startLabel(res, step, next)
 }
+
+/**
+ * The system countdown shows the remaining time rounded DOWN, so given the real end it reaches 0:00
+ * up to a second before the step ends. Ending it 999 ms later makes it show what the draft screen
+ * shows ([formatClock], rounded UP): 0:00 only once the step is over and the alert plays.
+ */
+internal fun countdownBase(endsAtMs: Long): Long = endsAtMs + 999

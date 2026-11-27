@@ -16,7 +16,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -133,14 +132,13 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
  * button, which asks.
  */
 @Composable
-fun NotificationsRow(state: NotificationAccessState, titleStyle: TextStyle, modifier: Modifier = Modifier,
-                     contentPadding: PaddingValues = PaddingValues(16.dp)) {
+fun NotificationsRow(state: NotificationAccessState, titleStyle: TextStyle, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
     val leaves = state.access != NotificationAccess.OFF
     Row(
         modifier.fillMaxWidth()
             .then(if (leaves) Modifier.clickable(role = Role.Button, onClick = state.change) else Modifier)
-            .padding(contentPadding),
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {

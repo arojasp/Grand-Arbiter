@@ -28,7 +28,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -167,10 +166,6 @@ fun DraftSetupScreen(
                         checked = beep, onCheckedChange = { viewModel.setBeep(it) },
                         colors = SwitchDefaults.colors(checkedTrackColor = colors.primary, checkedThumbColor = colors.onPrimary),
                     )
-                }
-                if (offered == true) {
-                    HorizontalDivider(color = colors.outlineVariant)
-                    NotificationsRow(notifications, MaterialTheme.typography.titleSmall, contentPadding = PaddingValues(0.dp))
                 }
             } }
             estimate?.let { e ->
